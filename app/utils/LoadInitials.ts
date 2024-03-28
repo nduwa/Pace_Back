@@ -1,0 +1,50 @@
+import { Sequelize } from "sequelize";
+import appPersmissions, { Permission } from "../database/constants/permissions";
+import appUsers from "../database/constants/users";
+import PermissionModel from "../database/models/PermissionModel";
+import UserModel from "../database/models/UserModel";
+import UserPermissions from "../database/models/UserPermissions";
+
+const permissions = appPersmissions
+  .map((permissionGroup) => permissionGroup.permissions)
+  .join(",")
+  .split(",") as Permission[];
+
+const loadInitialData = async (db: Sequelize): Promise<void> => {
+  try {
+    await db.transaction(async (t) => {
+      await Promise.all(
+        permissions.map(async (permission: Permission) => {
+          await PermissionModel.findOrCreate({
+            where: { label: permission },
+            defaults: { label: permission },
+            transaction: t,
+          });
+        })
+      );
+    });
+
+    await db.transaction(async (t) => {
+      await Promise.all(
+        appUsers.map(async (user) => {
+          const [createdUser] = await UserModel.findOrCreate({
+            where: { email: user.email },
+            defaults: { ...user },
+          });
+          const permission = (await PermissionModel.findOne({
+            where: { label: "ALL_PERMISSIONS" },
+          })) as unknown as PermissionModel;
+          await UserPermissions.findOrCreate({
+            where: { userId: createdUser.id, permissionId: permission.id },
+            defaults: { userId: createdUser.id, permissionId: permission.id },
+            transaction: t,
+          });
+        })
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export default loadInitialData;

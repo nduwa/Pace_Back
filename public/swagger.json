@@ -1,0 +1,282 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"IUser": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"phone",
+					"password",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IJWTPayload": {
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/IUser"
+					},
+					"accessToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"accessToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IRegister": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"password",
+					"phone"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ILogin": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IPermission.id-or-label_": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"label"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"UserPermission": {
+				"$ref": "#/components/schemas/Pick_IPermission.id-or-label_"
+			},
+			"IUserWithPermissions": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"permissions": {
+						"items": {
+							"$ref": "#/components/schemas/UserPermission"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"phone",
+					"password",
+					"createdAt",
+					"permissions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"jwtAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT",
+				"description": "Bearer token to access these API endpoints"
+			}
+		}
+	},
+	"info": {
+		"title": "digital-med",
+		"version": "1.0.0",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {
+			"name": "Reponse Ashimwe"
+		}
+	},
+	"paths": {
+		"/api/auth/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/IJWTPayload"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					},
+					"201": {
+						"description": ""
+					}
+				},
+				"tags": [
+					"Authorization"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IRegister"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IJWTPayload"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authorization"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ILogin"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth": {
+			"get": {
+				"operationId": "Me",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IUserWithPermissions"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authorization"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
