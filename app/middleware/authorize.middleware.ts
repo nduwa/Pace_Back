@@ -26,7 +26,7 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
       authorization?.split(" ")[1] as string
     )) as IJwtPayload;
 
-    const user = await UserService.userWithPermissions({
+    const user = await UserService.getUser({
       email: tokenData.email as string,
     });
 

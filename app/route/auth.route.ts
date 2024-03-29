@@ -6,6 +6,11 @@ import {
   registerSchema,
 } from "../middleware/validations/auth.schema";
 import authorize from "../middleware/authorize.middleware";
+import {
+  resetPasswordRequestSchema,
+  resetPasswordSchema,
+} from "../middleware/validations/auth.middleware";
+import { IUserWithPermissions } from "../type";
 
 const authRouter = express.Router();
 
@@ -42,6 +47,48 @@ authRouter.get(
     try {
       const response = await AuthController.me(req.user?.id as string);
       return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+authRouter.post(
+  "/reset-password-request",
+  validate(resetPasswordRequestSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await AuthController.resetPasswordRequest(req.body);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+authRouter.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await AuthController.resetPassword(req.body);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+authRouter.put(
+  "/update-password",
+  authorize,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await AuthController.updatePassword(
+        req.body,
+        req.user as IUserWithPermissions
+      );
+      return res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
       return next(error);
     }
