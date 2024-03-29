@@ -35,6 +35,9 @@ dependencies:
   multer-storage-cloudinary:
     specifier: ^4.0.0
     version: 4.0.0(cloudinary@1.41.3)
+  nodemailer:
+    specifier: ^6.9.13
+    version: 6.9.13
   pg:
     specifier: ^8.11.3
     version: 8.11.3
@@ -79,6 +82,9 @@ devDependencies:
   '@types/multer':
     specifier: ^1.4.11
     version: 1.4.11
+  '@types/nodemailer':
+    specifier: ^6.4.14
+    version: 6.4.14
   '@types/swagger-ui-express':
     specifier: ^4.1.6
     version: 4.1.6
@@ -305,6 +311,12 @@ packages:
     resolution: {integrity: sha512-TBHyJxk2b7HceLVGFcpAUjsa5zIdsPWlR6XHfyGzd0SFu+/NFgQgMAl96MSDZgQDvJAvV6BKsFOrt6zIL09JDw==}
     dependencies:
       undici-types: 5.26.5
+
+  /@types/nodemailer@6.4.14:
+    resolution: {integrity: sha512-fUWthHO9k9DSdPCSPRqcu6TWhYyxTBg382vlNIttSe9M7XfsT06y0f24KHXtbnijPGGRIcVvdKHTNikOI6qiHA==}
+    dependencies:
+      '@types/node': 20.11.25
+    dev: true
 
   /@types/qs@6.9.12:
     resolution: {integrity: sha512-bZcOkJ6uWrL0Qb2NAWKa7TBU+mJHPzhx9jjLL1KHF+XpzEcR7EXHvjbHlGtR/IsP1vyPrehuS6XqkmaePy//mg==}
@@ -3018,6 +3030,11 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: false
+
+  /nodemailer@6.9.13:
+    resolution: {integrity: sha512-7o38Yogx6krdoBf3jCAqnIN4oSQFx+fMa0I7dK1D+me9kBxx12D+/33wSb+fhOCtIxvYJ+4x4IMEhmhCKfAiOA==}
+    engines: {node: '>=6.0.0'}
     dev: false
 
   /nodemon@1.19.4:

@@ -7,94 +7,6 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"IUser": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"phone": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"email",
-					"phone",
-					"password",
-					"createdAt"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IJWTPayload": {
-				"properties": {
-					"user": {
-						"$ref": "#/components/schemas/IUser"
-					},
-					"accessToken": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"accessToken"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IRegister": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					},
-					"phone": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"name",
-					"email",
-					"password",
-					"phone"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ILogin": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"password"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"Pick_IPermission.id-or-label_": {
 				"properties": {
 					"id": {
@@ -153,6 +65,306 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"IUsersResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IUserWithPermissions"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IUsersResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IUsersResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IUser.Exclude_keyofIUser.deletedAt-or-updatedAt-or-password__": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"phone",
+					"createdAt"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"UserReponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"phone",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IRegister.Exclude_keyofIRegister.password__": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"phone"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"ICreateUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"phone"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUpdateUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"phone"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUser": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"phone",
+					"password",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IJWTPayload": {
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/IUser"
+					},
+					"accessToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"accessToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IRegister": {
+				"properties": {
+					"password": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"password",
+					"name",
+					"email",
+					"phone"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ILogin": {
+				"properties": {
+					"password": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"password",
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IResetPasswordRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IResetPassword": {
+				"properties": {
+					"token": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"confirmPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token",
+					"password",
+					"confirmPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUpdatePassword": {
+				"properties": {
+					"oldPassword": {
+						"type": "string"
+					},
+					"newPassword": {
+						"type": "string"
+					},
+					"confirmPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"oldPassword",
+					"newPassword",
+					"confirmPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -175,6 +387,137 @@
 		}
 	},
 	"paths": {
+		"/api/users": {
+			"get": {
+				"operationId": "GetAllUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IUsersResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserReponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ICreateUser"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/users/{id}": {
+			"get": {
+				"operationId": "GetUserWithPermissionsByPk",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IUserWithPermissions"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/users/profile": {
+			"put": {
+				"operationId": "UpdateUserProfile",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUpdateUser"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/auth/register": {
 			"post": {
 				"operationId": "Register",
@@ -271,6 +614,118 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/api/auth/reset-password-request": {
+			"post": {
+				"operationId": "ResetPasswordRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authorization"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IResetPasswordRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/reset-password": {
+			"post": {
+				"operationId": "ResetPassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authorization"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IResetPassword"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/update-password": {
+			"put": {
+				"operationId": "UpdatePassword",
+				"responses": {
+					"200": {
+						"description": ""
+					},
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Authorization"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUpdatePassword"
+							}
+						}
+					}
+				}
 			}
 		}
 	},
