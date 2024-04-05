@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { Permission } from "../database/constants/permissions";
+import {
+  Permission,
+  superAdminPermissions,
+} from "../database/constants/permissions";
 import CustomError from "../utils/CustomError";
-import { UserPermission } from "../type";
 
 export const allowedPermissions =
   (...persmissions: Permission[]) =>
@@ -11,7 +13,10 @@ export const allowedPermissions =
       ...persmissions,
     ];
 
-    expectedPermissions.push("INSTITUTION_ADMIN");
+    const needsSuperAdminRole = superAdminPermissions.some((element) => {
+      return persmissions.includes(element);
+    });
+    if (!needsSuperAdminRole) expectedPermissions.push("INSTITUTION_ADMIN");
 
     const userPersmission: Permission[] =
       (req?.user?.permissions.map(

@@ -36,6 +36,7 @@ app.use("/api", apiRouter);
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   console.log(err.message);
   if (err instanceof CustomError) {
+    console.error(err);
     return res.status(err.statusCode).json({ error: err.message });
   } else {
     return res.status(500).json({ error: "Something went wrong" });

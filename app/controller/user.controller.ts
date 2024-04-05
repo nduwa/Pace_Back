@@ -3,7 +3,6 @@ import {
   Controller,
   Post,
   Tags,
-  Response,
   Body,
   Security,
   Inject,
@@ -12,6 +11,7 @@ import {
   Path,
 } from "tsoa";
 import {
+  IAssignPermissionsRequest,
   ICreateUser,
   IPaged,
   IRegister,
@@ -22,6 +22,7 @@ import {
 } from "../type";
 import UserService from "../services/user.service";
 import { Paginations } from "../utils/DBHelpers";
+import RolesService from "../services/role.service";
 
 @Tags("Users")
 @Route("api/users")
@@ -29,24 +30,21 @@ import { Paginations } from "../utils/DBHelpers";
 export class UserController extends Controller {
   @Get("/")
   public static async getAllUsers(
+    @Inject() institutionId: string | null,
     @Inject() currentPage: number,
     @Inject() limit: number,
     @Inject() searchq: string | undefined
   ): Promise<IPaged<IUsersResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
-    const users = await UserService.getUsers(pageSize, offset, searchq);
-    const getUser = users.data.map((user) => {
-      const userJson = user.toJSON() as IUserWithPermissions;
-      return {
-        ...userJson,
-        permissions: userJson.permissions.map((permission) => ({
-          label: permission.label,
-          id: permission.id,
-        })),
-      };
-    });
+    const users = await UserService.getUsers(
+      institutionId,
+      pageSize,
+      offset,
+      searchq
+    );
+
     const filtersUsed: IUsersResponse = {
-      rows: getUser,
+      rows: users.data as unknown as IUserWithPermissions[],
     };
     return {
       data: filtersUsed,
@@ -67,9 +65,10 @@ export class UserController extends Controller {
 
   @Post()
   public static async createUser(
-    @Body() user: ICreateUser
+    @Body() user: ICreateUser,
+    @Inject() institutionId: string | null
   ): Promise<UserReponse> {
-    const createdUser = await UserService.create(user);
+    const createdUser = await UserService.create(institutionId, user);
     return createdUser;
   }
 
@@ -79,5 +78,18 @@ export class UserController extends Controller {
     @Body() data: IUpdateUser
   ): Promise<boolean> {
     return await UserService.updateUserProfile(id, data);
+  }
+
+  @Post("/{id}/permissions")
+  public static async assignPermissions(
+    @Path() id: string,
+    @Body() data: IAssignPermissionsRequest
+  ): Promise<boolean> {
+    try {
+      await RolesService.assignRoles(id, data);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }

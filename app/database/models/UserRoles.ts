@@ -13,14 +13,14 @@ import {
   ForeignKey,
   BelongsTo,
 } from "sequelize-typescript";
-import PermissionModel from "./PermissionModel";
 import UserModel from "./UserModel";
+import RolesModel from "./RolesModel";
 
 @Table({
-  tableName: "users_permissions",
+  tableName: "user_roles",
   paranoid: false,
 })
-class UserPermissions extends Model {
+class UserRoles extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
@@ -30,9 +30,9 @@ class UserPermissions extends Model {
   @Column(DataType.UUID)
   userId!: string;
 
-  @ForeignKey(() => PermissionModel)
+  @ForeignKey(() => RolesModel)
   @Column(DataType.UUID)
-  permissionId!: string;
+  roleId!: string;
 
   @DeletedAt
   @Column(DataType.DATE)
@@ -52,4 +52,4 @@ class UserPermissions extends Model {
   user!: UserModel;
 }
 
-export default UserPermissions;
+export default UserRoles;

@@ -3,7 +3,9 @@ import appPersmissions, { Permission } from "../database/constants/permissions";
 import appUsers from "../database/constants/users";
 import PermissionModel from "../database/models/PermissionModel";
 import UserModel from "../database/models/UserModel";
-import UserPermissions from "../database/models/UserPermissions";
+import UserRoles from "../database/models/UserRoles";
+import RolesModel from "../database/models/RolesModel";
+import RolePermissions from "../database/models/RolePermissions";
 
 const permissions = appPersmissions
   .map((permissionGroup) => permissionGroup.permissions)
@@ -34,9 +36,19 @@ const loadInitialData = async (db: Sequelize): Promise<void> => {
           const permission = (await PermissionModel.findOne({
             where: { label: "ALL_PERMISSIONS" },
           })) as unknown as PermissionModel;
-          await UserPermissions.findOrCreate({
-            where: { userId: createdUser.id, permissionId: permission.id },
-            defaults: { userId: createdUser.id, permissionId: permission.id },
+
+          const [role] = await RolesModel.findOrCreate({
+            where: { label: "SUDO" },
+            defaults: { label: "SUDO" },
+          });
+
+          const [sudoRole] = await RolePermissions.findOrCreate({
+            where: { permissionId: permission.id, roleId: role?.id },
+            defaults: { permissionId: permission.id, roleId: role?.id },
+          });
+          await UserRoles.findOrCreate({
+            where: { userId: createdUser.id, roleId: role.id },
+            defaults: { userId: createdUser.id, roleId: role.id },
             transaction: t,
           });
         })
