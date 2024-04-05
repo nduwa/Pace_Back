@@ -1,18 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import validate from "../middleware/validations/validator";
-import {
-  loginSchema,
-  registerSchema,
-} from "../middleware/validations/auth.schema";
 import authorize from "../middleware/authorize.middleware";
-import {
-  resetPasswordRequestSchema,
-  resetPasswordSchema,
-} from "../middleware/validations/auth.middleware";
-import { IUserWithPermissions } from "../type";
 import { allowedPermissions } from "../middleware/permission";
 import { UserController } from "../controller/user.controller";
 import { createUserSchema } from "../middleware/validations/user.schema";
+import UserRoles from "../database/models/UserRoles";
 
 const userRouter = express.Router();
 
@@ -28,6 +20,7 @@ userRouter.get(
       const { searchq } = req.query;
 
       const response = await UserController.getAllUsers(
+        req.user?.institutionId as string | null,
         parseInt(page as string),
         limit as unknown as number,
         searchq as string
@@ -61,7 +54,10 @@ userRouter.post(
   allowedPermissions("UPDATE_USERS"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await UserController.createUser(req.body);
+      const response = await UserController.createUser(
+        req.body,
+        req.user?.institutionId as string | null
+      );
       return res.status(201).json(response);
     } catch (error) {
       return next(error);
@@ -80,6 +76,22 @@ userRouter.put(
       return res.status(200).json(response);
     } catch (error) {
       console.log("An error occurred:", error);
+      return next(error);
+    }
+  }
+);
+
+userRouter.post(
+  "/:id/permissions",
+  allowedPermissions("INSTITUTION_ADMIN"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await UserController.assignPermissions(
+        req.params.id,
+        req.body
+      );
+      return res.status(200).json(response);
+    } catch (error) {
       return next(error);
     }
   }

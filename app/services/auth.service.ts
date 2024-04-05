@@ -1,7 +1,9 @@
 import VARIABLES from "../config/variables";
 import ResetToken from "../database/models/ResetToken";
+import UserInstitutions from "../database/models/UserInstitutions";
 import UserModel from "../database/models/UserModel";
 import {
+  ChangeInstitution,
   IJWTPayload,
   ILogin,
   IRegister,
@@ -109,6 +111,24 @@ class AuthService {
 
     await resetToken.destroy();
     return { message: "Password reset successful" };
+  }
+
+  public static async changeInstitution(
+    userId: string,
+    data: ChangeInstitution
+  ): Promise<boolean> {
+    const hasInstitution = await UserInstitutions.findOne({
+      where: { userId, institutionId: data.institutionId },
+    });
+    if (hasInstitution) {
+      await UserModel.update(
+        { institutionId: data.institutionId },
+        { where: { id: userId } }
+      );
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 

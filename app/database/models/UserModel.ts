@@ -11,9 +11,14 @@ import {
   Sequelize,
   CreatedAt,
   BelongsToMany,
+  ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 import PermissionModel from "./PermissionModel";
-import UserPermissions from "./UserPermissions";
+import UserInstitutions from "./UserInstitutions";
+import InstitutionModel from "./Institution";
+import RolesModel from "./RolesModel";
+import UserRoles from "./UserRoles";
 
 @Table({
   tableName: "users",
@@ -42,13 +47,23 @@ class UserModel extends Model {
   @Column(DataType.STRING)
   phone!: string;
 
+  @ForeignKey(() => InstitutionModel)
+  @Column(DataType.UUID)
+  institutionId!: string;
+
   @CreatedAt
   @Default(Sequelize.fn("NOW"))
   @Column(DataType.DATE)
   createdAt!: Date;
 
-  @BelongsToMany(() => PermissionModel, () => UserPermissions)
-  permissions!: PermissionModel[];
+  @BelongsToMany(() => RolesModel, () => UserRoles)
+  roles!: RolesModel[];
+
+  @BelongsToMany(() => InstitutionModel, () => UserInstitutions)
+  institutions!: InstitutionModel[];
+
+  @BelongsTo(() => InstitutionModel)
+  institution!: InstitutionModel;
 }
 
 export default UserModel;

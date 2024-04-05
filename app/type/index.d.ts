@@ -3,6 +3,7 @@ export interface IUser {
   name: string;
   email: string;
   phone: string;
+  institutionId: string | null;
   password: string;
   createdAt: Date;
 }
@@ -18,6 +19,8 @@ export type UserPermission = Pick<IPermission, "id" | "label">;
 
 export interface IUserWithPermissions extends IUser {
   permissions: UserPermission[];
+  institutions: IInstitution[];
+  roles: IRole[];
 }
 
 export interface UserReponse
@@ -71,4 +74,63 @@ export interface INewUserDTO extends UserReponse {
 
 export interface IUsersResponse {
   rows: IUserWithPermissions[];
+}
+
+export interface IInstitution {
+  id: string;
+  name: string;
+  institutionType: string;
+  admin: {
+    name: string;
+    phone: string;
+    email: string;
+  };
+  details: {
+    location: string;
+    TIN: string;
+  };
+
+  createdAt: Date;
+}
+
+export interface IInstitutionRequest
+  extends Omit<IInstitution, "id" | "createdAt" | "institutionType"> {
+  institutionType?: string | null;
+}
+
+export interface IInstitutionDTO extends IInstitution {
+  users?: UserReponse[];
+}
+
+export interface IInstitutionResponse {
+  type: string;
+  rows: IInstitutionDTO[];
+}
+
+export interface IRole {
+  id: string;
+  label: string;
+  institutionId: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IRoleRequest extends Pick<IRole, "label"> {
+  permissions?: string[];
+}
+export interface RoleResponseDTO extends IRole {
+  permissions: IPermission[];
+}
+
+export interface IAssignPermissionsRequest {
+  id: string;
+  roles?: string[];
+}
+
+export interface RoleResponseDTO extends IRole {
+  permissions: IPermission[];
+}
+
+export interface ChangeInstitution {
+  institutionId: string;
 }

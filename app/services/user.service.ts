@@ -3,9 +3,9 @@ import PermissionModel from "../database/models/PermissionModel";
 import UserModel from "../database/models/UserModel";
 import {
   ICreateUser,
-  INewUserDTO,
-  IRegister,
+  IRole,
   IUpdateUser,
+  IUser,
   IUserWithPermissions,
   Paged,
   UserPermission,
@@ -14,6 +14,9 @@ import {
 import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import CustomError from "../utils/CustomError";
 import { encrypt } from "../utils/Password";
+import UserInstitutions from "../database/models/UserInstitutions";
+import RolesModel from "../database/models/RolesModel";
+import RolePermissions from "../database/models/RolePermissions";
 
 class UserService {
   public static async getUser(
@@ -25,21 +28,31 @@ class UserService {
       include: withPermissions
         ? [
             {
-              model: PermissionModel,
-              attributes: ["id", "label"],
+              model: RolesModel,
+              attributes: ["id", "label", "institutionId"],
               through: {
                 attributes: [],
               },
+              as: "roles",
             },
+            "institutions",
+            "institution",
           ]
         : [],
     });
     let profileJson = user?.toJSON();
     if (withPermissions) {
-      const permissions: UserPermission[] = profileJson.permissions.map(
-        (permission: UserPermission) => ({
-          label: permission.label,
-          id: permission.id,
+      const roleIds = profileJson.roles
+        .filter((role: IRole) => role.institutionId == user?.institutionId)
+        .map((role: IRole) => role.id);
+      const rolePermissions = await RolePermissions.findAll({
+        where: { roleId: { [Op.in]: roleIds } },
+        include: ["permission"],
+      });
+      const permissions: UserPermission[] = rolePermissions.map(
+        (rolePermission: RolePermissions) => ({
+          label: rolePermission.permission.label,
+          id: rolePermission.permissionId,
         })
       );
 
@@ -50,14 +63,27 @@ class UserService {
   }
 
   public static async getUsers(
+    institutionId: string | null,
     limit: number,
     offset: number,
     searchq: string | undefined
   ): Promise<Paged<UserModel[]>> {
     let queryOptions = QueryOptions(["name", "email"], searchq);
 
+    const userIds = institutionId
+      ? (await UserInstitutions.findAll({ where: { institutionId } })).map(
+          (user) => user.userId
+        )
+      : [];
+
+    const userIdsOpt = institutionId
+      ? { id: { [Op.in]: userIds } }
+      : { institutionId: null };
+
+    queryOptions = { ...queryOptions, ...userIdsOpt };
+
     const data = await UserModel.findAll({
-      include: [{ model: PermissionModel }],
+      // include: ["roles"],
       where: {
         ...queryOptions,
         // email: { [Op.not]: "root@sudos.rw" }
@@ -67,7 +93,6 @@ class UserService {
         exclude: ["password", "deletedAt", "updatedAt"],
       },
 
-      group: ["UserModel.id"],
       limit,
       offset,
     });
@@ -80,23 +105,40 @@ class UserService {
     return { data, totalItems };
   }
 
-  public static async create(data: ICreateUser): Promise<UserReponse> {
-    const emailTaken = await UserService.getUser({ email: data.email }, false);
-    const phoneTaken = await UserService.getUser({ phone: data.phone }, false);
-    if (emailTaken || phoneTaken) {
-      const message =
-        emailTaken && phoneTaken
-          ? "Email and phone were taken"
-          : emailTaken
-          ? "Email was taken"
-          : "Phone was taken";
-      throw new CustomError(message, 409);
-    }
-    const password = encrypt("Pa$$word"); // TODO: random password generation and send to email/phone
-    const userWithpassword = { ...data, password } as INewUserDTO;
+  public static async create(
+    institutionId: string | null,
+    data: ICreateUser
+  ): Promise<UserReponse> {
+    const userWithEmail = await UserService.getUser(
+      { email: data.email },
+      false
+    );
+    let user: IUser;
+    if (userWithEmail) user = userWithEmail;
+    else {
+      const phoneTaken = await UserService.getUser(
+        { phone: data.phone },
+        false
+      );
+      if (phoneTaken) throw new CustomError("Phone was  taken", 409);
+      const password = encrypt("Pa$$word");
 
-    const newUser = await UserModel.create({ ...userWithpassword });
-    return newUser.toJSON() as UserReponse;
+      const createUser = await UserModel.create({
+        ...data,
+        password,
+        institutionId,
+      });
+      user = createUser.toJSON();
+    }
+
+    if (institutionId) {
+      await UserInstitutions.findOrCreate({
+        where: { userId: user.id, institutionId },
+        defaults: { userId: user.id, institutionId },
+      });
+    }
+
+    return user as UserReponse;
   }
 
   public static async updateUserProfile(

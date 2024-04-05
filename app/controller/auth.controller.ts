@@ -11,6 +11,7 @@ import {
   Put,
 } from "tsoa";
 import {
+  ChangeInstitution,
   IJWTPayload,
   ILogin,
   IRegister,
@@ -41,6 +42,15 @@ export class AuthController extends Controller {
   public static async login(@Body() data: ILogin): Promise<IJWTPayload> {
     const user = await AuthService.login(data);
     return user;
+  }
+
+  @Security("jwtAuth")
+  @Post("change-institution")
+  public static async changeInstitution(
+    @Body() body: ChangeInstitution,
+    @Inject() userId: string
+  ) {
+    return AuthService.changeInstitution(userId, body);
   }
 
   @Security("jwtAuth")
