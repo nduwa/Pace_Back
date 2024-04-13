@@ -10,7 +10,7 @@ import {
   resetPasswordRequestSchema,
   resetPasswordSchema,
 } from "../middleware/validations/auth.middleware";
-import { IUserWithPermissions } from "../type";
+import { IUserWithPermissions } from "../type/auth";
 
 const authRouter = express.Router();
 

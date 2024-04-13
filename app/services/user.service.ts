@@ -7,16 +7,16 @@ import {
   IUpdateUser,
   IUser,
   IUserWithPermissions,
-  Paged,
   UserPermission,
   UserReponse,
-} from "../type";
+} from "../type/auth";
 import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import CustomError from "../utils/CustomError";
 import { encrypt } from "../utils/Password";
 import UserInstitutions from "../database/models/UserInstitutions";
 import RolesModel from "../database/models/RolesModel";
 import RolePermissions from "../database/models/RolePermissions";
+import { Paged } from "../type";
 
 class UserService {
   public static async getUser(

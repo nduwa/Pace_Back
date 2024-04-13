@@ -9,7 +9,7 @@ import {
   IRegister,
   IResetPassword,
   IResetPasswordRequest,
-} from "../type";
+} from "../type/auth";
 import CustomError, { catchSequelizeError } from "../utils/CustomError";
 import { compare, encrypt, generateResetToken } from "../utils/Password";
 import sendEmail from "../utils/SendMail";

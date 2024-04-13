@@ -19,7 +19,7 @@ import {
   IResetPasswordRequest,
   IUpdatePassword,
   IUserWithPermissions,
-} from "../type";
+} from "../type/auth";
 import UserService from "../services/user.service";
 import AuthService from "../services/auth.service";
 import CustomError from "../utils/CustomError";

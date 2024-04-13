@@ -11,7 +11,7 @@ const appPersmissions = [
   },
   {
     group: "SUDO",
-    permissions: ["ALL_PERMISSIONS"],
+    permissions: ["ALL_PERMISSIONS", "IMPORT_MEDECINES"],
   },
   {
     group: "ADMIN",
@@ -19,7 +19,12 @@ const appPersmissions = [
   },
   {
     group: "MEDECINES",
-    permissions: ["VIEW_MEDECINES", "UPDATE_MEDECINES"],
+    permissions: [
+      "VIEW_MEDECINES",
+      "UPDATE_MEDECINES",
+      "PURCHASE_MEDECINES",
+      "SERVE_MEDECINES",
+    ],
   },
   {
     group: "PATIENTS",
