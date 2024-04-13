@@ -73,6 +73,30 @@ institutionRouter.get(
 );
 
 institutionRouter.get(
+  "/pharmacies",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await InstitutionController.getPharmacies();
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+institutionRouter.get(
+  "/insurances",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await InstitutionController.getInsurances();
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+institutionRouter.get(
   "/:id",
   async (req: Request, res: Response, next: NextFunction) => {
     try {

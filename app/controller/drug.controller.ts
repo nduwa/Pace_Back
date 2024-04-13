@@ -1,0 +1,94 @@
+import {
+  Route,
+  Controller,
+  Post,
+  Tags,
+  Body,
+  Security,
+  Inject,
+  Get,
+  Put,
+  Path,
+  Delete,
+} from "tsoa";
+
+import { Paginations } from "../utils/DBHelpers";
+import { IPaged } from "../type";
+import { IDrugDTO, IDrugRequest, IDrugResponse } from "../type/drugs";
+import DrugService from "../services/drug.service";
+
+@Tags("Users")
+@Route("api/drugs")
+@Security("jwtAuth")
+export class DrugController extends Controller {
+  @Get()
+  public static async getAll(
+    @Inject() institutionId: string | null,
+    @Inject() currentPage: number,
+    @Inject() limit: number,
+    @Inject() searchq: string | undefined,
+    @Inject() isOnMarket: string | undefined,
+    @Inject() sellingUnit: string | undefined
+  ): Promise<IPaged<IDrugResponse>> {
+    const { page, pageSize, offset } = Paginations(currentPage, limit);
+    const drugs = await DrugService.getAll(
+      institutionId,
+      pageSize,
+      offset,
+      searchq,
+      isOnMarket,
+      sellingUnit
+    );
+
+    const filtersUsed: IDrugResponse = {
+      isOnMarket: isOnMarket ?? "yes",
+      sellingUnit: sellingUnit ?? "all",
+      rows: drugs.data as unknown as IDrugDTO[],
+    };
+    return {
+      data: filtersUsed,
+      totalItems: drugs.totalItems,
+      currentPage: page,
+      itemsPerPage: pageSize,
+    };
+  }
+
+  @Get("/categories")
+  public static async categories(): Promise<string[]> {
+    return await DrugService.getCategories();
+  }
+
+  @Get("/{id}")
+  public static async getOne(@Path() id: string): Promise<IDrugDTO> {
+    return await DrugService.getOne(id);
+  }
+
+  @Post()
+  public static async create(
+    @Body() data: IDrugRequest,
+    @Inject() institutionId: string | null
+  ): Promise<IDrugDTO> {
+    const response = await DrugService.create(institutionId, data);
+    return response;
+  }
+
+  @Put("/{id}")
+  public static async update(
+    @Path() id: string,
+    @Body() data: IDrugRequest
+  ): Promise<boolean> {
+    return await DrugService.update(id, data);
+  }
+
+  @Delete("/{id}")
+  public static async delete(@Path() id: string): Promise<number> {
+    return await DrugService.delete(id);
+  }
+
+  @Get("/all")
+  public static async all(
+    @Inject() institutionId: string | null
+  ): Promise<IDrugDTO[]> {
+    return await DrugService.getAllNPaged(institutionId);
+  }
+}

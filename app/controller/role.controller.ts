@@ -18,7 +18,12 @@ import appPersmissions, {
 import PermissionModel from "../database/models/PermissionModel";
 import { Request } from "express";
 import { error } from "console";
-import { IPermission, IRole, IRoleRequest, RoleResponseDTO } from "../type";
+import {
+  IPermission,
+  IRole,
+  IRoleRequest,
+  RoleResponseDTO,
+} from "../type/auth";
 import RolesService from "../services/role.service";
 import InstitutionModel from "../database/models/Institution";
 import { Op } from "sequelize";

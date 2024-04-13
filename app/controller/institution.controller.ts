@@ -3,7 +3,6 @@ import {
   Controller,
   Post,
   Tags,
-  Response,
   Body,
   Security,
   Inject,
@@ -12,15 +11,16 @@ import {
   Path,
   Delete,
 } from "tsoa";
+
+import { Paginations } from "../utils/DBHelpers";
+import InstitutionService from "../services/institution.service";
+import { IPaged } from "../type";
 import {
   IInstitution,
   IInstitutionDTO,
   IInstitutionRequest,
   IInstitutionResponse,
-  IPaged,
-} from "../type";
-import { Paginations } from "../utils/DBHelpers";
-import InstitutionService from "../services/institution.service";
+} from "../type/instutution";
 
 @Tags("Institutions")
 @Route("api/institutions")
@@ -56,6 +56,16 @@ export class InstitutionController extends Controller {
   @Get("/{id}")
   public static async getOne(@Path() id: string): Promise<IInstitutionDTO> {
     return (await InstitutionService.getOne(id)) as IInstitutionDTO;
+  }
+
+  @Get("/pharmacies")
+  public static async getPharmacies(): Promise<IInstitutionDTO[]> {
+    return await InstitutionService.getByType("PHARMACY");
+  }
+
+  @Get("/insurances")
+  public static async getInsurances(): Promise<IInstitutionDTO[]> {
+    return await InstitutionService.getByType("INSURANCE");
   }
 
   @Post()

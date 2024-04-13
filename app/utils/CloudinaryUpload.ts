@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: (req: Request, file: Express.Multer.File) => ({
     public_id: v4(),
-    folder: "onboarding",
+    folder: "paccy-med",
   }),
 });
 const CloudinaryUpload = multer({ storage: storage });

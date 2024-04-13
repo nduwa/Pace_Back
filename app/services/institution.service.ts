@@ -1,12 +1,4 @@
 import UserModel from "../database/models/UserModel";
-import {
-  IInstitution,
-  IInstitutionDTO,
-  IInstitutionRequest,
-  IUser,
-  Paged,
-  UserReponse,
-} from "../type";
 import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import CustomError from "../utils/CustomError";
 import { encrypt } from "../utils/Password";
@@ -15,6 +7,13 @@ import UserInstitutions from "../database/models/UserInstitutions";
 import UserService from "./user.service";
 import PermissionModel from "../database/models/PermissionModel";
 import RolesService from "./role.service";
+import {
+  IInstitution,
+  IInstitutionDTO,
+  IInstitutionRequest,
+} from "../type/instutution";
+import { Paged } from "../type";
+import { IUser } from "../type/auth";
 
 class InstitutionService {
   public static async getOne(id: string): Promise<IInstitutionDTO | null> {
@@ -129,6 +128,11 @@ class InstitutionService {
     } catch (error) {
       throw new CustomError((error as Error).message, 400);
     }
+  }
+
+  public static async getByType(type: string): Promise<IInstitutionDTO[]> {
+    const data = await InstitutionModel.findAll({ where: { type } });
+    return data as unknown as IInstitutionDTO[];
   }
 }
 

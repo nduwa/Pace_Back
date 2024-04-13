@@ -13,16 +13,16 @@ import {
 import {
   IAssignPermissionsRequest,
   ICreateUser,
-  IPaged,
   IRegister,
   IUpdateUser,
   IUserWithPermissions,
   IUsersResponse,
   UserReponse,
-} from "../type";
+} from "../type/auth";
 import UserService from "../services/user.service";
 import { Paginations } from "../utils/DBHelpers";
 import RolesService from "../services/role.service";
+import { IPaged } from "../type";
 
 @Tags("Users")
 @Route("api/users")

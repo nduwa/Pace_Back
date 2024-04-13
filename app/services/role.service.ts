@@ -2,7 +2,7 @@ import PermissionModel from "../database/models/PermissionModel";
 import RolePermissions from "../database/models/RolePermissions";
 import RolesModel from "../database/models/RolesModel";
 import UserRoles from "../database/models/UserRoles";
-import { IAssignPermissionsRequest, IRoleRequest } from "../type";
+import { IAssignPermissionsRequest, IRoleRequest } from "../type/auth";
 import { TimestampsNOrder } from "../utils/DBHelpers";
 
 class RolesService {
