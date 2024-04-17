@@ -470,6 +470,230 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IPurchase": {
+				"properties": {
+					"note": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"id": {
+						"type": "string"
+					},
+					"totalCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"supplier": {
+						"type": "string"
+					},
+					"drugsCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"date",
+					"id",
+					"totalCost",
+					"drugsCount",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPurchaseDrugDTO": {
+				"properties": {
+					"drug": {
+						"type": "string"
+					},
+					"qty": {
+						"type": "number",
+						"format": "double"
+					},
+					"unitPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"sellingPrice": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"drug",
+					"qty",
+					"unitPrice",
+					"sellingPrice"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ICreatePurchaseDTO": {
+				"properties": {
+					"note": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string"
+					},
+					"supplier": {
+						"type": "string"
+					},
+					"drugs": {
+						"items": {
+							"$ref": "#/components/schemas/IPurchaseDrugDTO"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"note",
+					"date",
+					"supplier",
+					"drugs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IPurchase-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IPurchase"
+						},
+						"type": "array"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IInstitutionDrug": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"drugId": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"purchaseId": {
+						"type": "string"
+					},
+					"drugPurchaseId": {
+						"type": "string"
+					},
+					"batchNumber": {
+						"type": "string",
+						"nullable": true
+					},
+					"itemNo": {
+						"type": "string"
+					},
+					"quantity": {
+						"type": "number",
+						"format": "double"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"isAvailable": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"deletedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"drugId",
+					"institutionId",
+					"purchaseId",
+					"drugPurchaseId",
+					"batchNumber",
+					"itemNo",
+					"quantity",
+					"price",
+					"isAvailable",
+					"createdAt",
+					"deletedAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IDrugPurchaseAdjust": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"batchNumber": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IAdjustPurchaseDTO": {
+				"properties": {
+					"drugs": {
+						"items": {
+							"$ref": "#/components/schemas/IDrugPurchaseAdjust"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"drugs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IInstitutionDTO": {
 				"properties": {
 					"id": {
@@ -715,6 +939,10 @@
 						"type": "string",
 						"format": "date-time"
 					},
+					"totalQuantity": {
+						"type": "number",
+						"format": "double"
+					},
 					"institution": {
 						"$ref": "#/components/schemas/IInstitution"
 					}
@@ -801,6 +1029,10 @@
 						"type": "string"
 					},
 					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalQuantity": {
 						"type": "number",
 						"format": "double"
 					}
@@ -1419,6 +1651,183 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/api/purchases": {
+			"post": {
+				"operationId": "AddPurchase",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPurchase"
+								}
+							}
+						}
+					},
+					"201": {
+						"description": "Created"
+					}
+				},
+				"tags": [
+					"purchases"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ICreatePurchaseDTO"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetAllPurchases",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IPurchase-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"purchases"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/purchases/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/IPurchase"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"purchases"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/purchases/drugs-purchases/{id}": {
+			"get": {
+				"operationId": "GetDrugsByPurchase",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IInstitutionDrug"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"purchases"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/purchases/drugs-purchases": {
+			"post": {
+				"operationId": "DrugBatchNumbers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"purchases"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IAdjustPurchaseDTO"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/institutions": {

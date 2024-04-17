@@ -3,7 +3,9 @@ import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import CustomError from "../utils/CustomError";
 import { Paged } from "../type";
 import DrugModel from "../database/models/DrugModel";
-import { IDrug, IDrugDTO, IDrugRequest } from "../type/drugs";
+import { IDrug, IDrugDTO, IDrugRequest, IInstitutionDrug } from "../type/drugs";
+import DrugPurchasesModel from "../database/models/DrugPurchases";
+import InstitutionDrugs from "../database/models/InstututionDrugs";
 
 class DrugService {
   public static async getAll(
@@ -46,6 +48,18 @@ class DrugService {
         ...queryOptions,
       },
       ...TimestampsNOrder,
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+              SELECT SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
+              FROM "institution_drugs" AS "drug"
+              WHERE "drug"."drugId" = "DrugModel"."id" AND "drug"."isAvailable"=true AND "drug"."institutionId"='${institutionId}'
+            )`),
+            "totalQuantity",
+          ],
+        ],
+      },
       order: [["drug_code", "ASC"]],
       limit,
       offset,
@@ -129,6 +143,14 @@ class DrugService {
     const array = categories.map((category) => category.sellingUnit);
 
     return array;
+  }
+
+  public static async getDrugsByPurchase(
+    id: string
+  ): Promise<IInstitutionDrug[]> {
+    return await InstitutionDrugs.findAll({
+      where: { drugPurchaseId: id },
+    });
   }
 }
 

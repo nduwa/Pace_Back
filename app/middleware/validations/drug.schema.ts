@@ -32,3 +32,14 @@ export const importDrug = z.object({
     price: z.coerce.number(),
   }),
 });
+
+export const drugStockSchema = z.object({
+  body: z.object({
+    drugId: z.string().uuid("Invalid drug ID"),
+    quantity: z.number().min(0, "Quantity is required"),
+    price: z.number().min(0, "Price is required"),
+    bathcNumber: z.string().max(255, "Batch number is too long"),
+  }),
+});
+
+export type IDrugStockInput = z.infer<typeof drugStockSchema>;

@@ -5,6 +5,7 @@ import rolesRouter from "./role.route";
 import institutionRouter from "./institution.route";
 import drugsRouter from "./drug.route";
 import importRouter from "./import.route";
+import purchaseRouter from "./purchase.routes";
 
 const apiRouter = express.Router();
 
@@ -14,5 +15,6 @@ apiRouter.use("/institutions", institutionRouter);
 apiRouter.use("/roles", rolesRouter);
 apiRouter.use("/drugs", drugsRouter);
 apiRouter.use("/import", importRouter);
+apiRouter.use("/purchases", purchaseRouter);
 
 export default apiRouter;
