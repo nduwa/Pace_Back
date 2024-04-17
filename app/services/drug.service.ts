@@ -52,10 +52,18 @@ class DrugService {
         include: [
           [
             Sequelize.literal(`(
-              SELECT SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
+              SELECT 
+                  SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
               FROM "institution_drugs" AS "drug"
-              WHERE "drug"."drugId" = "DrugModel"."id" AND "drug"."isAvailable"=true AND "drug"."institutionId"='${institutionId}'
-            )`),
+              WHERE 
+                  "drug"."drugId" = "DrugModel"."id" 
+                  AND "drug"."isAvailable" = true 
+                  ${
+                    institutionId
+                      ? `AND "drug"."institutionId" = '${institutionId}'`
+                      : " AND 1=0"
+                  }
+          )`),
             "totalQuantity",
           ],
         ],
