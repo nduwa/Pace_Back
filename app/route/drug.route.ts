@@ -74,13 +74,14 @@ drugsRouter.put(
   }
 );
 
-drugsRouter.put(
+drugsRouter.get(
   "/all",
   allowedPermissions("VIEW_MEDECINES"),
-  validate(updateDrug),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.all(req.params.id);
+      const response = await DrugController.all(
+        req.user?.institutionId as string | null
+      );
       return res.status(200).json(response);
     } catch (error) {
       return next(error);

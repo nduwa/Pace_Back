@@ -1,6 +1,9 @@
 import DrugModel from "./models/DrugModel";
+import DrugPurchasesModel from "./models/DrugPurchases";
 import InstitutionModel from "./models/Institution";
+import InstitutionDrugs from "./models/InstututionDrugs";
 import PermissionModel from "./models/PermissionModel";
+import PurchasesModel from "./models/PurchasesModel";
 import ResetToken from "./models/ResetToken";
 import RolePermissions from "./models/RolePermissions";
 import RolesModel from "./models/RolesModel";
@@ -19,6 +22,9 @@ const models = [
   UserRoles,
 
   DrugModel,
+  PurchasesModel,
+  DrugPurchasesModel,
+  InstitutionDrugs,
 ];
 
 export default models;
