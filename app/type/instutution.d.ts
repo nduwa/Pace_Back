@@ -1,4 +1,4 @@
-import { UserReponse } from "./auth";
+import { IUser, UserReponse } from "./auth";
 
 export interface IInstitution {
   id: string;
@@ -29,4 +29,29 @@ export interface IInstitutionDTO extends IInstitution {
 export interface IInstitutionResponse {
   type: string;
   rows: IInstitutionDTO[];
+}
+
+export interface ITransaction {
+  id: string;
+  userId: string;
+  institutionId: string;
+  amount: number;
+  reason: string;
+  reference: string;
+  type: string;
+}
+
+export type ITransactionRequest = Omit<
+  ITransaction,
+  "id" | "userId" | "institutionId"
+>;
+
+export interface ITransactionDTO extends ITransaction {
+  user: IUser;
+  institution: IInstitution;
+}
+
+export interface ITransactionResponse {
+  type: string;
+  rows: ITransactionDTO[];
 }

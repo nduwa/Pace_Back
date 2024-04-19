@@ -2,18 +2,18 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("institution_drugs", {
+    await queryInterface.createTable("transactions", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      drugId: {
+      userId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "drugs",
+          model: "users",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -28,50 +28,21 @@ module.exports = {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
-      purchaseId: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "purchases",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      },
-      drugPurchaseId: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "drug_purchases",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      },
-
-      batchNumber: {
+      reason: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      expireDate: {
-        type: Sequelize.DATE,
+      amount: {
+        type: Sequelize.DOUBLE,
         allowNull: true,
       },
-      itemNo: {
+      type: {
         type: Sequelize.STRING,
         allowNull: true,
-        unique: true,
       },
-      quantity: {
-        type: Sequelize.DOUBLE,
+      reference: {
+        type: Sequelize.STRING,
         allowNull: true,
-      },
-      price: {
-        type: Sequelize.DOUBLE,
-        allowNull: true,
-      },
-      isAvailable: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
       },
       deletedAt: {
         type: Sequelize.DATE,
@@ -90,6 +61,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("institution_drugs");
+    await queryInterface.dropTable("transactions");
   },
 };

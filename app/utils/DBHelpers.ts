@@ -15,11 +15,9 @@ export const QueryOptions = (
   return queryOptions;
 };
 
-export const TimestampsNOrder = () => {
-  return {
-    attributes: { exclude: ["deletedAt", "updatedAt"] },
-    order: [["createdAt", "DESC"]] as unknown as Order,
-  };
+export const TimestampsNOrder = {
+  attributes: { exclude: ["deletedAt", "updatedAt"] },
+  order: [["createdAt", "DESC"]] as unknown as Order,
 };
 
 export const Paginations = (

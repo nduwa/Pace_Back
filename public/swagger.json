@@ -359,6 +359,204 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IUser": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string",
+						"nullable": true
+					},
+					"password": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"email",
+					"phone",
+					"institutionId",
+					"password",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ITransactionDTO": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"reason": {
+						"type": "string"
+					},
+					"reference": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"user": {
+						"$ref": "#/components/schemas/IUser"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					}
+				},
+				"required": [
+					"id",
+					"userId",
+					"institutionId",
+					"amount",
+					"reason",
+					"reference",
+					"type",
+					"user",
+					"institution"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ITransactionResponse": {
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/ITransactionDTO"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_ITransactionResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ITransactionResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ITransaction": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"reason": {
+						"type": "string"
+					},
+					"reference": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"userId",
+					"institutionId",
+					"amount",
+					"reason",
+					"reference",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_ITransaction.Exclude_keyofITransaction.id-or-userId-or-institutionId__": {
+				"properties": {
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"reason": {
+						"type": "string"
+					},
+					"reference": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"amount",
+					"reason",
+					"reference",
+					"type"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Omit_ITransaction.id-or-userId-or-institutionId_": {
+				"$ref": "#/components/schemas/Pick_ITransaction.Exclude_keyofITransaction.id-or-userId-or-institutionId__",
+				"description": "Construct a type with the properties of T except for those in type K."
+			},
+			"ITransactionRequest": {
+				"$ref": "#/components/schemas/Omit_ITransaction.id-or-userId-or-institutionId_"
+			},
 			"IPermission": {
 				"properties": {
 					"id": {
@@ -529,13 +727,22 @@
 					"sellingPrice": {
 						"type": "number",
 						"format": "double"
+					},
+					"batchNumber": {
+						"type": "string"
+					},
+					"expireDate": {
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"required": [
 					"drug",
 					"qty",
 					"unitPrice",
-					"sellingPrice"
+					"sellingPrice",
+					"batchNumber",
+					"expireDate"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -618,6 +825,11 @@
 						"type": "string",
 						"nullable": true
 					},
+					"expireDate": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
 					"itemNo": {
 						"type": "string"
 					},
@@ -652,6 +864,7 @@
 					"purchaseId",
 					"drugPurchaseId",
 					"batchNumber",
+					"expireDate",
 					"itemNo",
 					"quantity",
 					"price",
@@ -669,6 +882,10 @@
 						"type": "string"
 					},
 					"batchNumber": {
+						"type": "string",
+						"nullable": true
+					},
+					"expireDate": {
 						"type": "string",
 						"nullable": true
 					}
@@ -907,6 +1124,88 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IDrugCategory": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IDrugCategoryResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IDrugCategory"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IDrugCategoryResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IDrugCategoryResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IDrugCategory.Exclude_keyofIDrugCategory.id-or-createdAt__": {
+				"properties": {
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Omit_IDrugCategory.id-or-createdAt_": {
+				"$ref": "#/components/schemas/Pick_IDrugCategory.Exclude_keyofIDrugCategory.id-or-createdAt__",
+				"description": "Construct a type with the properties of T except for those in type K."
+			},
+			"IDrugCategoryRequest": {
+				"$ref": "#/components/schemas/Omit_IDrugCategory.id-or-createdAt_"
+			},
 			"IDrugDTO": {
 				"properties": {
 					"id": {
@@ -925,12 +1224,8 @@
 						"type": "string",
 						"nullable": true
 					},
-					"sellingUnit": {
+					"drugCategory": {
 						"type": "string"
-					},
-					"price": {
-						"type": "number",
-						"format": "double"
 					},
 					"isOnMarket": {
 						"type": "boolean"
@@ -953,8 +1248,7 @@
 					"description",
 					"designation",
 					"instruction",
-					"sellingUnit",
-					"price",
+					"drugCategory",
 					"isOnMarket",
 					"createdAt"
 				],
@@ -966,7 +1260,7 @@
 					"isOnMarket": {
 						"type": "string"
 					},
-					"sellingUnit": {
+					"drugCategory": {
 						"type": "string"
 					},
 					"rows": {
@@ -978,7 +1272,7 @@
 				},
 				"required": [
 					"isOnMarket",
-					"sellingUnit",
+					"drugCategory",
 					"rows"
 				],
 				"type": "object",
@@ -1025,12 +1319,8 @@
 					"instruction": {
 						"type": "string"
 					},
-					"sellingUnit": {
+					"drugCategory": {
 						"type": "string"
-					},
-					"price": {
-						"type": "number",
-						"format": "double"
 					},
 					"totalQuantity": {
 						"type": "number",
@@ -1042,8 +1332,7 @@
 					"description",
 					"designation",
 					"instruction",
-					"sellingUnit",
-					"price"
+					"drugCategory"
 				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
@@ -1054,44 +1343,6 @@
 			},
 			"IDrugRequest": {
 				"$ref": "#/components/schemas/Omit_IDrug.id-or-createdAt-or-isOnMarket_"
-			},
-			"IUser": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"phone": {
-						"type": "string"
-					},
-					"institutionId": {
-						"type": "string",
-						"nullable": true
-					},
-					"password": {
-						"type": "string"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"email",
-					"phone",
-					"institutionId",
-					"password",
-					"createdAt"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"IJWTPayload": {
 				"properties": {
@@ -1407,6 +1658,207 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/transactions": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_ITransactionResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ITransaction"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ITransactionRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/transactions/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ITransactionDTO"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ITransactionRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/transactions/all": {
+			"get": {
+				"operationId": "All",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ITransactionDTO"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/api/roles": {
@@ -1796,7 +2248,7 @@
 		},
 		"/api/purchases/drugs-purchases": {
 			"post": {
-				"operationId": "DrugBatchNumbers",
+				"operationId": "DrugsAdjust",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2102,6 +2554,206 @@
 				}
 			}
 		},
+		"/api/drug-categories": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IDrugCategoryResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IDrugCategory"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IDrugCategoryRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/drug-categories/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IDrugCategory"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IDrugCategoryRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/drug-categories/all": {
+			"get": {
+				"operationId": "GetNPaged",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IDrugCategory"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/api/drugs": {
 			"get": {
 				"operationId": "GetAll",
@@ -2160,35 +2812,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/api/drugs/categories": {
-			"get": {
-				"operationId": "Categories",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"type": "string"
-									},
-									"type": "array"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Users"
-				],
-				"security": [
-					{
-						"jwtAuth": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/api/drugs/{id}": {

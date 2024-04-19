@@ -92,7 +92,7 @@ purchaseRouter.post(
   allowedPermissions("PURCHASE_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await PurchaseController.drugBatchNumbers(req.body);
+      const response = await PurchaseController.drugsAdjust(req.body);
       return res.status(200).json(response);
     } catch (error) {
       console.log(error);

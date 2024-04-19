@@ -14,8 +14,14 @@ import {
 
 import { Paginations } from "../utils/DBHelpers";
 import { IPaged } from "../type";
-import { IDrugDTO, IDrugRequest, IDrugResponse } from "../type/drugs";
+import {
+  IDrugCategory,
+  IDrugDTO,
+  IDrugRequest,
+  IDrugResponse,
+} from "../type/drugs";
 import DrugService from "../services/drug.service";
+import DrugCategoryService from "../services/drugCategory.service";
 
 @Tags("Users")
 @Route("api/drugs")
@@ -28,7 +34,7 @@ export class DrugController extends Controller {
     @Inject() limit: number,
     @Inject() searchq: string | undefined,
     @Inject() isOnMarket: string | undefined,
-    @Inject() sellingUnit: string | undefined
+    @Inject() drugCategory: string | undefined
   ): Promise<IPaged<IDrugResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
     const drugs = await DrugService.getAll(
@@ -37,12 +43,12 @@ export class DrugController extends Controller {
       offset,
       searchq,
       isOnMarket,
-      sellingUnit
+      drugCategory
     );
 
     const filtersUsed: IDrugResponse = {
       isOnMarket: isOnMarket ?? "yes",
-      sellingUnit: sellingUnit ?? "all",
+      drugCategory: drugCategory ?? "all",
       rows: drugs.data as unknown as IDrugDTO[],
     };
     return {
@@ -51,11 +57,6 @@ export class DrugController extends Controller {
       currentPage: page,
       itemsPerPage: pageSize,
     };
-  }
-
-  @Get("/categories")
-  public static async categories(): Promise<string[]> {
-    return await DrugService.getCategories();
   }
 
   @Get("/{id}")

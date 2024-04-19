@@ -1,3 +1,6 @@
+import { IUser } from "./auth";
+import { IInstitution } from "./instutution";
+
 export interface IPaged<T> {
   data: T;
   totalItems: number;
