@@ -1,59 +1,66 @@
 import { UUIDV4 } from "sequelize";
 import {
   Table,
-  Default,
-  AllowNull,
-  Unique,
-  PrimaryKey,
   Model,
   Column,
-  DataType,
-  Sequelize,
+  PrimaryKey,
+  Default,
   CreatedAt,
-  DeletedAt,
   UpdatedAt,
+  Sequelize,
+  DataType,
+  DeletedAt,
+  AllowNull,
   ForeignKey,
   BelongsTo,
+  Min,
 } from "sequelize-typescript";
+import DrugModel from "./DrugModel";
 import InstitutionModel from "./Institution";
+import UserModel from "./UserModel";
 
 @Table({
-  tableName: "drugs",
+  tableName: "transactions",
+  paranoid: false,
 })
-class DrugModel extends Model {
+class Transactions extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
-  @AllowNull(true)
+  @ForeignKey(() => UserModel)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  userId!: string;
+
+  @BelongsTo(() => UserModel)
+  user!: DrugModel;
+
   @ForeignKey(() => InstitutionModel)
+  @AllowNull(false)
   @Column(DataType.UUID)
   institutionId!: string;
 
-  @AllowNull(false)
-  @Unique(true)
+  @BelongsTo(() => InstitutionModel)
+  institution!: InstitutionModel;
+
+  @AllowNull(true)
+  @Column(DataType.TEXT)
+  reason!: string;
+
+  @Min(0)
+  @AllowNull(true)
+  @Column(DataType.DOUBLE)
+  amount!: number;
+
+  @AllowNull(true)
   @Column(DataType.STRING)
-  drug_code!: string;
+  reference!: string;
 
   @AllowNull(true)
-  @Column(DataType.TEXT)
-  description!: string;
-
-  @AllowNull(true)
-  @Column(DataType.TEXT)
-  designation!: string;
-
-  @AllowNull(true)
-  @Column(DataType.TEXT)
-  instruction!: string;
-
   @Column(DataType.STRING)
-  drugCategory!: string;
-
-  @AllowNull(false)
-  @Column(DataType.BOOLEAN)
-  isOnMarket!: number;
+  type!: string;
 
   @DeletedAt
   @Column(DataType.DATE)
@@ -68,8 +75,6 @@ class DrugModel extends Model {
   @Default(Sequelize.fn("NOW"))
   @Column(DataType.DATE)
   updatedAt!: Date;
-
-  @BelongsTo(() => InstitutionModel)
-  institution!: InstitutionModel;
 }
-export default DrugModel;
+
+export default Transactions;

@@ -1,13 +1,24 @@
 import { IInstitution } from "./instutution";
 
+export interface IDrugCategory {
+  id: string;
+  name: string;
+  createdAt: Date;
+}
+
+export type IDrugCategoryRequest = Omit<IDrugCategory, "id" | "createdAt">;
+
+export interface IDrugCategoryResponse {
+  rows: IDrugCategory[];
+}
+
 export interface IDrug {
   id: string;
   drug_code: string;
   description: string;
   designation: string;
   instruction: string | null;
-  sellingUnit: string;
-  price: number;
+  drugCategory: string;
   isOnMarket: boolean;
 
   createdAt: Date;
@@ -22,7 +33,7 @@ export interface IDrugDTO extends IDrug {
 
 export interface IDrugResponse {
   isOnMarket: string;
-  sellingUnit: string;
+  drugCategory: string;
   rows: IDrugDTO[];
 }
 
@@ -31,6 +42,8 @@ export interface IPurchaseDrugDTO {
   qty: number;
   unitPrice: number;
   sellingPrice: number;
+  batchNumber: string;
+  expireDate: Date;
 }
 export interface ICreatePurchaseDTO {
   note: string;
@@ -52,6 +65,7 @@ export interface IPurchase {
 export interface IDrugPurchaseAdjust {
   id: string;
   batchNumber?: string | undefined | null;
+  expireDate?: string | undefined | null;
 }
 export interface IAdjustPurchaseDTO {
   drugs: IDrugPurchaseAdjust[];
@@ -64,6 +78,7 @@ export interface IInstitutionDrug {
   purchaseId: string;
   drugPurchaseId: string;
   batchNumber: string | null;
+  expireDate: Date | null;
   itemNo: string;
   quantity: number;
   price: number;

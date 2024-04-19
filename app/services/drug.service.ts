@@ -14,10 +14,10 @@ class DrugService {
     offset: number,
     searchq: string | undefined,
     isOnMarket: string | undefined,
-    sellingUnit: string | undefined
+    drugCategory: string | undefined
   ): Promise<Paged<DrugModel[]>> {
     let queryOptions = QueryOptions(
-      ["designation", "sellingUnit", "drug_code", "instruction"],
+      ["designation", "drugCategory", "drug_code", "instruction"],
       searchq
     );
 
@@ -25,10 +25,8 @@ class DrugService {
       [Op.or]: [{ institutionId: null }, { institutionId: institutionId }],
     };
 
-    console.log(queryOptions);
-
-    const sellingUnitOpt =
-      sellingUnit && sellingUnit != "all" ? { sellingUnit } : {};
+    const drugCategoryOpt =
+      drugCategory && drugCategory != "all" ? { drugCategory } : {};
     const isOnMarketOpt =
       isOnMarket && isOnMarket != "all"
         ? { isOnMarket: isOnMarket == "no" ? false : true }
@@ -36,11 +34,9 @@ class DrugService {
 
     queryOptions = {
       [Op.and]: [queryOptions, institutionOpt],
-      ...sellingUnitOpt,
+      ...drugCategoryOpt,
       ...isOnMarketOpt,
     };
-
-    console.log(queryOptions);
 
     const data = await DrugModel.findAll({
       include: ["institution"],
@@ -145,10 +141,13 @@ class DrugService {
   public static async getCategories(): Promise<string[]> {
     const categories = await DrugModel.findAll({
       attributes: [
-        [Sequelize.fn("DISTINCT", Sequelize.col("sellingUnit")), "sellingUnit"],
+        [
+          Sequelize.fn("DISTINCT", Sequelize.col("drugCategory")),
+          "drugCategory",
+        ],
       ],
     });
-    const array = categories.map((category) => category.sellingUnit);
+    const array = categories.map((category) => category.drugCategory);
 
     return array;
   }

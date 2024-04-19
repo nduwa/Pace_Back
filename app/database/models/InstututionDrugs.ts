@@ -71,6 +71,10 @@ class InstitutionDrugs extends Model {
   @Column(DataType.TEXT)
   batchNumber!: string;
 
+  @AllowNull(true)
+  @Column(DataType.DATE)
+  expireDate!: Date;
+
   @Min(0)
   @AllowNull(true)
   @Column(DataType.DOUBLE)

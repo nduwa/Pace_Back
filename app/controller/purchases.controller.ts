@@ -74,9 +74,9 @@ export class PurchaseController extends Controller {
   }
 
   @Post("/drugs-purchases")
-  public static async drugBatchNumbers(
+  public static async drugsAdjust(
     @Body() data: IAdjustPurchaseDTO
   ): Promise<boolean> {
-    return await PurchaseService.drugBatchNumbers(data);
+    return await PurchaseService.drugsAdjust(data);
   }
 }

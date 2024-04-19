@@ -2,25 +2,23 @@ import express, { NextFunction, Request, Response } from "express";
 import authorize from "../middleware/authorize.middleware";
 import { allowedPermissions } from "../middleware/permission";
 import validate from "../middleware/validations/validator";
-import { DrugController } from "../controller/drug.controller";
-import { createDrug, updateDrug } from "../middleware/validations/drug.schema";
+import { TransactionController } from "../controller/transaction.controller";
+import { transactionSchema } from "../middleware/validations/transaction.schema";
 
-const drugsRouter = express.Router();
-drugsRouter.use(authorize);
+const transactionsRouter = express.Router();
+transactionsRouter.use(authorize);
 
-drugsRouter.get(
+transactionsRouter.get(
   "/",
-  allowedPermissions("INSTITUTION_ADMIN", "VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { drugCategory, isOnMarket, page, limit, searchq } = req.query;
-      const response = await DrugController.getAll(
+      const { type, page, limit, searchq } = req.query;
+      const response = await TransactionController.getAll(
         req.user?.institutionId as string | null,
         parseInt(page as string),
         limit as unknown as number,
         searchq as string,
-        isOnMarket as string,
-        drugCategory as string
+        type as string
       );
 
       return res.status(200).json(response);
@@ -30,15 +28,15 @@ drugsRouter.get(
   }
 );
 
-drugsRouter.post(
+transactionsRouter.post(
   "/",
-  allowedPermissions("UPDATE_MEDECINES"),
-  validate(createDrug),
+  validate(transactionSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.create(
+      const response = await TransactionController.create(
         req.body,
-        req.user?.institutionId as string | null
+        req.user?.institutionId as string | null,
+        req?.user?.id as unknown as string
       );
       return res.status(200).json(response);
     } catch (error) {
@@ -46,12 +44,11 @@ drugsRouter.post(
     }
   }
 );
-drugsRouter.delete(
+transactionsRouter.delete(
   "/:id",
-  allowedPermissions("UPDATE_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.delete(req.params.id);
+      const response = await TransactionController.delete(req.params.id);
       return res.status(200).json(response);
     } catch (error) {
       return next(error);
@@ -59,13 +56,15 @@ drugsRouter.delete(
   }
 );
 
-drugsRouter.put(
+transactionsRouter.put(
   "/:id",
-  allowedPermissions("UPDATE_MEDECINES"),
-  validate(updateDrug),
+  validate(transactionSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.update(req.params.id, req.body);
+      const response = await TransactionController.update(
+        req.params.id,
+        req.body
+      );
       return res.status(200).json(response);
     } catch (error) {
       return next(error);
@@ -73,12 +72,11 @@ drugsRouter.put(
   }
 );
 
-drugsRouter.get(
+transactionsRouter.get(
   "/all",
-  allowedPermissions("VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.all(
+      const response = await TransactionController.all(
         req.user?.institutionId as string | null
       );
       return res.status(200).json(response);
@@ -88,12 +86,11 @@ drugsRouter.get(
   }
 );
 
-drugsRouter.get(
+transactionsRouter.get(
   "/:id",
-  allowedPermissions("VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.getOne(req.params.id);
+      const response = await TransactionController.getOne(req.params.id);
       return res.status(200).json(response);
     } catch (error) {
       return next(error);
@@ -101,4 +98,4 @@ drugsRouter.get(
   }
 );
 
-export default drugsRouter;
+export default transactionsRouter;

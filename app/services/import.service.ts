@@ -1,8 +1,12 @@
 import CustomError, { catchSequelizeError } from "../utils/CustomError";
 import readXlsxFile from "read-excel-file/node";
-import { importDrug } from "../middleware/validations/drug.schema";
+import {
+  drugCategory,
+  importDrug,
+} from "../middleware/validations/drug.schema";
 import DrugModel from "../database/models/DrugModel";
 import fs from "fs";
+import DrugCategory from "../database/models/DrugCategory";
 
 class ImportService {
   public static async importDrugs(
@@ -22,14 +26,12 @@ class ImportService {
       const notInserted: string[] = [];
 
       for (const row of rows) {
-        console.log(row[6]);
         const data = {
           drug_code: this.nullToEmpty(row[1]),
           description: this.nullToEmpty(row[2]),
           designation: this.nullToEmpty(row[3]),
           instruction: this.nullToEmpty(row[4]).toUpperCase(),
-          sellingUnit: this.nullToEmpty(row[5]).toUpperCase(),
-          price: Math.ceil(parseInt(this.nullToEmpty(row[6]))).toFixed(2),
+          drugCategory: this.nullToEmpty(row[5]).toUpperCase(),
         };
 
         const validateData = importDrug.safeParse({ body: data });
@@ -42,6 +44,11 @@ class ImportService {
               institutionId,
             },
             // transaction: transaction,
+          });
+
+          DrugCategory.findOrCreate({
+            where: { name: data.drugCategory },
+            defaults: { name: data.drugCategory },
           });
 
           if (!created) {

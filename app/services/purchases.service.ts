@@ -40,6 +40,8 @@ class PurchaseService {
           drugId: drug.drug,
           unitPrice: drug.unitPrice,
           sellingPrice: drug.sellingPrice,
+          batchNumber: drug.batchNumber,
+          expireDate: drug.expireDate,
           totalPrice: drug.unitPrice * drug.qty,
           purchaseId: purchase.id,
           quantity: drug.qty ?? 1,
@@ -59,6 +61,8 @@ class PurchaseService {
                 drugId: purchase.drugId,
                 purchaseId: purchase.purchaseId,
                 drugPurchaseId: purchase.id,
+                batchNumber: purchase.batchNumber,
+                expireDate: purchase.expireDate,
                 quantity: 1,
                 price: purchase.sellingPrice,
                 institutionId,
@@ -110,15 +114,14 @@ class PurchaseService {
     return result;
   }
 
-  public static async drugBatchNumbers(
-    data: IAdjustPurchaseDTO
-  ): Promise<boolean> {
+  public static async drugsAdjust(data: IAdjustPurchaseDTO): Promise<boolean> {
     try {
       await Promise.all(
         data.drugs?.map(async (drug) => {
           const drugData = {
             ...drug,
             batchNumber: drug.batchNumber == "" ? null : drug.batchNumber,
+            expireDate: drug.expireDate == "" ? null : drug.expireDate,
           };
           if (drug.id !== undefined) {
             await InstitutionDrugs.update(drugData, {

@@ -36,6 +36,14 @@ module.exports = {
           allowNull: false,
           defaultValue: 0,
         },
+        batchNumber: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        expireDate: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
         totalPrice: {
           type: Sequelize.FLOAT,
           allowNull: true,

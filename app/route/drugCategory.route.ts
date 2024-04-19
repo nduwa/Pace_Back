@@ -2,25 +2,22 @@ import express, { NextFunction, Request, Response } from "express";
 import authorize from "../middleware/authorize.middleware";
 import { allowedPermissions } from "../middleware/permission";
 import validate from "../middleware/validations/validator";
-import { DrugController } from "../controller/drug.controller";
-import { createDrug, updateDrug } from "../middleware/validations/drug.schema";
+import { DrugCategoryController } from "../controller/drugCategory.controller";
+import { drugCategorySchema } from "../middleware/validations/purchase.schema";
 
-const drugsRouter = express.Router();
-drugsRouter.use(authorize);
+const drugsCategoryRouter = express.Router();
+drugsCategoryRouter.use(authorize);
 
-drugsRouter.get(
+drugsCategoryRouter.get(
   "/",
-  allowedPermissions("INSTITUTION_ADMIN", "VIEW_MEDECINES"),
+  allowedPermissions("VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { drugCategory, isOnMarket, page, limit, searchq } = req.query;
-      const response = await DrugController.getAll(
-        req.user?.institutionId as string | null,
+      const { page, limit, searchq } = req.query;
+      const response = await DrugCategoryController.getAll(
         parseInt(page as string),
         limit as unknown as number,
-        searchq as string,
-        isOnMarket as string,
-        drugCategory as string
+        searchq as string
       );
 
       return res.status(200).json(response);
@@ -30,15 +27,41 @@ drugsRouter.get(
   }
 );
 
-drugsRouter.post(
+drugsCategoryRouter.post(
   "/",
   allowedPermissions("UPDATE_MEDECINES"),
-  validate(createDrug),
+  validate(drugCategorySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.create(
-        req.body,
-        req.user?.institutionId as string | null
+      const response = await DrugCategoryController.create(req.body);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+drugsCategoryRouter.delete(
+  "/:id",
+  allowedPermissions("UPDATE_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugCategoryController.delete(req.params.id);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+drugsCategoryRouter.put(
+  "/:id",
+  allowedPermissions("UPDATE_MEDECINES"),
+  validate(drugCategorySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugCategoryController.update(
+        req.params.id,
+        req.body
       );
       return res.status(200).json(response);
     } catch (error) {
@@ -46,41 +69,13 @@ drugsRouter.post(
     }
   }
 );
-drugsRouter.delete(
-  "/:id",
-  allowedPermissions("UPDATE_MEDECINES"),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await DrugController.delete(req.params.id);
-      return res.status(200).json(response);
-    } catch (error) {
-      return next(error);
-    }
-  }
-);
 
-drugsRouter.put(
-  "/:id",
-  allowedPermissions("UPDATE_MEDECINES"),
-  validate(updateDrug),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await DrugController.update(req.params.id, req.body);
-      return res.status(200).json(response);
-    } catch (error) {
-      return next(error);
-    }
-  }
-);
-
-drugsRouter.get(
+drugsCategoryRouter.get(
   "/all",
   allowedPermissions("VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.all(
-        req.user?.institutionId as string | null
-      );
+      const response = await DrugCategoryController.getNPaged();
       return res.status(200).json(response);
     } catch (error) {
       return next(error);
@@ -88,12 +83,12 @@ drugsRouter.get(
   }
 );
 
-drugsRouter.get(
+drugsCategoryRouter.get(
   "/:id",
   allowedPermissions("VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await DrugController.getOne(req.params.id);
+      const response = await DrugCategoryController.getOne(req.params.id);
       return res.status(200).json(response);
     } catch (error) {
       return next(error);
@@ -101,4 +96,4 @@ drugsRouter.get(
   }
 );
 
-export default drugsRouter;
+export default drugsCategoryRouter;

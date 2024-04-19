@@ -54,6 +54,14 @@ class DrugPurchasesModel extends Model {
   @Column(DataType.FLOAT)
   totalPrice!: number;
 
+  @AllowNull(true)
+  @Column(DataType.TEXT)
+  batchNumber!: string;
+
+  @AllowNull(true)
+  @Column(DataType.DATE)
+  expireDate!: Date;
+
   @ForeignKey(() => PurchasesModel)
   @AllowNull(false)
   @Column(DataType.UUID)

@@ -38,12 +38,8 @@ module.exports = {
           type: Sequelize.TEXT,
           allowNull: true,
         },
-        sellingUnit: {
+        drugCategory: {
           type: Sequelize.STRING,
-          allowNull: false,
-        },
-        price: {
-          type: Sequelize.DOUBLE,
           allowNull: false,
         },
         isOnMarket: {
