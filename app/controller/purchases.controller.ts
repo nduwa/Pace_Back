@@ -16,12 +16,14 @@ import {
 import {
   IAdjustPurchaseDTO,
   ICreatePurchaseDTO,
+  IDrugPurchase,
+  IDrugPurchaseResponse,
   IInstitutionDrug,
   IPurchase,
 } from "../type/drugs";
 import PurchaseService from "../services/purchases.service";
 import { Paginations } from "../utils/DBHelpers";
-import { IPaged } from "../type";
+import { IPaged, Paged } from "../type";
 import DrugService from "../services/drug.service";
 
 @Tags("purchases")
@@ -64,13 +66,35 @@ export class PurchaseController extends Controller {
     const purchasesList = await PurchaseService.getOne(id);
     return purchasesList;
   }
-  @Response(200, "OK")
   @Get("/drugs-purchases/{id}")
   public static async getDrugsByPurchase(
     @Path() id: string
   ): Promise<IInstitutionDrug[]> {
     const purchasesList = await DrugService.getDrugsByPurchase(id);
     return purchasesList;
+  }
+
+  public static async getDrugPurchaseHistory(
+    @Inject() institutionId: string,
+    @Inject() currentPage: number,
+    @Inject() limit: number
+  ): Promise<IPaged<IDrugPurchaseResponse>> {
+    const { page, pageSize, offset } = Paginations(currentPage, limit);
+
+    const purchasesList = (await DrugService.getDrugPurchaseHistory(
+      institutionId,
+      pageSize,
+      offset
+    )) as unknown as Paged<IDrugPurchase[]>;
+    const filtersUsed: IDrugPurchaseResponse = {
+      rows: purchasesList.data as unknown as IDrugPurchase[],
+    };
+    return {
+      data: filtersUsed,
+      totalItems: purchasesList.totalItems,
+      currentPage: page,
+      itemsPerPage: pageSize,
+    };
   }
 
   @Post("/drugs-purchases")

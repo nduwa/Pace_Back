@@ -55,6 +55,26 @@ purchaseRouter.get(
 );
 
 purchaseRouter.get(
+  "/drugs-purchases",
+  allowedPermissions("PURCHASE_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { page } = req.query;
+      const { limit } = req.query;
+      const response = await PurchaseController.getDrugPurchaseHistory(
+        req.user?.institutionId as string,
+        page as unknown as number,
+        limit as unknown as number
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      return next(error);
+    }
+  }
+);
+
+purchaseRouter.get(
   "/:id",
   allowedPermissions("PURCHASE_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {

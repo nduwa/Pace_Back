@@ -87,3 +87,28 @@ export interface IInstitutionDrug {
   deletedAt: Date;
   updatedAt: Date;
 }
+
+export interface IDrugPurchase {
+  id: string;
+  drugId: string;
+  institutionId: string;
+  purchaseId: string;
+  batchNumber: string | null;
+  expireDate: Date | null;
+  unitPrice: number;
+  sellingPrice: number;
+  totalPrice: number;
+  quantity: number;
+
+  createdAt: Date;
+  deletedAt: Date;
+  updatedAt: Date;
+
+  drugs?: IInstitutionDrug[];
+  drug?: IDrug;
+  purchase?: IPurchase;
+}
+
+export interface IDrugPurchaseResponse {
+  rows: IDrugPurchase[];
+}
