@@ -3,7 +3,13 @@ import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import CustomError from "../utils/CustomError";
 import { Paged } from "../type";
 import DrugModel from "../database/models/DrugModel";
-import { IDrug, IDrugDTO, IDrugRequest, IInstitutionDrug } from "../type/drugs";
+import {
+  IDrug,
+  IDrugDTO,
+  IDrugPurchase,
+  IDrugRequest,
+  IInstitutionDrug,
+} from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
 
@@ -44,26 +50,6 @@ class DrugService {
         ...queryOptions,
       },
       ...TimestampsNOrder,
-      attributes: {
-        include: [
-          [
-            Sequelize.literal(`(
-              SELECT 
-                  SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
-              FROM "institution_drugs" AS "drug"
-              WHERE 
-                  "drug"."drugId" = "DrugModel"."id" 
-                  AND "drug"."isAvailable" = true 
-                  ${
-                    institutionId
-                      ? `AND "drug"."institutionId" = '${institutionId}'`
-                      : " AND 1=0"
-                  }
-          )`),
-            "totalQuantity",
-          ],
-        ],
-      },
       order: [["drug_code", "ASC"]],
       limit,
       offset,
@@ -158,6 +144,30 @@ class DrugService {
     return await InstitutionDrugs.findAll({
       where: { drugPurchaseId: id },
     });
+  }
+
+  public static async getDrugPurchaseHistory(
+    institutionId: string,
+    limit: number,
+    offset: number
+  ): Promise<Paged<DrugPurchasesModel[]>> {
+    let queryOptions = { institutionId };
+
+    const data = await DrugPurchasesModel.findAll({
+      ...TimestampsNOrder,
+      where: { institutionId },
+      include: ["purchase", "drug", "drugs"],
+      limit,
+      offset,
+    });
+
+    const totalItems = await DrugPurchasesModel.count({
+      where: {
+        ...queryOptions,
+      },
+    });
+
+    return { data, totalItems };
   }
 }
 
