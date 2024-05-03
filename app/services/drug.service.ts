@@ -64,6 +64,76 @@ class DrugService {
     return { data, totalItems };
   }
 
+  public static async getInstitutionDrugs(
+    institutionId: string | null,
+    limit: number,
+    offset: number,
+    searchq: string | undefined,
+    isOnMarket: string | undefined,
+    drugCategory: string | undefined
+  ): Promise<Paged<DrugModel[]>> {
+    let queryOptions = QueryOptions(
+      ["designation", "drugCategory", "drug_code", "instruction"],
+      searchq
+    );
+
+    const drugCategoryOpt =
+      drugCategory && drugCategory != "all" ? { drugCategory } : {};
+    const isOnMarketOpt =
+      isOnMarket && isOnMarket != "all"
+        ? { isOnMarket: isOnMarket == "no" ? false : true }
+        : {};
+
+    queryOptions = {
+      ...queryOptions,
+      ...drugCategoryOpt,
+      ...isOnMarketOpt,
+    };
+
+    const data = await DrugModel.findAll({
+      include: ["institution"],
+      where: {
+        ...queryOptions,
+      },
+      ...TimestampsNOrder,
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+              SELECT 
+                  SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
+              FROM "institution_drugs" AS "drug"
+              WHERE 
+                  "drug"."drugId" = "DrugModel"."id" 
+                  AND "drug"."isAvailable" = true 
+                  ${
+                    institutionId
+                      ? `AND "drug"."institutionId" = '${institutionId}'`
+                      : " AND 1=0"
+                  }
+          )`),
+            "totalQuantity",
+          ],
+        ],
+      },
+      order: [["drug_code", "ASC"]],
+      group: [
+        "DrugModel.id", // Group by primary key of DrugModel
+        "institution.id", // Group by primary key of Institution
+      ],
+    });
+
+    const filteredData = data.filter(
+      (record) => (record.toJSON()?.totalQuantity || 0) > 0
+    );
+
+    // Apply pagination with limit and offset
+    const pageData = filteredData.slice(offset, offset + limit);
+    const totalItems = filteredData.length;
+
+    return { data: pageData, totalItems };
+  }
+
   public static async getOne(id: string): Promise<IDrugDTO> {
     const drug = await DrugModel.findByPk(id, {
       include: ["institution"],
@@ -84,6 +154,45 @@ class DrugService {
     });
 
     return drugs as unknown as IDrugDTO[];
+  }
+
+  public static async getAllInstitutionNPaged(
+    institutionId: string | null
+  ): Promise<IDrugDTO[]> {
+    const drugs = await DrugModel.findAll({
+      include: ["institution"],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+              SELECT 
+                  SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
+              FROM "institution_drugs" AS "drug"
+              WHERE 
+                  "drug"."drugId" = "DrugModel"."id" 
+                  AND "drug"."isAvailable" = true 
+                  ${
+                    institutionId
+                      ? `AND "drug"."institutionId" = '${institutionId}'`
+                      : " AND 1=0"
+                  }
+          )`),
+            "totalQuantity",
+          ],
+        ],
+      },
+      order: [["drug_code", "ASC"]],
+      group: [
+        "DrugModel.id", // Group by primary key of DrugModel
+        "institution.id", // Group by primary key of Institution
+      ],
+    });
+
+    const filteredData = drugs.filter(
+      (record) => (record.toJSON()?.totalQuantity || 0) > 0
+    );
+
+    return filteredData as unknown as IDrugDTO[];
   }
 
   public static async create(
@@ -143,6 +252,14 @@ class DrugService {
   ): Promise<IInstitutionDrug[]> {
     return await InstitutionDrugs.findAll({
       where: { drugPurchaseId: id },
+    });
+  }
+
+  public static async getDrugsByInstitution(
+    institutionId: string
+  ): Promise<IInstitutionDrug[]> {
+    return await InstitutionDrugs.findAll({
+      where: { institutionId, quatity: { [Op.gt]: 0 } },
     });
   }
 

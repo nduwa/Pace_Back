@@ -3,6 +3,9 @@ import DrugModel from "./models/DrugModel";
 import DrugPurchasesModel from "./models/DrugPurchases";
 import InstitutionModel from "./models/Institution";
 import InstitutionDrugs from "./models/InstututionDrugs";
+import InvoiceDrugsModel from "./models/InvoiceDrugsModel";
+import InvoiceModel from "./models/InvoiceModel";
+import PatientsModel from "./models/PatientsModel";
 import PermissionModel from "./models/PermissionModel";
 import PurchasesModel from "./models/PurchasesModel";
 import ResetToken from "./models/ResetToken";
@@ -30,6 +33,10 @@ const models = [
   DrugCategory,
 
   Transactions,
+
+  InvoiceModel,
+  InvoiceDrugsModel,
+  PatientsModel,
 ];
 
 export default models;

@@ -6,6 +6,9 @@ import UserModel from "../database/models/UserModel";
 import UserRoles from "../database/models/UserRoles";
 import RolesModel from "../database/models/RolesModel";
 import RolePermissions from "../database/models/RolePermissions";
+import { patientsData } from "../database/constants/patients";
+import { IPatient } from "../type/drugs";
+import PatientsModel from "../database/models/PatientsModel";
 
 const permissions = appPersmissions
   .map((permissionGroup) => permissionGroup.permissions)
@@ -57,6 +60,19 @@ const loadInitialData = async (db: Sequelize): Promise<void> => {
   } catch (error) {
     console.log(error);
   }
+
+  // await db.transaction(async (t) => {
+  //   await Promise.all(
+  //     patientsData.map(async (patient: IPatient) => {
+  //       await PatientsModel.findOrCreate({
+  //         where: { NID: patient.NID },
+  //         defaults: { ...patient },
+  //         transaction: t,
+  //         hooks: false,
+  //       });
+  //     })
+  //   );
+  // });
 };
 
 export default loadInitialData;

@@ -59,6 +59,38 @@ export class DrugController extends Controller {
     };
   }
 
+  @Get("/institution")
+  public static async getInstitutionDrugs(
+    @Inject() institutionId: string | null,
+    @Inject() currentPage: number,
+    @Inject() limit: number,
+    @Inject() searchq: string | undefined,
+    @Inject() isOnMarket: string | undefined,
+    @Inject() drugCategory: string | undefined
+  ): Promise<IPaged<IDrugResponse>> {
+    const { page, pageSize, offset } = Paginations(currentPage, limit);
+    const drugs = await DrugService.getInstitutionDrugs(
+      institutionId,
+      pageSize,
+      offset,
+      searchq,
+      isOnMarket,
+      drugCategory
+    );
+
+    const filtersUsed: IDrugResponse = {
+      isOnMarket: isOnMarket ?? "yes",
+      drugCategory: drugCategory ?? "all",
+      rows: drugs.data as unknown as IDrugDTO[],
+    };
+    return {
+      data: filtersUsed,
+      totalItems: drugs.totalItems,
+      currentPage: page,
+      itemsPerPage: pageSize,
+    };
+  }
+
   @Get("/{id}")
   public static async getOne(@Path() id: string): Promise<IDrugDTO> {
     return await DrugService.getOne(id);
@@ -91,5 +123,12 @@ export class DrugController extends Controller {
     @Inject() institutionId: string | null
   ): Promise<IDrugDTO[]> {
     return await DrugService.getAllNPaged(institutionId);
+  }
+
+  @Get("/institution/all")
+  public static async institutionAll(
+    @Inject() institutionId: string | null
+  ): Promise<IDrugDTO[]> {
+    return await DrugService.getAllInstitutionNPaged(institutionId);
   }
 }

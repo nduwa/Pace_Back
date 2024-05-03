@@ -75,22 +75,6 @@ purchaseRouter.get(
 );
 
 purchaseRouter.get(
-  "/:id",
-  allowedPermissions("PURCHASE_MEDECINES"),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-
-      const response = await PurchaseController.getOne(id as string);
-      return res.status(200).json(response);
-    } catch (error) {
-      console.log(error);
-      return next(error);
-    }
-  }
-);
-
-purchaseRouter.get(
   "/drugs-purchases/:id",
   allowedPermissions("PURCHASE_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -113,6 +97,22 @@ purchaseRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await PurchaseController.drugsAdjust(req.body);
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      return next(error);
+    }
+  }
+);
+
+purchaseRouter.get(
+  "/:id",
+  allowedPermissions("PURCHASE_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      const response = await PurchaseController.getOne(id as string);
       return res.status(200).json(response);
     } catch (error) {
       console.log(error);

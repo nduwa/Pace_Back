@@ -33,7 +33,7 @@ const appPersmissions = [
 ] as const;
 
 export const permissionBasedOnInstitution = {
-  PHARMACY: ["USERS", "MEDECINES"],
+  PHARMACY: ["USERS", "MEDECINES", "PATIENTS"],
   CLINIC: ["USERS", "PATIENTS"],
   INSURANCE: ["USERS", "MEDECINES"],
   ADMIN: ["USERS", "INSTITUTIONS"],
