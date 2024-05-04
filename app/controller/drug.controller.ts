@@ -19,6 +19,8 @@ import {
   IDrugDTO,
   IDrugRequest,
   IDrugResponse,
+  IInstitutionDrug,
+  IInstitutionDrugResponse,
 } from "../type/drugs";
 import DrugService from "../services/drug.service";
 import DrugCategoryService from "../services/drugCategory.service";
@@ -63,25 +65,17 @@ export class DrugController extends Controller {
   public static async getInstitutionDrugs(
     @Inject() institutionId: string | null,
     @Inject() currentPage: number,
-    @Inject() limit: number,
-    @Inject() searchq: string | undefined,
-    @Inject() isOnMarket: string | undefined,
-    @Inject() drugCategory: string | undefined
-  ): Promise<IPaged<IDrugResponse>> {
+    @Inject() limit: number
+  ): Promise<IPaged<IInstitutionDrugResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
     const drugs = await DrugService.getInstitutionDrugs(
       institutionId,
       pageSize,
-      offset,
-      searchq,
-      isOnMarket,
-      drugCategory
+      offset
     );
 
-    const filtersUsed: IDrugResponse = {
-      isOnMarket: isOnMarket ?? "yes",
-      drugCategory: drugCategory ?? "all",
-      rows: drugs.data as unknown as IDrugDTO[],
+    const filtersUsed: IInstitutionDrugResponse = {
+      rows: drugs.data,
     };
     return {
       data: filtersUsed,
@@ -128,7 +122,7 @@ export class DrugController extends Controller {
   @Get("/institution/all")
   public static async institutionAll(
     @Inject() institutionId: string | null
-  ): Promise<IDrugDTO[]> {
+  ): Promise<IInstitutionDrug[]> {
     return await DrugService.getAllInstitutionNPaged(institutionId);
   }
 }

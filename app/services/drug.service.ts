@@ -12,6 +12,7 @@ import {
 } from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
+import { IInstitutionDTO } from "../type/instutution";
 
 class DrugService {
   public static async getAll(
@@ -67,69 +68,42 @@ class DrugService {
   public static async getInstitutionDrugs(
     institutionId: string | null,
     limit: number,
-    offset: number,
-    searchq: string | undefined,
-    isOnMarket: string | undefined,
-    drugCategory: string | undefined
-  ): Promise<Paged<DrugModel[]>> {
-    let queryOptions = QueryOptions(
-      ["designation", "drugCategory", "drug_code", "instruction"],
-      searchq
-    );
-
-    const drugCategoryOpt =
-      drugCategory && drugCategory != "all" ? { drugCategory } : {};
-    const isOnMarketOpt =
-      isOnMarket && isOnMarket != "all"
-        ? { isOnMarket: isOnMarket == "no" ? false : true }
-        : {};
-
-    queryOptions = {
-      ...queryOptions,
-      ...drugCategoryOpt,
-      ...isOnMarketOpt,
-    };
-
-    const data = await DrugModel.findAll({
-      include: ["institution"],
-      where: {
-        ...queryOptions,
-      },
+    offset: number
+  ): Promise<Paged<IInstitutionDrug[]>> {
+    const data = await InstitutionDrugs.findAll({
+      where: { institutionId, quantity: { [Op.gte]: 0 } },
       ...TimestampsNOrder,
-      attributes: {
-        include: [
-          [
-            Sequelize.literal(`(
-              SELECT 
-                  SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
-              FROM "institution_drugs" AS "drug"
-              WHERE 
-                  "drug"."drugId" = "DrugModel"."id" 
-                  AND "drug"."isAvailable" = true 
-                  ${
-                    institutionId
-                      ? `AND "drug"."institutionId" = '${institutionId}'`
-                      : " AND 1=0"
-                  }
-          )`),
-            "totalQuantity",
-          ],
-        ],
-      },
-      order: [["drug_code", "ASC"]],
-      group: [
-        "DrugModel.id", // Group by primary key of DrugModel
-        "institution.id", // Group by primary key of Institution
-      ],
+      include: ["drug"],
+      order: ["expireDate"],
     });
 
-    const filteredData = data.filter(
-      (record) => (record.toJSON()?.totalQuantity || 0) > 0
-    );
+    const result: IInstitutionDrug[] = [];
+
+    data.forEach((drug) => {
+      const item = drug.toJSON() as unknown as IInstitutionDrug;
+      const batchNumber = item.batchNumber;
+      const drugId = item?.drug?.id;
+
+      const index = result.findIndex(
+        (drug) => drug.batchNumber === batchNumber && drug.drugId == drugId
+      );
+
+      if (index == -1) {
+        result.push(item as unknown as IInstitutionDrug);
+      } else {
+        result[index] = {
+          ...result[index],
+          totalQuantity: (result[index]?.totalQuantity || 1) + item.quantity,
+        };
+      }
+    });
 
     // Apply pagination with limit and offset
-    const pageData = filteredData.slice(offset, offset + limit);
-    const totalItems = filteredData.length;
+    const pageData = result.slice(
+      offset,
+      offset + limit
+    ) as unknown as IInstitutionDrug[];
+    const totalItems = result.length;
 
     return { data: pageData, totalItems };
   }
@@ -158,41 +132,36 @@ class DrugService {
 
   public static async getAllInstitutionNPaged(
     institutionId: string | null
-  ): Promise<IDrugDTO[]> {
-    const drugs = await DrugModel.findAll({
-      include: ["institution"],
-      attributes: {
-        include: [
-          [
-            Sequelize.literal(`(
-              SELECT 
-                  SUM(CASE WHEN "quantity" IS NULL THEN 1 ELSE "quantity" END)
-              FROM "institution_drugs" AS "drug"
-              WHERE 
-                  "drug"."drugId" = "DrugModel"."id" 
-                  AND "drug"."isAvailable" = true 
-                  ${
-                    institutionId
-                      ? `AND "drug"."institutionId" = '${institutionId}'`
-                      : " AND 1=0"
-                  }
-          )`),
-            "totalQuantity",
-          ],
-        ],
-      },
-      order: [["drug_code", "ASC"]],
-      group: [
-        "DrugModel.id", // Group by primary key of DrugModel
-        "institution.id", // Group by primary key of Institution
-      ],
+  ): Promise<IInstitutionDrug[]> {
+    const data = await InstitutionDrugs.findAll({
+      where: { institutionId, quantity: { [Op.gte]: 0 } },
+      ...TimestampsNOrder,
+      include: ["drug"],
+      order: ["expireDate"],
     });
 
-    const filteredData = drugs.filter(
-      (record) => (record.toJSON()?.totalQuantity || 0) > 0
-    );
+    const result: IInstitutionDrug[] = [];
 
-    return filteredData as unknown as IDrugDTO[];
+    data.forEach((drug) => {
+      const item = drug.toJSON() as unknown as IInstitutionDrug;
+      const batchNumber = item.batchNumber;
+      const drugId = item?.drug?.id;
+
+      const index = result.findIndex(
+        (drug) => drug.batchNumber === batchNumber && drug.drugId == drugId
+      );
+
+      if (index == -1) {
+        result.push(item as unknown as IInstitutionDrug);
+      } else {
+        result[index] = {
+          ...result[index],
+          totalQuantity: (result[index]?.totalQuantity || 1) + item.quantity,
+        };
+      }
+    });
+
+    return result;
   }
 
   public static async create(
@@ -250,17 +219,17 @@ class DrugService {
   public static async getDrugsByPurchase(
     id: string
   ): Promise<IInstitutionDrug[]> {
-    return await InstitutionDrugs.findAll({
+    return (await InstitutionDrugs.findAll({
       where: { drugPurchaseId: id },
-    });
+    })) as unknown as IInstitutionDrug[];
   }
 
   public static async getDrugsByInstitution(
     institutionId: string
   ): Promise<IInstitutionDrug[]> {
-    return await InstitutionDrugs.findAll({
+    return (await InstitutionDrugs.findAll({
       where: { institutionId, quatity: { [Op.gt]: 0 } },
-    });
+    })) as unknown as IInstitutionDrug[];
   }
 
   public static async getDrugPurchaseHistory(

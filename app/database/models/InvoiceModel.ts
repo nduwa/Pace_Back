@@ -20,6 +20,7 @@ import InstitutionModel from "./Institution";
 import PatientsModel from "./PatientsModel";
 import InvoiceDrugsModel from "./InvoiceDrugsModel";
 import { IInvoice } from "../../type/drugs";
+import UserModel from "./UserModel";
 
 @Table({
   tableName: "invoices",
@@ -35,6 +36,11 @@ class InvoiceModel extends Model {
   @AllowNull(false)
   @Column(DataType.UUID)
   institutionId!: string;
+
+  @ForeignKey(() => UserModel)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  userId!: string;
 
   @ForeignKey(() => PatientsModel)
   @AllowNull(true)
@@ -67,6 +73,9 @@ class InvoiceModel extends Model {
 
   @BelongsTo(() => PatientsModel)
   patient!: PatientsModel;
+
+  @BelongsTo(() => UserModel)
+  user!: UserModel;
 
   @BelongsTo(() => InstitutionModel)
   institution!: InstitutionModel;

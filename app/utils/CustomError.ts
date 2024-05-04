@@ -9,14 +9,14 @@ class CustomError extends Error {
 }
 
 type IError = {
-  drugStock: string;
+  item: string;
   error: any;
 };
 
-export const catchSequelizeError = ({ drugStock, error }: IError): void => {
+export const catchSequelizeError = ({ item, error }: IError): void => {
   if (error.name === "SequelizeUniqueConstraintError") {
     throw new CustomError(
-      `${drugStock} ${error.errors[0].path} already exists`,
+      `${item} ${error.errors[0].path} already exists`,
       400
     );
   } else {

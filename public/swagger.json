@@ -804,6 +804,52 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IDrug": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"drug_code": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"designation": {
+						"type": "string"
+					},
+					"instruction": {
+						"type": "string",
+						"nullable": true
+					},
+					"drugCategory": {
+						"type": "string"
+					},
+					"isOnMarket": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"totalQuantity": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"drug_code",
+					"description",
+					"designation",
+					"instruction",
+					"drugCategory",
+					"isOnMarket",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IInstitutionDrug": {
 				"properties": {
 					"id": {
@@ -855,6 +901,13 @@
 					"updatedAt": {
 						"type": "string",
 						"format": "date-time"
+					},
+					"totalQuantity": {
+						"type": "number",
+						"format": "double"
+					},
+					"drug": {
+						"$ref": "#/components/schemas/IDrug"
 					}
 				},
 				"required": [
@@ -1307,6 +1360,231 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IInvoiceResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IInvoice"
+						},
+						"type": "array"
+					},
+					"startDate": {
+						"type": "string"
+					},
+					"endDate": {
+						"type": "string"
+					},
+					"requester": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"rows",
+					"startDate",
+					"endDate",
+					"requester"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IInvoiceResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IInvoiceResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IInvoiceDrug": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"patientId": {
+						"type": "string",
+						"nullable": true
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"drugId": {
+						"type": "string"
+					},
+					"invoiceId": {
+						"type": "string"
+					},
+					"quantity": {
+						"type": "number",
+						"format": "double"
+					},
+					"unitPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"drug": {
+						"$ref": "#/components/schemas/IDrug"
+					}
+				},
+				"required": [
+					"id",
+					"patientId",
+					"institutionId",
+					"drugId",
+					"invoiceId",
+					"quantity",
+					"unitPrice",
+					"totalPrice",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IInvoiceDTO": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"patientId": {
+						"type": "string",
+						"nullable": true
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"note": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"invoiceNO": {
+						"type": "string"
+					},
+					"drugsCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"patient": {
+						"$ref": "#/components/schemas/IPatient"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					},
+					"drugs": {
+						"$ref": "#/components/schemas/IInvoiceDrug"
+					}
+				},
+				"required": [
+					"id",
+					"patientId",
+					"institutionId",
+					"note",
+					"name",
+					"phone",
+					"invoiceNO",
+					"drugsCount",
+					"totalCost",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IInvoiceDrugCreateDTO": {
+				"properties": {
+					"drug": {
+						"type": "string"
+					},
+					"qty": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"drug",
+					"qty"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ICreateInvoiceDTO": {
+				"properties": {
+					"note": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"patientId": {
+						"type": "string"
+					},
+					"drugs": {
+						"items": {
+							"$ref": "#/components/schemas/IInvoiceDrugCreateDTO"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"note",
+					"name",
+					"phone",
+					"patientId",
+					"drugs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IInstitutionDTO": {
 				"properties": {
 					"id": {
@@ -1678,6 +1956,48 @@
 				"properties": {
 					"data": {
 						"$ref": "#/components/schemas/IDrugResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IInstitutionDrugResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IInstitutionDrug"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IInstitutionDrugResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IInstitutionDrugResponse"
 					},
 					"totalItems": {
 						"type": "number",
@@ -2922,6 +3242,132 @@
 				"parameters": []
 			}
 		},
+		"/api/invoices": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IInvoiceResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IInvoice"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ICreateInvoiceDTO"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/invoices/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/IInvoiceDTO"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/api/institutions": {
 			"get": {
 				"operationId": "GetAll",
@@ -3463,7 +3909,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/IPaged_IDrugResponse_"
+									"$ref": "#/components/schemas/IPaged_IInstitutionDrugResponse_"
 								}
 							}
 						}
@@ -3631,7 +4077,7 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"$ref": "#/components/schemas/IDrugDTO"
+										"$ref": "#/components/schemas/IInstitutionDrug"
 									},
 									"type": "array"
 								}
