@@ -30,6 +30,21 @@ module.exports = {
           onDelete: "SET NULL",
           onUpdate: "SET NULL",
         },
+
+        userId: {
+          type: Sequelize.UUID,
+          allowNull: true,
+          defaultValue: null,
+          references: {
+            model: "users",
+          },
+          onDelete: "SET NULL",
+          onUpdate: "SET NULL",
+        },
+        invoiceNO: {
+          type: Sequelize.STRING,
+          allowNull: true,
+        },
         note: {
           type: Sequelize.STRING,
           allowNull: true,
@@ -39,7 +54,7 @@ module.exports = {
           allowNull: true,
         },
         phone: {
-          type: Sequelize.DATE,
+          type: Sequelize.STRING,
           allowNull: false,
         },
         drugsCount: {

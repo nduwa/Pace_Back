@@ -34,7 +34,7 @@ class AuthService {
         accessToken: tokenData.accessToken,
       };
     } catch (error) {
-      catchSequelizeError({ drugStock: "User", error });
+      catchSequelizeError({ item: "User", error });
       return null;
     }
   }

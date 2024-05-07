@@ -37,7 +37,7 @@ class InvoiceDrugsModel extends Model {
   drugId!: string;
 
   @ForeignKey(() => PatientsModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   patientId!: string;
 

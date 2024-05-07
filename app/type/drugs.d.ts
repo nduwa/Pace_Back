@@ -86,6 +86,9 @@ export interface IInstitutionDrug {
   createdAt: Date;
   deletedAt: Date;
   updatedAt: Date;
+
+  totalQuantity?: number;
+  drug?: IDrug;
 }
 
 export interface IPatient {
@@ -145,12 +148,14 @@ export interface IInvoiceDrug {
   totalPrice: number;
   createdAt: Date;
   updatedAt: Date;
+
+  drug?: IDrug;
 }
 
 export interface IInvoiceDTO extends IInvoice {
   patient?: IPatient;
   institution?: IInstitution;
-  drugs?: IDrug;
+  drugs?: IInvoiceDrug;
 }
 
 export interface IInvoiceResponse {
@@ -194,4 +199,15 @@ export interface IDrugPurchase {
 
 export interface IDrugPurchaseResponse {
   rows: IDrugPurchase[];
+}
+
+export interface IInstitutionDrugResponse {
+  rows: IInstitutionDrug[];
+}
+
+export interface IInvoiceResponse {
+  startDate: string;
+  endDate: string;
+  requester: string;
+  rows: IInvoice[];
 }

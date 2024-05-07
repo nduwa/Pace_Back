@@ -70,7 +70,7 @@ class ImportService {
 
       return { message: "Data imported successfully", failed: notInserted };
     } catch (err: any) {
-      catchSequelizeError({ drugStock: "Drug", error: err });
+      catchSequelizeError({ item: "Drug", error: err });
     }
   }
 

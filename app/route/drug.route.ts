@@ -35,14 +35,11 @@ drugsRouter.get(
   allowedPermissions("INSTITUTION_ADMIN", "VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { drugCategory, isOnMarket, page, limit, searchq } = req.query;
+      const { page, limit } = req.query;
       const response = await DrugController.getInstitutionDrugs(
         req.user?.institutionId as string | null,
         parseInt(page as string),
-        limit as unknown as number,
-        searchq as string,
-        isOnMarket as string,
-        drugCategory as string
+        limit as unknown as number
       );
 
       return res.status(200).json(response);
