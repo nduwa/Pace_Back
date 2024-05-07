@@ -52,6 +52,7 @@ db.authenticate().then(async () => {
     await loadInitialData(db);
     console.log("DATABASE SYNC COMPLETED ");
   } catch (error) {
+    console.error(error);
     console.log("DATABASE SYNC FAILED ");
   }
 });

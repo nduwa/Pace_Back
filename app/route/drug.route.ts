@@ -30,6 +30,28 @@ drugsRouter.get(
   }
 );
 
+drugsRouter.get(
+  "/institution",
+  allowedPermissions("INSTITUTION_ADMIN", "VIEW_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { drugCategory, isOnMarket, page, limit, searchq } = req.query;
+      const response = await DrugController.getInstitutionDrugs(
+        req.user?.institutionId as string | null,
+        parseInt(page as string),
+        limit as unknown as number,
+        searchq as string,
+        isOnMarket as string,
+        drugCategory as string
+      );
+
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
 drugsRouter.post(
   "/",
   allowedPermissions("UPDATE_MEDECINES"),
@@ -94,6 +116,21 @@ drugsRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await DrugController.getOne(req.params.id);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+drugsRouter.get(
+  "/institution/all",
+  allowedPermissions("VIEW_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugController.institutionAll(
+        req.user?.institutionId as string | null
+      );
       return res.status(200).json(response);
     } catch (error) {
       return next(error);

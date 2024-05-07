@@ -8,6 +8,7 @@ import importRouter from "./import.route";
 import purchaseRouter from "./purchase.routes";
 import drugsCategoryRouter from "./drugCategory.route";
 import transactionsRouter from "./transaction.route";
+import patientsRouter from "./patient.route";
 
 const apiRouter = express.Router();
 
@@ -20,5 +21,6 @@ apiRouter.use("/import", importRouter);
 apiRouter.use("/purchases", purchaseRouter);
 apiRouter.use("/drug-categories", drugsCategoryRouter);
 apiRouter.use("/transactions", transactionsRouter);
+apiRouter.use("/patients", patientsRouter);
 
 export default apiRouter;

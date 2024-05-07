@@ -911,6 +911,402 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IInvoice": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"patientId": {
+						"type": "string",
+						"nullable": true
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"note": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"invoiceNO": {
+						"type": "string"
+					},
+					"drugsCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"patientId",
+					"institutionId",
+					"note",
+					"name",
+					"phone",
+					"invoiceNO",
+					"drugsCount",
+					"totalCost",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPatient": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"gender": {
+						"type": "string"
+					},
+					"birthDate": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							}
+						]
+					},
+					"address": {
+						"properties": {
+							"village": {
+								"type": "string"
+							},
+							"cell": {
+								"type": "string"
+							},
+							"sector": {
+								"type": "string"
+							},
+							"distict": {
+								"type": "string"
+							},
+							"province": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"village",
+							"cell",
+							"sector",
+							"distict",
+							"province"
+						],
+						"type": "object"
+					},
+					"patientNO": {
+						"type": "string"
+					},
+					"NID": {
+						"type": "string"
+					},
+					"NIDIndex": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"phone",
+					"gender",
+					"birthDate",
+					"address",
+					"patientNO",
+					"NID",
+					"NIDIndex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPatientDTO": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"gender": {
+						"type": "string"
+					},
+					"birthDate": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							}
+						]
+					},
+					"address": {
+						"properties": {
+							"village": {
+								"type": "string"
+							},
+							"cell": {
+								"type": "string"
+							},
+							"sector": {
+								"type": "string"
+							},
+							"distict": {
+								"type": "string"
+							},
+							"province": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"village",
+							"cell",
+							"sector",
+							"distict",
+							"province"
+						],
+						"type": "object"
+					},
+					"patientNO": {
+						"type": "string"
+					},
+					"NID": {
+						"type": "string"
+					},
+					"NIDIndex": {
+						"type": "number",
+						"format": "double"
+					},
+					"invoices": {
+						"items": {
+							"$ref": "#/components/schemas/IInvoice"
+						},
+						"type": "array"
+					},
+					"dependents": {
+						"items": {
+							"$ref": "#/components/schemas/IPatient"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"phone",
+					"gender",
+					"birthDate",
+					"address",
+					"patientNO",
+					"NID",
+					"NIDIndex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPatientsResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IPatientDTO"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IPatientsResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IPatientsResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IPatient.Exclude_keyofIPatient.id-or-patientNO-or-NIDIndex__": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"gender": {
+						"type": "string"
+					},
+					"birthDate": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							}
+						]
+					},
+					"address": {
+						"properties": {
+							"village": {
+								"type": "string"
+							},
+							"cell": {
+								"type": "string"
+							},
+							"sector": {
+								"type": "string"
+							},
+							"distict": {
+								"type": "string"
+							},
+							"province": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"village",
+							"cell",
+							"sector",
+							"distict",
+							"province"
+						],
+						"type": "object"
+					},
+					"NID": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"phone",
+					"gender",
+					"birthDate",
+					"address",
+					"NID"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"IPatientRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"gender": {
+						"type": "string"
+					},
+					"birthDate": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"format": "date-time"
+							}
+						]
+					},
+					"address": {
+						"properties": {
+							"village": {
+								"type": "string"
+							},
+							"cell": {
+								"type": "string"
+							},
+							"sector": {
+								"type": "string"
+							},
+							"distict": {
+								"type": "string"
+							},
+							"province": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"village",
+							"cell",
+							"sector",
+							"distict",
+							"province"
+						],
+						"type": "object"
+					},
+					"NID": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"phone",
+					"gender",
+					"birthDate",
+					"address",
+					"NID"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IInstitutionDTO": {
 				"properties": {
 					"id": {
@@ -2282,6 +2678,250 @@
 				}
 			}
 		},
+		"/api/patients": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IPatientsResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPatient"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IPatientRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/patients/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPatientDTO"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IPatientRequest"
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "AddDependent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPatient"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IPatientRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/patients/all": {
+			"get": {
+				"operationId": "All",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IPatientDTO"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/api/institutions": {
 			"get": {
 				"operationId": "GetAll",
@@ -2814,6 +3454,32 @@
 				}
 			}
 		},
+		"/api/drugs/institution": {
+			"get": {
+				"operationId": "GetInstitutionDrugs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IDrugResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/api/drugs/{id}": {
 			"get": {
 				"operationId": "GetOne",
@@ -2929,6 +3595,35 @@
 		"/api/drugs/all": {
 			"get": {
 				"operationId": "All",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IDrugDTO"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Users"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/drugs/institution/all": {
+			"get": {
+				"operationId": "InstitutionAll",
 				"responses": {
 					"200": {
 						"description": "Ok",

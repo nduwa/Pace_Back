@@ -88,6 +88,89 @@ export interface IInstitutionDrug {
   updatedAt: Date;
 }
 
+export interface IPatient {
+  id: string;
+  name: string;
+  phone: string;
+  gender: string;
+  birthDate: string | Date;
+  address: {
+    province: string;
+    distict: string;
+    sector: string;
+    cell: string;
+    village: string;
+  };
+  patientNO: string;
+  NID: string;
+  NIDIndex: number;
+}
+
+export interface IPatientRequest
+  extends Omit<IPatient, "id" | "patientNO" | "NIDIndex"> {
+  id?: string;
+}
+
+export interface IPatientDTO extends IPatient {
+  invoices?: IInvoice[];
+  dependents?: IPatient[];
+}
+
+export interface IPatientsResponse {
+  rows: IPatientDTO[];
+}
+
+export interface IInvoice {
+  id: string;
+  patientId: string | null;
+  institutionId: string;
+  note: string;
+  name: string;
+  phone: string;
+  invoiceNO: string;
+  drugsCount: number;
+  totalCost: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IInvoiceDrug {
+  id: string;
+  patientId: string | null;
+  institutionId: string;
+  drugId: string;
+  invoiceId: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IInvoiceDTO extends IInvoice {
+  patient?: IPatient;
+  institution?: IInstitution;
+  drugs?: IDrug;
+}
+
+export interface IInvoiceResponse {
+  rows: IInvoice[];
+}
+
+export interface IInvoiceDrugCreateDTO {
+  drug: string;
+  qty: number;
+}
+export interface ICreateInvoiceDTO {
+  note: string;
+  name: string;
+  phone: string;
+  patientId: string;
+  drugs: IInvoiceDrugCreateDTO[];
+}
+
+export type UpdateNID = Pick<IPatientRequest, "NID">;
+
 export interface IDrugPurchase {
   id: string;
   drugId: string;
