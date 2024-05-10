@@ -69,7 +69,7 @@ export class PurchaseController extends Controller {
   @Get("/drugs-purchases/{id}")
   public static async getDrugsByPurchase(
     @Path() id: string
-  ): Promise<IInstitutionDrug[]> {
+  ): Promise<IDrugPurchase[]> {
     const purchasesList = await DrugService.getDrugsByPurchase(id);
     return purchasesList;
   }

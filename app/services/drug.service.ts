@@ -9,10 +9,10 @@ import {
   IDrugPurchase,
   IDrugRequest,
   IInstitutionDrug,
+  IPurchaseDrugDTO,
 } from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
-import { IInstitutionDTO } from "../type/instutution";
 
 class DrugService {
   public static async getAll(
@@ -70,42 +70,23 @@ class DrugService {
     limit: number,
     offset: number
   ): Promise<Paged<IInstitutionDrug[]>> {
-    const data = await InstitutionDrugs.findAll({
-      where: { institutionId, quantity: { [Op.gte]: 0 } },
+    const queryOptions = { institutionId, quantity: { [Op.gte]: 0 } };
+    const data = (await InstitutionDrugs.findAll({
+      where: { ...queryOptions },
       ...TimestampsNOrder,
       include: ["drug"],
       order: ["expireDate"],
-    });
-
-    const result: IInstitutionDrug[] = [];
-
-    data.forEach((drug) => {
-      const item = drug.toJSON() as unknown as IInstitutionDrug;
-      const batchNumber = item.batchNumber;
-      const drugId = item?.drug?.id;
-
-      const index = result.findIndex(
-        (drug) => drug.batchNumber === batchNumber && drug.drugId == drugId
-      );
-
-      if (index == -1) {
-        result.push(item as unknown as IInstitutionDrug);
-      } else {
-        result[index] = {
-          ...result[index],
-          totalQuantity: (result[index]?.totalQuantity || 1) + item.quantity,
-        };
-      }
-    });
-
-    // Apply pagination with limit and offset
-    const pageData = result.slice(
+      limit,
       offset,
-      offset + limit
-    ) as unknown as IInstitutionDrug[];
-    const totalItems = result.length;
+    })) as unknown as IInstitutionDrug[];
 
-    return { data: pageData, totalItems };
+    const totalItems = await InstitutionDrugs.count({
+      where: {
+        ...queryOptions,
+      },
+    });
+
+    return { data, totalItems };
   }
 
   public static async getOne(id: string): Promise<IDrugDTO> {
@@ -133,35 +114,14 @@ class DrugService {
   public static async getAllInstitutionNPaged(
     institutionId: string | null
   ): Promise<IInstitutionDrug[]> {
-    const data = await InstitutionDrugs.findAll({
+    const data = (await InstitutionDrugs.findAll({
       where: { institutionId, quantity: { [Op.gte]: 0 } },
       ...TimestampsNOrder,
       include: ["drug"],
       order: ["expireDate"],
-    });
+    })) as unknown as IInstitutionDrug[];
 
-    const result: IInstitutionDrug[] = [];
-
-    data.forEach((drug) => {
-      const item = drug.toJSON() as unknown as IInstitutionDrug;
-      const batchNumber = item.batchNumber;
-      const drugId = item?.drug?.id;
-
-      const index = result.findIndex(
-        (drug) => drug.batchNumber === batchNumber && drug.drugId == drugId
-      );
-
-      if (index == -1) {
-        result.push(item as unknown as IInstitutionDrug);
-      } else {
-        result[index] = {
-          ...result[index],
-          totalQuantity: (result[index]?.totalQuantity || 1) + item.quantity,
-        };
-      }
-    });
-
-    return result;
+    return data;
   }
 
   public static async create(
@@ -216,12 +176,10 @@ class DrugService {
     return array;
   }
 
-  public static async getDrugsByPurchase(
-    id: string
-  ): Promise<IInstitutionDrug[]> {
-    return (await InstitutionDrugs.findAll({
-      where: { drugPurchaseId: id },
-    })) as unknown as IInstitutionDrug[];
+  public static async getDrugsByPurchase(id: string): Promise<IDrugPurchase[]> {
+    return (await DrugPurchasesModel.findAll({
+      where: { purchaseId: id },
+    })) as unknown as IDrugPurchase[];
   }
 
   public static async getDrugsByInstitution(
@@ -242,7 +200,7 @@ class DrugService {
     const data = await DrugPurchasesModel.findAll({
       ...TimestampsNOrder,
       where: { institutionId },
-      include: ["purchase", "drug", "drugs"],
+      include: ["purchase", "drug"],
       limit,
       offset,
     });
