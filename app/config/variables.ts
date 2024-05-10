@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const VARIABLES = {
-  PORT: process.env.PORT || 3000,
+  PORT: process.env.PORT || 2023,
   DBHOST: process.env.DBHOST,
   DBUSER: process.env.DBUSER || "root",
   DBPASS: process.env.DBPASS || "",

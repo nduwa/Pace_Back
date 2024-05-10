@@ -51,27 +51,45 @@ class PurchaseService {
           transaction: t,
         });
 
-        let drugs = [];
-
         if (x[0]) {
           for (let index = 0; index < x.length; index++) {
             const purchase = x[index] as DrugPurchasesModel;
-            for (let j = 0; j < purchase.quantity; j++) {
-              drugs.push({
-                drugId: purchase.drugId,
-                purchaseId: purchase.purchaseId,
-                drugPurchaseId: purchase.id,
-                batchNumber: purchase.batchNumber,
-                expireDate: purchase.expireDate,
-                quantity: 1,
-                price: purchase.sellingPrice,
-                institutionId,
+            const drugData = {
+              drugId: purchase.drugId,
+              batchNumber: purchase.batchNumber,
+              expireDate: purchase.expireDate,
+              quantity: purchase.quantity,
+              price: purchase.sellingPrice,
+              institutionId,
+              isAvailable: true,
+            };
+
+            const [institutionDrug, created] =
+              await InstitutionDrugs.findOrCreate({
+                where: {
+                  drugId: purchase.drugId,
+                  institutionId,
+                  batchNumber: purchase.batchNumber,
+                },
+                defaults: { ...drugData },
               });
+
+            if (!created) {
+              await institutionDrug.increment("quantity", {
+                by: drugData.quantity,
+              });
+              if (drugData.quantity > 0) {
+                await InstitutionDrugs.update(
+                  {
+                    isAvailable: true,
+                  },
+                  { where: { id: institutionDrug.id } }
+                );
+              }
             }
           }
         }
 
-        await InstitutionDrugs.bulkCreate(drugs, { transaction: t });
         return purchase;
       });
     } catch (error) {
@@ -90,6 +108,7 @@ class PurchaseService {
     const data = await PurchasesModel.findAll({
       ...TimestampsNOrder,
       where: { ...queryOptions },
+      include: [{ model: DrugPurchasesModel, include: [DrugModel] }],
       limit,
       offset,
     });
@@ -106,9 +125,8 @@ class PurchaseService {
       include: [
         {
           model: DrugPurchasesModel,
-          include: [{ model: InstitutionDrugs }, { model: DrugModel }],
+          include: [{ model: DrugModel }],
         },
-        { model: InstitutionDrugs },
       ],
     });
     return result;

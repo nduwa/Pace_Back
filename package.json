@@ -4,9 +4,8 @@
   "description": "",
   "main": "./src/main.ts",
   "scripts": {
-    "predev": "pnpm run swagger",
     "swagger": "tsoa spec",
-    "dev": "concurrently \"nodemon \" \"nodemon -x tsoa spec\"",
+    "dev": "concurrently \"nodemon \"",
     "start": "node ./dist/main.js",
     "build": "tsc",
     "migrate": "pnpm sequelize-cli db:migrate",

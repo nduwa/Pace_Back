@@ -78,9 +78,6 @@ class DrugPurchasesModel extends Model {
   @BelongsTo(() => PurchasesModel)
   purchase!: PurchasesModel;
 
-  @HasMany(() => InstitutionDrugs)
-  drugs!: InstitutionDrugs[];
-
   @DeletedAt
   @Column(DataType.DATE)
   deletedAt!: Date;

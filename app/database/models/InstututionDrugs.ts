@@ -19,8 +19,6 @@ import {
 } from "sequelize-typescript";
 import DrugModel from "./DrugModel";
 import InstitutionModel from "./Institution";
-import PurchasesModel from "./PurchasesModel";
-import DrugPurchasesModel from "./DrugPurchases";
 
 @Table({
   tableName: "institution_drugs",
@@ -50,22 +48,6 @@ class InstitutionDrugs extends Model {
 
   @BelongsTo(() => InstitutionModel)
   institution!: InstitutionModel;
-
-  @ForeignKey(() => PurchasesModel)
-  @AllowNull(true)
-  @Column(DataType.UUID)
-  purchaseId!: string;
-
-  @BelongsTo(() => PurchasesModel)
-  purchase!: PurchasesModel;
-
-  @ForeignKey(() => DrugPurchasesModel)
-  @AllowNull(true)
-  @Column(DataType.UUID)
-  drugPurchaseId!: string;
-
-  @BelongsTo(() => DrugPurchasesModel)
-  drugPurchase!: DrugPurchasesModel;
 
   @AllowNull(true)
   @Column(DataType.TEXT)

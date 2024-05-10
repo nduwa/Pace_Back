@@ -44,11 +44,8 @@ class InvoiceService {
         const drugJSON: IInstitutionDrug = requestedDrugs
           .find((d) => d.toJSON().id == drug.drug)
           ?.toJSON() as IInstitutionDrug;
-        const sum = await InstitutionDrugs.sum("quantity", {
-          where: { batchNumber: drugJSON.batchNumber, drugId: drugJSON.drugId },
-        });
 
-        if (drug.qty > sum) {
+        if (drug.qty > drugJSON.quantity) {
           error = `${drugJSON?.drug?.designation} has insuficcient quantity`;
         }
       })

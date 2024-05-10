@@ -52,6 +52,7 @@ export interface ICreatePurchaseDTO {
   drugs: IPurchaseDrugDTO[];
 }
 export interface IPurchase {
+  purchaseNO?: string;
   note?: string;
   date: Date;
   id: string;
@@ -192,7 +193,6 @@ export interface IDrugPurchase {
   deletedAt: Date;
   updatedAt: Date;
 
-  drugs?: IInstitutionDrug[];
   drug?: IDrug;
   purchase?: IPurchase;
 }
