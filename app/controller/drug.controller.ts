@@ -15,7 +15,6 @@ import {
 import { Paginations } from "../utils/DBHelpers";
 import { IPaged } from "../type";
 import {
-  IDrugCategory,
   IDrugDTO,
   IDrugRequest,
   IDrugResponse,
@@ -23,7 +22,6 @@ import {
   IInstitutionDrugResponse,
 } from "../type/drugs";
 import DrugService from "../services/drug.service";
-import DrugCategoryService from "../services/drugCategory.service";
 
 @Tags("Users")
 @Route("api/drugs")
@@ -65,16 +63,22 @@ export class DrugController extends Controller {
   public static async getInstitutionDrugs(
     @Inject() institutionId: string | null,
     @Inject() currentPage: number,
-    @Inject() limit: number
+    @Inject() limit: number,
+    @Inject() listType: string,
+    @Inject() drug: string | undefined
   ): Promise<IPaged<IInstitutionDrugResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
     const drugs = await DrugService.getInstitutionDrugs(
       institutionId,
       pageSize,
-      offset
+      offset,
+      listType,
+      drug
     );
 
     const filtersUsed: IInstitutionDrugResponse = {
+      listType,
+      drug: drug ?? "all",
       rows: drugs.data,
     };
     return {
@@ -124,5 +128,12 @@ export class DrugController extends Controller {
     @Inject() institutionId: string | null
   ): Promise<IInstitutionDrug[]> {
     return await DrugService.getAllInstitutionNPaged(institutionId);
+  }
+
+  @Get("/institution/grouped")
+  public static async institutionGrouped(
+    @Inject() institutionId: string | null
+  ): Promise<IInstitutionDrug[]> {
+    return await DrugService.getAllInstitutionGroupedNPaged(institutionId);
   }
 }

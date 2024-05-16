@@ -22,7 +22,7 @@ import { IPurchase } from "../../type/drugs";
 
 @Table({
   tableName: "purchases",
-  paranoid: true,
+  paranoid: false,
 })
 class PurchasesModel extends Model {
   @Default(UUIDV4())
@@ -46,6 +46,11 @@ class PurchasesModel extends Model {
   @AllowNull(true)
   @Column(DataType.STRING)
   supplier!: string;
+
+  @AllowNull(true)
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  approved!: boolean;
 
   @Column(DataType.DATE)
   date!: Date;

@@ -68,9 +68,67 @@ class DrugService {
   public static async getInstitutionDrugs(
     institutionId: string | null,
     limit: number,
-    offset: number
+    offset: number,
+    listType: string,
+    drug: string | undefined
   ): Promise<Paged<IInstitutionDrug[]>> {
-    const queryOptions = { institutionId, quantity: { [Op.gte]: 0 } };
+    const drugOpt = drug && drug != "all" ? { drugId: drug } : {};
+
+    let queryOptions = { institutionId, quantity: { [Op.gte]: 0 }, ...drugOpt };
+
+    if (listType == "batchNumbers") {
+      return this.withBatchNumbers(queryOptions, limit, offset);
+    }
+
+    return this.groupedByDrug(queryOptions, limit, offset);
+  }
+  static async groupedByDrug(
+    queryOptions: { [key: string]: any },
+    limit: number,
+    offset: number
+  ) {
+    const data = await InstitutionDrugs.findAll({
+      where: { ...queryOptions },
+      ...TimestampsNOrder,
+      include: ["drug"],
+      order: ["expireDate"],
+    });
+
+    const result: IInstitutionDrug[] = [];
+
+    data.forEach((drug) => {
+      const item = drug.toJSON() as unknown as IInstitutionDrug;
+      const drugId = item?.drug?.id;
+
+      const index = result.findIndex((drug) => drug.drugId == drugId);
+
+      if (index == -1) {
+        result.push({
+          ...item,
+          totalQuantity: item.quantity,
+        } as unknown as IInstitutionDrug);
+      } else {
+        result[index] = {
+          ...result[index],
+          totalQuantity: (result[index]?.totalQuantity || 1) + item.quantity,
+        };
+      }
+    });
+
+    // Apply pagination with limit and offset
+    const pageData = result.slice(
+      offset,
+      offset + limit
+    ) as unknown as IInstitutionDrug[];
+    const totalItems = result.length;
+
+    return { data: pageData, totalItems };
+  }
+  static async withBatchNumbers(
+    queryOptions: { [key: string]: any },
+    limit: number,
+    offset: number
+  ) {
     const data = (await InstitutionDrugs.findAll({
       where: { ...queryOptions },
       ...TimestampsNOrder,
@@ -122,6 +180,35 @@ class DrugService {
     })) as unknown as IInstitutionDrug[];
 
     return data;
+  }
+
+  public static async getAllInstitutionGroupedNPaged(
+    institutionId: string | null
+  ): Promise<IInstitutionDrug[]> {
+    const data = await InstitutionDrugs.findAll({
+      where: { institutionId, quantity: { [Op.gte]: 0 } },
+      ...TimestampsNOrder,
+      include: ["drug"],
+      order: ["expireDate"],
+    });
+
+    const result: IInstitutionDrug[] = [];
+
+    data.forEach((drug) => {
+      const item = drug.toJSON() as unknown as IInstitutionDrug;
+      const drugId = item?.drug?.id;
+
+      const index = result.findIndex((drug) => drug.drugId == drugId);
+
+      if (index == -1) {
+        result.push({
+          ...item,
+          totalQuantity: item.quantity,
+        } as unknown as IInstitutionDrug);
+      }
+    });
+
+    return result;
   }
 
   public static async create(

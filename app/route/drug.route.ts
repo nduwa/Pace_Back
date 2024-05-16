@@ -35,11 +35,13 @@ drugsRouter.get(
   allowedPermissions("INSTITUTION_ADMIN", "VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { page, limit } = req.query;
+      const { page, limit, listType, drug } = req.query;
       const response = await DrugController.getInstitutionDrugs(
         req.user?.institutionId as string | null,
         parseInt(page as string),
-        limit as unknown as number
+        limit as unknown as number,
+        listType as string,
+        drug as string
       );
 
       return res.status(200).json(response);
@@ -126,6 +128,21 @@ drugsRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await DrugController.institutionAll(
+        req.user?.institutionId as string | null
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+drugsRouter.get(
+  "/institution/grouped",
+  allowedPermissions("VIEW_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugController.institutionGrouped(
         req.user?.institutionId as string | null
       );
       return res.status(200).json(response);

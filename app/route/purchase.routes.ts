@@ -26,7 +26,24 @@ purchaseRouter.post(
       );
       return res.status(201).json(response);
     } catch (error) {
-      console.log(error);
+      return next(error);
+    }
+  }
+);
+
+purchaseRouter.put(
+  "/:id",
+  validate(createPurchaseSchema),
+  allowedPermissions("PURCHASE_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await PurchaseController.update(
+        req.params.id,
+        req.user?.institutionId as string,
+        req.body
+      );
+      return res.status(201).json(response);
+    } catch (error) {
       return next(error);
     }
   }
@@ -116,6 +133,35 @@ purchaseRouter.get(
       return res.status(200).json(response);
     } catch (error) {
       console.log(error);
+      return next(error);
+    }
+  }
+);
+
+purchaseRouter.get(
+  "/:id/approve",
+  allowedPermissions("PURCHASE_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      const response = await PurchaseController.approve(id as string);
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      return next(error);
+    }
+  }
+);
+
+purchaseRouter.delete(
+  "/:id",
+  allowedPermissions("PURCHASE_MEDECINES"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await PurchaseController.delete(req.params.id);
+      return res.status(200).json(response);
+    } catch (error) {
       return next(error);
     }
   }

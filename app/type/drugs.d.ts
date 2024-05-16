@@ -46,6 +46,7 @@ export interface IPurchaseDrugDTO {
   expireDate: Date;
 }
 export interface ICreatePurchaseDTO {
+  id?: string;
   note: string;
   date: string;
   supplier: string;
@@ -202,6 +203,8 @@ export interface IDrugPurchaseResponse {
 }
 
 export interface IInstitutionDrugResponse {
+  listType: string;
+  drug: string;
   rows: IInstitutionDrug[];
 }
 

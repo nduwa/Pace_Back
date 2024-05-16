@@ -39,6 +39,15 @@ export class PurchaseController extends Controller {
     return PurchaseService.createPurchase(institutionId, data);
   }
 
+  @Put("{id}")
+  public static async update(
+    @Inject() id: string,
+    @Inject() institutionId: string,
+    @Body() data: ICreatePurchaseDTO
+  ): Promise<IPurchase> {
+    return PurchaseService.update(id, institutionId, data);
+  }
+
   @Get()
   public static async getAllPurchases(
     @Inject() institutionId: string,
@@ -66,6 +75,13 @@ export class PurchaseController extends Controller {
     const purchasesList = await PurchaseService.getOne(id);
     return purchasesList;
   }
+
+  @Get("{id}/approve")
+  public static async approve(@Path() id: string): Promise<IPurchase | null> {
+    const result = await PurchaseService.approve(id);
+    return result;
+  }
+
   @Get("/drugs-purchases/{id}")
   public static async getDrugsByPurchase(
     @Path() id: string
@@ -102,5 +118,10 @@ export class PurchaseController extends Controller {
     @Body() data: IAdjustPurchaseDTO
   ): Promise<boolean> {
     return await PurchaseService.drugsAdjust(data);
+  }
+
+  @Delete("{id}")
+  public static async delete(@Path() id: string): Promise<number> {
+    return await PurchaseService.destroy(id);
   }
 }
