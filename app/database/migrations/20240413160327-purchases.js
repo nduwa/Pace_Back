@@ -54,7 +54,7 @@ module.exports = {
         },
       },
       {
-        paranoid: true,
+        paranoid: false,
       }
     );
   },

@@ -36,6 +36,7 @@ class PurchaseService {
           },
           { transaction: t }
         );
+
         const drugsAdded = data.drugs.map((drug) => ({
           drugId: drug.drug,
           unitPrice: drug.unitPrice,
@@ -47,48 +48,8 @@ class PurchaseService {
           quantity: drug.qty ?? 1,
           institutionId,
         }));
-        const x = await DrugPurchasesModel.bulkCreate(drugsAdded, {
-          transaction: t,
-        });
 
-        if (x[0]) {
-          for (let index = 0; index < x.length; index++) {
-            const purchase = x[index] as DrugPurchasesModel;
-            const drugData = {
-              drugId: purchase.drugId,
-              batchNumber: purchase.batchNumber,
-              expireDate: purchase.expireDate,
-              quantity: purchase.quantity,
-              price: purchase.sellingPrice,
-              institutionId,
-              isAvailable: true,
-            };
-
-            const [institutionDrug, created] =
-              await InstitutionDrugs.findOrCreate({
-                where: {
-                  drugId: purchase.drugId,
-                  institutionId,
-                  batchNumber: purchase.batchNumber,
-                },
-                defaults: { ...drugData },
-              });
-
-            if (!created) {
-              await institutionDrug.increment("quantity", {
-                by: drugData.quantity,
-              });
-              if (drugData.quantity > 0) {
-                await InstitutionDrugs.update(
-                  {
-                    isAvailable: true,
-                  },
-                  { where: { id: institutionDrug.id } }
-                );
-              }
-            }
-          }
-        }
+        await DrugPurchasesModel.bulkCreate(drugsAdded, { transaction: t });
 
         return purchase;
       });
@@ -96,6 +57,76 @@ class PurchaseService {
       throw new CustomError("Can not create new Purchase", 500);
     }
   }
+
+  public static async update(
+    id: string,
+    institutionId: string,
+    data: ICreatePurchaseDTO
+  ) {
+    const old = await PurchasesModel.findByPk(id);
+    if (old?.approved) throw new CustomError("Purchase is approved");
+
+    const purchase = await this.createPurchase(institutionId, {
+      ...data,
+      id: undefined,
+    });
+    await this.destroy(id);
+    await PurchasesModel.update(
+      { purchaseNO: old?.purchaseNO },
+      { where: { id: purchase.id } }
+    );
+    return purchase;
+  }
+
+  public static async approve(id: string) {
+    const x = await DrugPurchasesModel.findAll({
+      where: { purchaseId: id },
+    });
+    const old = await PurchasesModel.findByPk(id);
+    if (old?.approved) throw new CustomError("Purchase is approved");
+
+    if (x[0]) {
+      for (let index = 0; index < x.length; index++) {
+        const purchase = x[index] as DrugPurchasesModel;
+        const drugData = {
+          drugId: purchase.drugId,
+          batchNumber: purchase.batchNumber,
+          expireDate: purchase.expireDate,
+          quantity: purchase.quantity,
+          price: purchase.sellingPrice,
+          institutionId: purchase.institutionId,
+          isAvailable: true,
+        };
+
+        const [institutionDrug, created] = await InstitutionDrugs.findOrCreate({
+          where: {
+            drugId: purchase.drugId,
+            institutionId: purchase.institutionId,
+            batchNumber: purchase.batchNumber,
+          },
+          defaults: { ...drugData },
+        });
+
+        if (!created) {
+          await institutionDrug.increment("quantity", {
+            by: drugData.quantity,
+          });
+          if (drugData.quantity > 0) {
+            await InstitutionDrugs.update(
+              {
+                isAvailable: true,
+              },
+              { where: { id: institutionDrug.id } }
+            );
+          }
+        }
+      }
+
+      await PurchasesModel.update({ approved: true }, { where: { id } });
+    }
+    return this.getOne(id);
+  }
+
   static async getAllPurchases(
     institutionId: string,
     limit: number,
@@ -110,6 +141,7 @@ class PurchaseService {
       where: { ...queryOptions },
       include: [{ model: DrugPurchasesModel, include: [DrugModel] }],
       limit,
+      order: [["purchaseNO", "DESC"]],
       offset,
     });
     const list: IPurchase[] = data.map((purchase) => purchase.toJSON());
@@ -153,6 +185,11 @@ class PurchaseService {
     } catch (error) {
       return false;
     }
+  }
+
+  public static async destroy(id: string) {
+    await DrugPurchasesModel.destroy({ where: { drugId: id } });
+    return await PurchasesModel.destroy({ where: { id } });
   }
 }
 

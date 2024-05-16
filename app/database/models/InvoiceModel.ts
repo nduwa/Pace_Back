@@ -68,6 +68,11 @@ class InvoiceModel extends Model {
   @Column(DataType.STRING)
   invoiceNO!: string;
 
+  @AllowNull(true)
+  @Default("PHARMACETICAL_RECORD")
+  @Column(DataType.STRING)
+  type!: string;
+
   @HasMany(() => InvoiceDrugsModel)
   drugs!: InvoiceDrugsModel[];
 
