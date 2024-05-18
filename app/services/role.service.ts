@@ -91,11 +91,17 @@ class RolesService {
 
   public static async assignRoles(
     id: string,
+    institutionId: string | null,
     data: IAssignPermissionsRequest
   ): Promise<boolean> {
-    const existingRoles = await UserRoles.findAll({
+    let existingRoles = await UserRoles.findAll({
       where: { userId: id },
+      include: ["role"],
     });
+
+    existingRoles = existingRoles.filter(
+      (r) => r.role.institutionId === institutionId
+    );
 
     const existingRolesIds = existingRoles.map((role) => role.roleId);
     const updatedRolesIds = data.roles || [];

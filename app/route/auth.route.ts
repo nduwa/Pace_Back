@@ -7,10 +7,12 @@ import {
 } from "../middleware/validations/auth.schema";
 import authorize from "../middleware/authorize.middleware";
 import {
+  changeInstitutionSchema,
   resetPasswordRequestSchema,
   resetPasswordSchema,
 } from "../middleware/validations/auth.middleware";
 import { IUserWithPermissions } from "../type/auth";
+import { branchSchema } from "../middleware/validations/institution.schema";
 
 const authRouter = express.Router();
 
@@ -66,6 +68,22 @@ authRouter.post(
   }
 );
 
+authRouter.post(
+  "/change-institution",
+  authorize,
+  validate(changeInstitutionSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await AuthController.changeInstitution(
+        req.body,
+        req.user?.id as string
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
 authRouter.post(
   "/reset-password",
   validate(resetPasswordSchema),

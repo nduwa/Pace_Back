@@ -8,17 +8,19 @@ import UserService from "./user.service";
 import PermissionModel from "../database/models/PermissionModel";
 import RolesService from "./role.service";
 import {
+  ICreateBranch,
   IInstitution,
   IInstitutionDTO,
   IInstitutionRequest,
 } from "../type/instutution";
 import { Paged } from "../type";
 import { IUser } from "../type/auth";
+import { Op } from "sequelize";
 
 class InstitutionService {
   public static async getOne(id: string): Promise<IInstitutionDTO | null> {
     return (await InstitutionModel.findByPk(id, {
-      include: ["users"],
+      include: ["users", "branches", "parentInstitution"],
     })) as unknown as IInstitutionDTO;
   }
 
@@ -37,9 +39,10 @@ class InstitutionService {
     const data = await InstitutionModel.findAll({
       where: {
         ...queryOptions,
+        institutionId: { [Op.is]: null },
       },
       ...TimestampsNOrder,
-
+      include: ["branches"],
       limit,
       offset,
     });
@@ -85,6 +88,12 @@ class InstitutionService {
       institutionId: institution.id,
     });
 
+    if (!userWithEmail)
+      await UserModel.update(
+        { institutionId: institution.id },
+        { where: { id: user.id } }
+      );
+
     const adminPermission = await PermissionModel.findOne({
       where: { label: "INSTITUTION_ADMIN" },
     });
@@ -95,18 +104,41 @@ class InstitutionService {
         permissions: [adminPermission?.id],
       });
 
-      await RolesService.assignRoles(user.id, {
+      await RolesService.assignRoles(user.id, institution.id, {
         id: user.id,
         roles: [role.id],
       });
     }
 
-    await UserModel.update(
-      { institutionId: institution.id },
-      { where: { id: user.id } }
-    );
-
     return institution.toJSON();
+  }
+
+  public static async createBranch(userId: string, data: ICreateBranch) {
+    const user = await UserModel.findByPk(userId, {
+      include: ["institution"],
+    });
+
+    const institution = await user?.institution;
+    if (!user) throw new CustomError("Something went wrong");
+    if (institution?.institutionId !== null)
+      throw new CustomError("This is a branch already");
+
+    const admin = {
+      name: user?.name,
+      phone: user?.phone,
+      email: user?.email,
+    };
+
+    const institutionType = institution.institutionType;
+
+    const requestData = {
+      ...data,
+      admin,
+      institutionId: user.institutionId,
+      institutionType,
+    };
+    const branch = await this.create(requestData);
+    return branch;
   }
 
   public static async update(

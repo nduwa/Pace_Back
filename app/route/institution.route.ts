@@ -3,7 +3,11 @@ import authorize from "../middleware/authorize.middleware";
 import { allowedPermissions } from "../middleware/permission";
 import validate from "../middleware/validations/validator";
 import { InstitutionController } from "../controller/institution.controller";
-import { institutionSchema } from "../middleware/validations/institution.schema";
+import {
+  branchSchema,
+  institutionSchema,
+} from "../middleware/validations/institution.schema";
+import isInstitution from "../middleware/isInstitution.middleware";
 
 const institutionRouter = express.Router();
 institutionRouter.use(authorize);
@@ -15,6 +19,23 @@ institutionRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await InstitutionController.create(req.body);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+institutionRouter.post(
+  "/branches",
+  isInstitution,
+  allowedPermissions("INSTITUTION_ADMIN"),
+  validate(branchSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await InstitutionController.createBranches(
+        req.body,
+        req.user?.id as string
+      );
       return res.status(200).json(response);
     } catch (error) {
       return next(error);

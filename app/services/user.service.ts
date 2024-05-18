@@ -17,6 +17,7 @@ import UserInstitutions from "../database/models/UserInstitutions";
 import RolesModel from "../database/models/RolesModel";
 import RolePermissions from "../database/models/RolePermissions";
 import { Paged } from "../type";
+import InstitutionModel from "../database/models/Institution";
 
 class UserService {
   public static async getUser(
@@ -35,16 +36,25 @@ class UserService {
               },
               as: "roles",
             },
-            "institutions",
-            "institution",
+            {
+              model: InstitutionModel,
+              as: "institutions",
+              include: ["parentInstitution"],
+            },
+            {
+              model: InstitutionModel,
+              as: "institution",
+              include: ["parentInstitution", "branches"],
+            },
           ]
         : [],
     });
     let profileJson = user?.toJSON();
     if (withPermissions) {
-      const roleIds = profileJson.roles
-        .filter((role: IRole) => role.institutionId == user?.institutionId)
-        .map((role: IRole) => role.id);
+      let roles = profileJson.roles.filter(
+        (role: IRole) => role.institutionId == user?.institutionId
+      );
+      const roleIds = roles.map((role: IRole) => role.id);
       const rolePermissions = await RolePermissions.findAll({
         where: { roleId: { [Op.in]: roleIds } },
         include: ["permission"],
@@ -56,7 +66,7 @@ class UserService {
         })
       );
 
-      profileJson = { ...profileJson, permissions };
+      profileJson = { ...profileJson, permissions, roles };
     }
 
     return profileJson as unknown as IUserWithPermissions;
