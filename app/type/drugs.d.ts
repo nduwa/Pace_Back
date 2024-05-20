@@ -214,3 +214,11 @@ export interface IInvoiceResponse {
   requester: string;
   rows: IInvoice[];
 }
+
+export interface IPatientInvoiceResponse {
+  startDate: string;
+  endDate: string;
+  type: string;
+  institution: string;
+  rows: IInvoice[];
+}

@@ -10,7 +10,10 @@ class PatientService {
     offset: number,
     searchq: string | undefined
   ): Promise<Paged<IPatientDTO[]>> {
-    let queryOptions = QueryOptions(["name", "NID"], searchq);
+    let queryOptions = QueryOptions(
+      ["name", "NID", "patientNO", "phone"],
+      searchq
+    );
 
     const data = await PatientsModel.findAll({
       where: queryOptions,
@@ -74,7 +77,10 @@ class PatientService {
   public static async getAllNPaged(
     searchq: string | undefined
   ): Promise<IPatientDTO[]> {
-    let queryOptions = QueryOptions(["name", "NID"], searchq);
+    let queryOptions = QueryOptions(
+      ["name", "NID", "patientNO", "phone"],
+      searchq
+    );
     const Patients = await PatientsModel.findAll({
       ...TimestampsNOrder,
       where: queryOptions,

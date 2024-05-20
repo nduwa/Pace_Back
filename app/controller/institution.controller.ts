@@ -98,4 +98,9 @@ export class InstitutionController extends Controller {
   public static async delete(@Path() id: string): Promise<boolean> {
     return await InstitutionService.delete(id);
   }
+
+  @Get("/all")
+  public static async all(): Promise<IInstitutionDTO[]> {
+    return await InstitutionService.getAllNPaged();
+  }
 }
