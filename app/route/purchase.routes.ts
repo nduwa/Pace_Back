@@ -85,7 +85,6 @@ purchaseRouter.get(
       );
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }
@@ -101,7 +100,6 @@ purchaseRouter.get(
       const response = await PurchaseController.getDrugsByPurchase(id);
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }
@@ -116,7 +114,6 @@ purchaseRouter.post(
       const response = await PurchaseController.drugsAdjust(req.body);
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }
@@ -132,7 +129,6 @@ purchaseRouter.get(
       const response = await PurchaseController.getOne(id as string);
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }
@@ -148,7 +144,6 @@ purchaseRouter.get(
       const response = await PurchaseController.approve(id as string);
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }

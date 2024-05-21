@@ -12,6 +12,7 @@ import UserModel from "../database/models/UserModel";
 import { Paged } from "../type";
 import { TimestampsNOrder } from "../utils/DBHelpers";
 import InstitutionModel from "../database/models/Institution";
+import DrugService from "./drug.service";
 
 class InvoiceService {
   public static async create(
@@ -30,9 +31,14 @@ class InvoiceService {
       totalCost: 0,
       drugsCount: 0,
     });
+
+    const requestedDrugsIds = data.drugs.map((drug) => drug.drug);
+
     const requestedDrugs = await InstitutionDrugs.findAll({
-      where: { id: { [Op.in]: data.drugs.map((drug) => drug.drug) } },
+      where: { id: { [Op.in]: requestedDrugsIds } },
       include: ["drug"],
+    }).then(async (drugs) => {
+      return DrugService.getPrices(drugs);
     });
 
     //   check quantity
@@ -41,9 +47,9 @@ class InvoiceService {
 
     await Promise.all(
       data.drugs.map(async (drug, index) => {
-        const drugJSON: IInstitutionDrug = requestedDrugs
-          .find((d) => d.toJSON().id == drug.drug)
-          ?.toJSON() as IInstitutionDrug;
+        const drugJSON: IInstitutionDrug = requestedDrugs.find(
+          (d) => d.id == drug.drug
+        ) as unknown as IInstitutionDrug;
 
         if (drug.qty > drugJSON.quantity) {
           error = `${drugJSON?.drug?.designation} has insuficcient quantity`;
@@ -51,7 +57,6 @@ class InvoiceService {
       })
     );
 
-    console.log(error);
     if (error) {
       throw new CustomError(error, 400);
     }
