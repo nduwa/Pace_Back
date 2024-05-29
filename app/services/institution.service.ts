@@ -166,6 +166,15 @@ class InstitutionService {
     const data = await InstitutionModel.findAll({ where: { type } });
     return data as unknown as IInstitutionDTO[];
   }
+
+  public static async getAllNPaged(): Promise<IInstitutionDTO[]> {
+    const drugs = await InstitutionModel.findAll({
+      include: ["parentInstitution"],
+      order: [["name", "ASC"]],
+    });
+
+    return drugs as unknown as IInstitutionDTO[];
+  }
 }
 
 export default InstitutionService;

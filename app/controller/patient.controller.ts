@@ -15,12 +15,15 @@ import {
 import { Paginations } from "../utils/DBHelpers";
 import { IPaged } from "../type";
 import {
+  IInvoice,
   IPatient,
   IPatientDTO,
+  IPatientInvoiceResponse,
   IPatientRequest,
   IPatientsResponse,
 } from "../type/drugs";
 import PatientService from "../services/patients.service";
+import InvoiceService from "../services/invoice.service";
 
 @Tags("Users")
 @Route("api/patients")
@@ -83,5 +86,41 @@ export class PatientController extends Controller {
     @Inject() searchq: string | undefined
   ): Promise<IPatientDTO[]> {
     return await PatientService.getAllNPaged(searchq);
+  }
+
+  @Get("/{id}/invoices")
+  public static async patientsInvoices(
+    @Inject() patientId: string,
+    @Inject() currentPage: number,
+    @Inject() limit: number,
+    @Inject() startDate: string | undefined,
+    @Inject() endDate: string | undefined,
+    @Inject() type: string | undefined,
+    @Inject() institution: string | undefined
+  ): Promise<IPaged<IPatientInvoiceResponse>> {
+    const { page, pageSize, offset } = Paginations(currentPage, limit);
+    const invoices = await InvoiceService.patientInvoices(
+      patientId as string,
+      pageSize,
+      offset,
+      startDate,
+      endDate,
+      type,
+      institution
+    );
+
+    const filtersUsed: IPatientInvoiceResponse = {
+      startDate: startDate ?? "all",
+      endDate: endDate ?? "all",
+      type: type ?? "all",
+      institution: institution ?? "all",
+      rows: invoices.data as unknown as IInvoice[],
+    };
+    return {
+      data: filtersUsed,
+      totalItems: invoices.totalItems,
+      currentPage: page,
+      itemsPerPage: pageSize,
+    };
   }
 }

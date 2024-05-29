@@ -4,6 +4,8 @@ import { allowedPermissions } from "../middleware/permission";
 import validate from "../middleware/validations/validator";
 import { PatientController } from "../controller/patient.controller";
 import { patientSchema } from "../middleware/validations/patient.schema";
+import { InvoiceController } from "../controller/invoices.controller";
+import { string } from "zod";
 
 const patientsRouter = express.Router();
 patientsRouter.use(authorize);
@@ -97,6 +99,30 @@ patientsRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await PatientController.getOne(req.params.id);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+patientsRouter.get(
+  "/:id/invoices",
+
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { startDate, endDate, type, institution, page, limit, searchq } =
+        req.query;
+      const response = await PatientController.patientsInvoices(
+        req.params.id as string,
+        parseInt(page as string),
+        limit as unknown as number,
+        startDate as string,
+        endDate as string,
+        type as string,
+        institution as string
+      );
+
       return res.status(200).json(response);
     } catch (error) {
       return next(error);

@@ -11,7 +11,6 @@ import InstitutionDrugs from "../database/models/InstututionDrugs";
 import UserModel from "../database/models/UserModel";
 import { Paged } from "../type";
 import { TimestampsNOrder } from "../utils/DBHelpers";
-import DrugModel from "../database/models/DrugModel";
 import InstitutionModel from "../database/models/Institution";
 
 class InvoiceService {
@@ -129,14 +128,7 @@ class InvoiceService {
     );
 
     const Invoice = (await InvoiceModel.findByPk(createdInvoice.id, {
-      include: [
-        "patient",
-        {
-          model: UserModel,
-          as: "user",
-        },
-        { model: InvoiceDrugsModel, as: "drugs", include: ["drug"] },
-      ],
+      include: this.includeStatement,
     })) as unknown as IInvoiceDTO;
 
     return Invoice;
@@ -217,18 +209,60 @@ class InvoiceService {
   }
 
   static includeStatement = [
-    "drugs",
     "patient",
     {
       model: UserModel,
       as: "user",
     },
+    { model: InvoiceDrugsModel, as: "drugs", include: ["drug"] },
     {
       model: InstitutionModel,
       as: "institution",
       include: ["parentInstitution"],
     },
   ];
+
+  public static async patientInvoices(
+    patientId: string,
+    limit: number,
+    offset: number,
+    startDate: string | undefined,
+    endDate: string | undefined,
+    type: string | undefined,
+    institution: string | undefined
+  ): Promise<Paged<IInvoiceDTO[]>> {
+    const columns: string[] = [];
+    let queryOptions: { [key: string]: any } = { patientId };
+
+    const typeOpt = type && type != "all" ? { typeId: type } : {},
+      institutionOpt =
+        institution && institution != "all"
+          ? { institutionId: institution }
+          : {},
+      datesOpt = {
+        [Op.and]: [
+          startDate ? { createdAt: { [Op.gte]: startDate } } : {},
+          endDate ? { createdAt: { [Op.lte]: endDate } } : {},
+        ],
+      };
+
+    queryOptions = {
+      ...queryOptions,
+      ...typeOpt,
+      ...institutionOpt,
+      ...datesOpt,
+    };
+
+    const data = (await InvoiceModel.findAll({
+      include: this.includeStatement,
+      where: { ...queryOptions },
+      ...TimestampsNOrder,
+      limit,
+      offset,
+    })) as unknown as IInvoiceDTO[];
+    const totalItems = await InvoiceModel.count({ where: { ...queryOptions } });
+    return { data, totalItems };
+  }
 }
 
 export default InvoiceService;

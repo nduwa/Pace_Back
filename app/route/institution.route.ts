@@ -118,6 +118,18 @@ institutionRouter.get(
 );
 
 institutionRouter.get(
+  "/all",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await InstitutionController.all();
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+institutionRouter.get(
   "/:id",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
