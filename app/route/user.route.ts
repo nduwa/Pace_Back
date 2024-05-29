@@ -88,7 +88,8 @@ userRouter.post(
     try {
       const response = await UserController.assignPermissions(
         req.params.id,
-        req.body
+        req.body,
+        req.user?.institutionId as string
       );
       return res.status(200).json(response);
     } catch (error) {

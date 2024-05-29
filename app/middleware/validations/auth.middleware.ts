@@ -36,3 +36,9 @@ export const resetPasswordSchema = z.object({
     }),
   }),
 });
+
+export const changeInstitutionSchema = z.object({
+  body: z.object({
+    institutionId: z.string().min(1, "Select one"),
+  }),
+});

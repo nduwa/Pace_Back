@@ -14,6 +14,8 @@ export interface IInstitution {
     TIN: string;
   };
 
+  institutionId?: string | null;
+
   createdAt: Date;
 }
 
@@ -24,6 +26,8 @@ export interface IInstitutionRequest
 
 export interface IInstitutionDTO extends IInstitution {
   users?: UserReponse[];
+  parentInstitution?: IInstitution;
+  branches?: IInstitution[];
 }
 
 export interface IInstitutionResponse {
@@ -54,4 +58,13 @@ export interface ITransactionDTO extends ITransaction {
 export interface ITransactionResponse {
   type: string;
   rows: ITransactionDTO[];
+}
+
+export interface ICreateBranch {
+  name: string;
+  location: string;
+  details: {
+    location: string;
+    TIN: string;
+  };
 }

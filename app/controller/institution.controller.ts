@@ -16,6 +16,7 @@ import { Paginations } from "../utils/DBHelpers";
 import InstitutionService from "../services/institution.service";
 import { IPaged } from "../type";
 import {
+  ICreateBranch,
   IInstitution,
   IInstitutionDTO,
   IInstitutionRequest,
@@ -73,6 +74,15 @@ export class InstitutionController extends Controller {
     @Body() data: IInstitutionRequest
   ): Promise<IInstitution> {
     const result = await InstitutionService.create(data);
+    return result;
+  }
+
+  @Post("branches")
+  public static async createBranches(
+    @Body() data: ICreateBranch,
+    @Inject() userId: string
+  ): Promise<IInstitution> {
+    const result = await InstitutionService.createBranch(userId, data);
     return result;
   }
 

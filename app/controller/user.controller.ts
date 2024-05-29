@@ -83,10 +83,11 @@ export class UserController extends Controller {
   @Post("/{id}/permissions")
   public static async assignPermissions(
     @Path() id: string,
-    @Body() data: IAssignPermissionsRequest
+    @Body() data: IAssignPermissionsRequest,
+    @Inject() institutionId: string | null
   ): Promise<boolean> {
     try {
-      await RolesService.assignRoles(id, data);
+      await RolesService.assignRoles(id, institutionId, data);
       return true;
     } catch (error) {
       return false;

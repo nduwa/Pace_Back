@@ -12,6 +12,9 @@ import {
   DeletedAt,
   BelongsTo,
   BelongsToMany,
+  ForeignKey,
+  AllowNull,
+  HasMany,
 } from "sequelize-typescript";
 import UserModel from "./UserModel";
 import UserInstitutions from "./UserInstitutions";
@@ -39,6 +42,11 @@ class InstitutionModel extends Model {
   @Column(DataType.JSON)
   details!: Record<string, any>;
 
+  @ForeignKey(() => InstitutionModel)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  institutionId!: string;
+
   @DeletedAt
   @Column(DataType.DATE)
   deletedAt!: Date;
@@ -55,6 +63,12 @@ class InstitutionModel extends Model {
 
   @BelongsToMany(() => UserModel, () => UserInstitutions)
   users!: UserModel[];
+
+  @BelongsTo(() => InstitutionModel)
+  parentInstitution!: InstitutionModel;
+
+  @HasMany(() => InstitutionModel)
+  branches!: InstitutionModel[];
 }
 
 export default InstitutionModel;

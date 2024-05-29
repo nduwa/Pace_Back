@@ -12,6 +12,7 @@ import UserModel from "../database/models/UserModel";
 import { Paged } from "../type";
 import { TimestampsNOrder } from "../utils/DBHelpers";
 import DrugModel from "../database/models/DrugModel";
+import InstitutionModel from "../database/models/Institution";
 
 class InvoiceService {
   public static async create(
@@ -187,6 +188,11 @@ class InvoiceService {
           as: "user",
         },
         { model: InvoiceDrugsModel, as: "drugs", include: ["drug"] },
+        {
+          model: InstitutionModel,
+          as: "institution",
+          include: ["parentInstitution"],
+        },
       ],
     }) as unknown as IInvoiceDTO;
   }
@@ -216,6 +222,11 @@ class InvoiceService {
     {
       model: UserModel,
       as: "user",
+    },
+    {
+      model: InstitutionModel,
+      as: "institution",
+      include: ["parentInstitution"],
     },
   ];
 }

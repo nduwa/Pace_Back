@@ -50,6 +50,9 @@ class UserRoles extends Model {
 
   @BelongsTo(() => UserModel)
   user!: UserModel;
+
+  @BelongsTo(() => RolesModel)
+  role!: RolesModel;
 }
 
 export default UserRoles;
