@@ -9,6 +9,7 @@ import {
   IDrugPurchase,
   IDrugRequest,
   IInstitutionDrug,
+  IPriceChange,
   IPurchaseDrugDTO,
 } from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
@@ -116,13 +117,16 @@ class DrugService {
     });
 
     // Apply pagination with limit and offset
-    const pageData = result.slice(
+    let pageData = result.slice(
       offset,
       offset + limit
     ) as unknown as IInstitutionDrug[];
+
+    const res = await this.getPrices(pageData, true);
+
     const totalItems = result.length;
 
-    return { data: pageData, totalItems };
+    return { data: res, totalItems };
   }
   static async withBatchNumbers(
     queryOptions: { [key: string]: any },
@@ -172,14 +176,54 @@ class DrugService {
   public static async getAllInstitutionNPaged(
     institutionId: string | null
   ): Promise<IInstitutionDrug[]> {
-    const data = (await InstitutionDrugs.findAll({
+    const data = await InstitutionDrugs.findAll({
       where: { institutionId, quantity: { [Op.gte]: 0 } },
       ...TimestampsNOrder,
       include: ["drug"],
-      order: ["expireDate"],
-    })) as unknown as IInstitutionDrug[];
+      order: ["price", "expireDate"],
+    });
 
-    return data;
+    const result = await this.getPrices(data);
+
+    return result;
+  }
+
+  public static async getPrices(
+    drugs: InstitutionDrugs[] | IInstitutionDrug[],
+    alreadyJSON: boolean = false
+  ) {
+    const ids = drugs.map((drug) => drug.drugId);
+    if (drugs.length == 0) return [];
+
+    const institutionId = drugs[0].institutionId;
+
+    const highPrices = await InstitutionDrugs.findAll({
+      where: {
+        drugId: { [Op.in]: ids },
+        quantity: { [Op.gt]: 0 },
+        institutionId,
+      },
+      attributes: [
+        "drugId",
+        [Sequelize.fn("max", Sequelize.col("price")), "price"],
+      ],
+      group: ["drugId"],
+    });
+
+    let drugPrices: { [key: string]: number } = {};
+    for (const record of highPrices) {
+      drugPrices[record.drugId] = record.price;
+    }
+
+    const result: IInstitutionDrug[] = drugs.map((drug) => {
+      const drugJSON = alreadyJSON ? drug : (drug as InstitutionDrugs).toJSON();
+      return {
+        ...drugJSON,
+        price: drugPrices[drug.drugId],
+      };
+    });
+
+    return result;
   }
 
   public static async getAllInstitutionGroupedNPaged(
@@ -299,6 +343,27 @@ class DrugService {
     });
 
     return { data, totalItems };
+  }
+
+  public static async updatePrice(
+    data: IPriceChange,
+    institutionId: string,
+    drugId: string
+  ) {
+    await InstitutionDrugs.update(
+      {
+        price: data.price,
+      },
+      {
+        where: {
+          quantity: { [Op.gt]: 0 },
+          institutionId,
+          drugId,
+        },
+      }
+    );
+
+    return true;
   }
 }
 

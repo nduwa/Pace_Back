@@ -3,7 +3,12 @@ import authorize from "../middleware/authorize.middleware";
 import { allowedPermissions } from "../middleware/permission";
 import validate from "../middleware/validations/validator";
 import { DrugController } from "../controller/drug.controller";
-import { createDrug, updateDrug } from "../middleware/validations/drug.schema";
+import {
+  createDrug,
+  priceSchema,
+  updateDrug,
+} from "../middleware/validations/drug.schema";
+import isInstitution from "../middleware/isInstitution.middleware";
 
 const drugsRouter = express.Router();
 drugsRouter.use(authorize);
@@ -101,6 +106,25 @@ drugsRouter.get(
     try {
       const response = await DrugController.all(
         req.user?.institutionId as string | null
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+drugsRouter.put(
+  "/:id/prices",
+  isInstitution,
+  allowedPermissions("UPDATE_MEDECINES"),
+  validate(priceSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugController.updatePrice(
+        req.body,
+        req.user?.institutionId as string,
+        req.params.id
       );
       return res.status(200).json(response);
     } catch (error) {

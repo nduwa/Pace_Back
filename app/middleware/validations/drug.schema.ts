@@ -47,3 +47,9 @@ export const drugCategory = z.object({
 });
 
 export type IDrugStockInput = z.infer<typeof drugStockSchema>;
+
+export const priceSchema = z.object({
+  body: z.object({
+    price: z.coerce.number().min(0.1, "Selling unit is required"),
+  }),
+});

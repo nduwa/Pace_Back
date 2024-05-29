@@ -80,7 +80,6 @@ class PatientsModel extends Model {
 
     if (latestPatient) {
       const prevPatientId = latestPatient.patientNO;
-      console.log(prevPatientId);
       const prevNumber = parseInt(prevPatientId.substring(2, 7), 10);
       const prevLastLetter = prevPatientId.substring(7);
       const prevLetter = prevPatientId.substring(1, 2);

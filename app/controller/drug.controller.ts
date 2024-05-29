@@ -20,6 +20,7 @@ import {
   IDrugResponse,
   IInstitutionDrug,
   IInstitutionDrugResponse,
+  IPriceChange,
 } from "../type/drugs";
 import DrugService from "../services/drug.service";
 
@@ -135,5 +136,14 @@ export class DrugController extends Controller {
     @Inject() institutionId: string | null
   ): Promise<IInstitutionDrug[]> {
     return await DrugService.getAllInstitutionGroupedNPaged(institutionId);
+  }
+
+  @Put("/{id}/prices")
+  public static async updatePrice(
+    @Body() data: IPriceChange,
+    @Inject() institutionId: string,
+    @Path() id: string
+  ): Promise<boolean> {
+    return await DrugService.updatePrice(data, institutionId, id);
   }
 }
