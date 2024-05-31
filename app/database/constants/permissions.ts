@@ -1,5 +1,3 @@
-import { group } from "console";
-
 const appPersmissions = [
   {
     group: "INSTITUTIONS",
@@ -27,16 +25,26 @@ const appPersmissions = [
     ],
   },
   {
+    group: "INVOICES",
+    permissions: ["VIEW_INVOICES"],
+  },
+  {
+    group: "TRANSACTIONS",
+    permissions: ["VIEW_TRANSACTIONS", "UPDATE_TRANSACTIONS"],
+  },
+  {
     group: "PATIENTS",
     permissions: ["VIEW_PATIENTS", "UPDATE_PATIENTS"],
   },
 ] as const;
 
+const commonGroups = ["USERS", "TRANSACTIONS"];
+
 export const permissionBasedOnInstitution = {
-  PHARMACY: ["USERS", "MEDECINES", "PATIENTS"],
-  CLINIC: ["USERS", "PATIENTS"],
-  INSURANCE: ["USERS", "MEDECINES"],
-  ADMIN: ["USERS", "INSTITUTIONS"],
+  PHARMACY: [...commonGroups, "MEDECINES", "PATIENTS"],
+  CLINIC: [...commonGroups, "PATIENTS"],
+  INSURANCE: [...commonGroups, "MEDECINES"],
+  ADMIN: [...commonGroups, "INSTITUTIONS", "PATIENTS"],
 };
 
 export type PermissionGroups = typeof appPersmissions;

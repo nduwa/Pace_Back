@@ -33,7 +33,7 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
     req.user = user;
     return next();
   } catch (error) {
-    return res.status(500).json({ error });
+    return res.status(401).json({ error });
   }
 };
 
