@@ -1,6 +1,7 @@
 import DrugCategory from "./models/DrugCategory";
 import DrugModel from "./models/DrugModel";
 import DrugPurchasesModel from "./models/DrugPurchases";
+import ExamModel from "./models/ExamModel";
 import InstitutionModel from "./models/Institution";
 import InstitutionDrugs from "./models/InstututionDrugs";
 import InvoiceDrugsModel from "./models/InvoiceDrugsModel";
@@ -37,6 +38,8 @@ const models = [
   InvoiceModel,
   InvoiceDrugsModel,
   PatientsModel,
+
+  ExamModel,
 ];
 
 export default models;

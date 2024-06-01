@@ -32,18 +32,18 @@ export class DrugCategoryController extends Controller {
     @Inject() searchq: string | undefined
   ): Promise<IPaged<IDrugCategoryResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
-    const institutions = await DrugCategoryService.getAll(
+    const categories = await DrugCategoryService.getAll(
       pageSize,
       offset,
       searchq
     );
 
     const filtersUsed: IDrugCategoryResponse = {
-      rows: institutions.data as unknown as IDrugCategory[],
+      rows: categories.data as unknown as IDrugCategory[],
     };
     return {
       data: filtersUsed,
-      totalItems: institutions.totalItems,
+      totalItems: categories.totalItems,
       currentPage: page,
       itemsPerPage: pageSize,
     };
