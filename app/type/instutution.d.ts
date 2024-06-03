@@ -68,3 +68,24 @@ export interface ICreateBranch {
     TIN: string;
   };
 }
+
+export interface IInstitutionResponse {
+  type: string;
+  rows: IInstitutionDTO[];
+}
+
+export interface IConsultation {
+  id: string;
+  institutionId: string;
+  price: number;
+  label: string;
+  createdAt: Date;
+}
+
+export type IConsultationDTO = IConsultation;
+
+export type IConsultationRequest = Pick<IConsultation, "price" | "label">;
+
+export interface IConsultationResponse {
+  rows: IConsultation[];
+}

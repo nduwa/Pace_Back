@@ -43,7 +43,7 @@ class InstitutionModel extends Model {
   details!: Record<string, any>;
 
   @ForeignKey(() => InstitutionModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   institutionId!: string;
 

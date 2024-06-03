@@ -25,7 +25,7 @@ import {
 import PatientService from "../services/patients.service";
 import InvoiceService from "../services/invoice.service";
 
-@Tags("Users")
+@Tags("Patients")
 @Route("api/patients")
 @Security("jwtAuth")
 export class PatientController extends Controller {

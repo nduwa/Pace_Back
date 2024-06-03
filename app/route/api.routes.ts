@@ -11,6 +11,7 @@ import transactionsRouter from "./transaction.route";
 import patientsRouter from "./patient.route";
 import invoicesRouter from "./invoices.route";
 import examRouter from "./exam.route";
+import consultationsRouter from "./consultation.route";
 
 const apiRouter = express.Router();
 
@@ -26,5 +27,6 @@ apiRouter.use("/transactions", transactionsRouter);
 apiRouter.use("/patients", patientsRouter);
 apiRouter.use("/invoices", invoicesRouter);
 apiRouter.use("/exams", examRouter);
+apiRouter.use("/consultations", consultationsRouter);
 
 export default apiRouter;

@@ -24,7 +24,7 @@ import {
 } from "../type/drugs";
 import DrugService from "../services/drug.service";
 
-@Tags("Users")
+@Tags("Drugs")
 @Route("api/drugs")
 @Security("jwtAuth")
 export class DrugController extends Controller {

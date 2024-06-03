@@ -1,3 +1,4 @@
+import Consultations from "./models/Consultations";
 import DrugCategory from "./models/DrugCategory";
 import DrugModel from "./models/DrugModel";
 import DrugPurchasesModel from "./models/DrugPurchases";
@@ -40,6 +41,7 @@ const models = [
   PatientsModel,
 
   ExamModel,
+  Consultations,
 ];
 
 export default models;
