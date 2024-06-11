@@ -1,4 +1,5 @@
-import { IInstitution } from "./instutution";
+import { IExam } from "./exams";
+import { IConsultation, IInstitution } from "./instutution";
 
 export interface IDrugCategory {
   id: string;
@@ -133,7 +134,6 @@ export interface IInvoice {
   name: string;
   phone: string;
   invoiceNO: string;
-  drugsCount: number;
   totalCost: number;
   createdAt: Date;
   updatedAt: Date;
@@ -154,10 +154,38 @@ export interface IInvoiceDrug {
   drug?: IDrug;
 }
 
+export interface IInvoiceExam {
+  id: string;
+  patientId: string | null;
+  institutionId: string;
+  examId: string;
+  invoiceId: string;
+  price: number;
+  createdAt: Date;
+  updatedAt: Date;
+
+  exam?: IExam;
+}
+
+export interface IInvoiceConsultation {
+  id: string;
+  patientId: string | null;
+  institutionId: string;
+  consultationId: string;
+  invoiceId: string;
+  price: number;
+  createdAt: Date;
+  updatedAt: Date;
+
+  consultation?: IConsultation;
+}
+
 export interface IInvoiceDTO extends IInvoice {
   patient?: IPatient;
   institution?: IInstitution;
-  drugs?: IInvoiceDrug;
+  drugs?: IInvoiceDrug[];
+  exams?: IInvoiceDrug[];
+  consultations?: IInvoiceDrug[];
 }
 
 export interface IInvoiceResponse {
@@ -169,6 +197,8 @@ export interface IInvoiceDrugCreateDTO {
   qty: number;
 }
 export interface ICreateInvoiceDTO {
+  formId?: string;
+  published?: boolean;
   note: string;
   name: string;
   phone: string;

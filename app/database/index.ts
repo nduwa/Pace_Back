@@ -3,9 +3,15 @@ import DrugCategory from "./models/DrugCategory";
 import DrugModel from "./models/DrugModel";
 import DrugPurchasesModel from "./models/DrugPurchases";
 import ExamModel from "./models/ExamModel";
+import FormConsultations from "./models/FormConsultations";
+import FormDrugs from "./models/FormDrugs";
+import FormExams from "./models/FormExams";
+import FormModel from "./models/FormModel";
 import InstitutionModel from "./models/Institution";
 import InstitutionDrugs from "./models/InstututionDrugs";
+import InvoiceConsultations from "./models/InvoiceConsultations";
 import InvoiceDrugsModel from "./models/InvoiceDrugsModel";
+import InvoiceExams from "./models/InvoiceExams";
 import InvoiceModel from "./models/InvoiceModel";
 import PatientsModel from "./models/PatientsModel";
 import PermissionModel from "./models/PermissionModel";
@@ -40,8 +46,16 @@ const models = [
   InvoiceDrugsModel,
   PatientsModel,
 
+  InvoiceExams,
+  InvoiceConsultations,
+
   ExamModel,
   Consultations,
+
+  FormModel,
+  FormExams,
+  FormDrugs,
+  FormConsultations,
 ];
 
 export default models;

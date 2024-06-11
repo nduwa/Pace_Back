@@ -21,6 +21,9 @@ import PatientsModel from "./PatientsModel";
 import InvoiceDrugsModel from "./InvoiceDrugsModel";
 import { IInvoice } from "../../type/drugs";
 import UserModel from "./UserModel";
+import FormModel from "./FormModel";
+import InvoiceExams from "./InvoiceExams";
+import InvoiceConsultations from "./InvoiceConsultations";
 
 @Table({
   tableName: "invoices",
@@ -47,6 +50,11 @@ class InvoiceModel extends Model {
   @Column(DataType.UUID)
   patientId!: string;
 
+  @ForeignKey(() => FormModel)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  formId!: string;
+
   @AllowNull(true)
   @Column(DataType.STRING)
   note!: string;
@@ -60,10 +68,11 @@ class InvoiceModel extends Model {
   phone!: string;
 
   @Column(DataType.INTEGER)
-  drugsCount!: number;
-
-  @Column(DataType.INTEGER)
   totalCost!: number;
+
+  @Default(true)
+  @Column(DataType.BOOLEAN)
+  published!: boolean;
 
   @Column(DataType.STRING)
   invoiceNO!: string;
@@ -76,8 +85,17 @@ class InvoiceModel extends Model {
   @HasMany(() => InvoiceDrugsModel)
   drugs!: InvoiceDrugsModel[];
 
+  @HasMany(() => InvoiceExams)
+  exams!: InvoiceExams[];
+
+  @HasMany(() => InvoiceConsultations)
+  consultations!: InvoiceConsultations[];
+
   @BelongsTo(() => PatientsModel)
   patient!: PatientsModel;
+
+  @BelongsTo(() => FormModel)
+  form!: FormModel;
 
   @BelongsTo(() => UserModel)
   user!: UserModel;
