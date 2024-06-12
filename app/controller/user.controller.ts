@@ -15,6 +15,7 @@ import {
   ICreateUser,
   IRegister,
   IUpdateUser,
+  IUser,
   IUserWithPermissions,
   IUsersResponse,
   UserReponse,
@@ -61,6 +62,13 @@ export class UserController extends Controller {
     return (await UserService.getUser({
       id,
     })) as IUserWithPermissions;
+  }
+
+  @Get("/all")
+  public static async all(
+    @Inject() institutionId: string | null
+  ): Promise<IUser[]> {
+    return (await UserService.all(institutionId)) as IUser[];
   }
 
   @Post()

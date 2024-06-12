@@ -10,7 +10,7 @@ import CustomError, { catchSequelizeError } from "../utils/CustomError";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
 import UserModel from "../database/models/UserModel";
 import { Paged } from "../type";
-import { TimestampsNOrder } from "../utils/DBHelpers";
+import { DatesOpt, TimestampsNOrder } from "../utils/DBHelpers";
 import InstitutionModel from "../database/models/Institution";
 import DrugService from "./drug.service";
 import InvoiceExams from "../database/models/InvoiceExams";
@@ -152,12 +152,7 @@ class InvoiceService {
 
     const requesterOpt =
         requester && requester != "all" ? { requesterId: requester } : {},
-      datesOpt = {
-        [Op.and]: [
-          startDate ? { createdAt: { [Op.gte]: startDate } } : {},
-          endDate ? { createdAt: { [Op.lte]: endDate } } : {},
-        ],
-      };
+      datesOpt = DatesOpt(startDate, endDate);
 
     queryOptions = {
       ...queryOptions,
@@ -251,12 +246,7 @@ class InvoiceService {
         institution && institution != "all"
           ? { institutionId: institution }
           : {},
-      datesOpt = {
-        [Op.and]: [
-          startDate ? { createdAt: { [Op.gte]: startDate } } : {},
-          endDate ? { createdAt: { [Op.lte]: endDate } } : {},
-        ],
-      };
+      datesOpt = DatesOpt(startDate, endDate);
 
     queryOptions = {
       ...queryOptions,

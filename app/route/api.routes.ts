@@ -13,6 +13,7 @@ import invoicesRouter from "./invoices.route";
 import examRouter from "./exam.route";
 import consultationsRouter from "./consultation.route";
 import formsRouter from "./forms.route";
+import dashboardRouter from "./dashboard.route";
 
 const apiRouter = express.Router();
 
@@ -30,5 +31,6 @@ apiRouter.use("/invoices", invoicesRouter);
 apiRouter.use("/exams", examRouter);
 apiRouter.use("/consultations", consultationsRouter);
 apiRouter.use("/forms", formsRouter);
+apiRouter.use("/dashboard", dashboardRouter);
 
 export default apiRouter;

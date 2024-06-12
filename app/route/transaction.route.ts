@@ -12,13 +12,15 @@ transactionsRouter.get(
   "/",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { type, page, limit, searchq } = req.query;
+      const { type, page, limit, searchq, startDate, endDate } = req.query;
       const response = await TransactionController.getAll(
         req.user?.institutionId as string | null,
         parseInt(page as string),
         limit as unknown as number,
         searchq as string,
-        type as string
+        type as string,
+        startDate as string,
+        endDate as string
       );
 
       return res.status(200).json(response);

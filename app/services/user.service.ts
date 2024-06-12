@@ -115,6 +115,35 @@ class UserService {
     return { data, totalItems };
   }
 
+  public static async all(institutionId: string | null): Promise<IUser[]> {
+    let queryOptions: { [key: string]: any } = {};
+
+    const userIds = institutionId
+      ? (await UserInstitutions.findAll({ where: { institutionId } })).map(
+          (user) => user.userId
+        )
+      : [];
+
+    const userIdsOpt = institutionId
+      ? { id: { [Op.in]: userIds } }
+      : { institutionId: null };
+
+    queryOptions = { ...queryOptions, ...userIdsOpt };
+
+    const data = await UserModel.findAll({
+      where: {
+        ...queryOptions,
+        // email: { [Op.not]: "root@sudos.rw" }
+      },
+      ...TimestampsNOrder,
+      attributes: {
+        exclude: ["password", "deletedAt", "updatedAt"],
+      },
+    });
+
+    return data;
+  }
+
   public static async create(
     institutionId: string | null,
     data: ICreateUser

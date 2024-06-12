@@ -63,6 +63,7 @@ class FormService {
 
     let isOpenOpt = {};
     if (isOpen && isOpen == "no") isOpenOpt = { isOpen: false };
+    if (isOpen && isOpen == "yes") isOpenOpt = { isOpen: true };
 
     queryOptions = { ...institutionOpt, ...atOpt, ...isOpenOpt };
 

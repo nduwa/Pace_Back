@@ -1,5 +1,5 @@
 import { Op, Sequelize } from "sequelize";
-import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
+import { DatesOpt, QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import { Paged } from "../type";
 import Transactions from "../database/models/Transactions";
 import {
@@ -14,20 +14,28 @@ class TransactionService {
     limit: number,
     offset: number,
     searchq: string | undefined,
-    type: string | undefined
+    type: string | undefined,
+    startDate: string | undefined,
+    endDate: string | undefined
   ): Promise<Paged<Transactions[]>> {
-    let queryOptions = QueryOptions(["type", "reason"], searchq);
+    let queryOptions = QueryOptions(["type", "reason", "reference"], searchq);
 
     const institutionOpt = {
       institutionId: institutionId,
     };
 
     const typeOpt = type && type !== "all" ? { type: type } : {};
+    let endDateStr = endDate;
+    if (startDate && endDate && startDate == endDate) {
+      endDateStr = undefined;
+    }
+    const datesOpt = DatesOpt(startDate, endDate);
 
     queryOptions = {
       ...queryOptions,
       ...institutionOpt,
       ...typeOpt,
+      ...datesOpt,
     };
 
     const data = await Transactions.findAll({
