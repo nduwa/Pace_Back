@@ -10,20 +10,31 @@ import {
   Sequelize,
   DataType,
   DeletedAt,
+  Unique,
 } from "sequelize-typescript";
 
 @Table({
-  tableName: "drug_categories",
-  paranoid: false,
+  tableName: "exams",
+  paranoid: true,
 })
-class DrugCategory extends Model {
+class ExamModel extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
-  @Column(DataType.UUID)
+  @Unique
+  @Column(DataType.STRING)
+  exam_code!: string;
+
+  @Column(DataType.TEXT)
   name!: string;
+
+  @Column(DataType.TEXT)
+  description!: string;
+
+  @Column(DataType.FLOAT)
+  price!: number;
 
   @DeletedAt
   @Column(DataType.DATE)
@@ -40,4 +51,4 @@ class DrugCategory extends Model {
   updatedAt!: Date;
 }
 
-export default DrugCategory;
+export default ExamModel;

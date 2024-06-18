@@ -22,7 +22,7 @@ import {
   ITransactionResponse,
 } from "../type/instutution";
 
-@Tags("Users")
+@Tags("Transactions")
 @Route("api/transactions")
 @Security("jwtAuth")
 export class TransactionController extends Controller {

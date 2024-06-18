@@ -10,20 +10,30 @@ import {
   Sequelize,
   DataType,
   DeletedAt,
+  ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
+import InstitutionModel from "./Institution";
 
 @Table({
-  tableName: "drug_categories",
-  paranoid: false,
+  tableName: "consultations",
+  paranoid: true,
 })
-class DrugCategory extends Model {
+class Consultations extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
+  @Column(DataType.STRING)
+  label!: string;
+
+  @Column(DataType.FLOAT)
+  price!: number;
+
+  @ForeignKey(() => InstitutionModel)
   @Column(DataType.UUID)
-  name!: string;
+  institutionId!: string;
 
   @DeletedAt
   @Column(DataType.DATE)
@@ -38,6 +48,9 @@ class DrugCategory extends Model {
   @Default(Sequelize.fn("NOW"))
   @Column(DataType.DATE)
   updatedAt!: Date;
+
+  @BelongsTo(() => InstitutionModel)
+  institution!: InstitutionModel;
 }
 
-export default DrugCategory;
+export default Consultations;

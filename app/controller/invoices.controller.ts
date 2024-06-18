@@ -21,7 +21,7 @@ import {
   IInvoiceResponse,
 } from "../type/drugs";
 
-@Tags("Users")
+@Tags("Invoices")
 @Route("api/invoices")
 @Security("jwtAuth")
 export class InvoiceController extends Controller {
