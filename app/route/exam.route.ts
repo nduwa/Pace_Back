@@ -69,7 +69,6 @@ examRouter.put(
 
 examRouter.get(
   "/all",
-  allowedPermissions("VIEW_EXAMS"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await ExamController.getNPaged();

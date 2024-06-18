@@ -72,6 +72,15 @@ export class UserController extends Controller {
     return createdUser;
   }
 
+  @Put("/{id}")
+  public static async updateUser(
+    @Body() user: ICreateUser,
+    @Path() id: string
+  ): Promise<UserReponse> {
+    const createdUser = await UserService.create(id, user);
+    return createdUser;
+  }
+
   @Put("/profile")
   public static async updateUserProfile(
     @Inject() id: string,

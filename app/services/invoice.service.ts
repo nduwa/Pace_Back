@@ -13,6 +13,8 @@ import { Paged } from "../type";
 import { TimestampsNOrder } from "../utils/DBHelpers";
 import InstitutionModel from "../database/models/Institution";
 import DrugService from "./drug.service";
+import InvoiceExams from "../database/models/InvoiceExams";
+import InvoiceConsultations from "../database/models/InvoiceConsultations";
 
 class InvoiceService {
   public static async create(
@@ -29,7 +31,6 @@ class InvoiceService {
       userId: userId,
       institutionId,
       totalCost: 0,
-      drugsCount: 0,
     });
 
     const requestedDrugsIds = data.drugs.map((drug) => drug.drug);
@@ -125,7 +126,6 @@ class InvoiceService {
     await InvoiceModel.update(
       {
         totalCost: totalCost,
-        drugsCount: data.drugs.length,
       },
       {
         where: { id: createdInvoice.id },
@@ -163,6 +163,7 @@ class InvoiceService {
       ...queryOptions,
       ...requesterOpt,
       ...datesOpt,
+      ...{ published: true },
     };
 
     const data = (await InvoiceModel.findAll({
@@ -185,6 +186,12 @@ class InvoiceService {
           as: "user",
         },
         { model: InvoiceDrugsModel, as: "drugs", include: ["drug"] },
+        { model: InvoiceExams, as: "exams", include: ["exam"] },
+        {
+          model: InvoiceConsultations,
+          as: "consultations",
+          include: ["consultation"],
+        },
         {
           model: InstitutionModel,
           as: "institution",
@@ -256,6 +263,7 @@ class InvoiceService {
       ...typeOpt,
       ...institutionOpt,
       ...datesOpt,
+      ...{ published: true },
     };
 
     const data = (await InvoiceModel.findAll({

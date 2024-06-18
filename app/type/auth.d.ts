@@ -23,6 +23,7 @@ export interface IUserWithPermissions extends IUser {
   permissions: UserPermission[];
   institutions: IInstitution[];
   roles: IRole[];
+  institution: IInstitution;
 }
 
 export interface UserReponse

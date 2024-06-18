@@ -101,7 +101,6 @@ drugsRouter.put(
 
 drugsRouter.get(
   "/all",
-  allowedPermissions("VIEW_MEDECINES"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await DrugController.all(
