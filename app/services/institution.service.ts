@@ -80,6 +80,7 @@ class InstitutionService {
         email: user.email,
         phone: user.phone,
       },
+      hasPharmacy: data.institutionType === "PHARMACY" ? true : false,
     });
 
     // set userInstitution
@@ -146,7 +147,10 @@ class InstitutionService {
     data: IInstitutionRequest
   ): Promise<boolean> {
     try {
-      await InstitutionModel.update({ ...data }, { where: { id: id } });
+      await InstitutionModel.update(
+        { ...data, insitutionType: undefined },
+        { where: { id: id } }
+      );
       return true;
     } catch (error) {
       throw new CustomError((error as Error).message, 400);
