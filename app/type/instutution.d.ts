@@ -4,6 +4,7 @@ export interface IInstitution {
   id: string;
   name: string;
   institutionType: string;
+  hasPharmacy: boolean;
   admin: {
     name: string;
     phone: string;
@@ -20,8 +21,12 @@ export interface IInstitution {
 }
 
 export interface IInstitutionRequest
-  extends Omit<IInstitution, "id" | "createdAt" | "institutionType"> {
+  extends Omit<
+    IInstitution,
+    "id" | "createdAt" | "institutionType" | "hasPharmacy"
+  > {
   institutionType?: string | null;
+  hasPharmacy?: boolean;
 }
 
 export interface IInstitutionDTO extends IInstitution {

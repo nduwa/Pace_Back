@@ -56,7 +56,7 @@ institutionRouter.delete(
 );
 institutionRouter.put(
   "/:id",
-  allowedPermissions("UPDATE_INSTITUTIONS"),
+  allowedPermissions("UPDATE_INSTITUTIONS", "INSTITUTION_ADMIN"),
   validate(institutionSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {

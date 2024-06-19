@@ -42,6 +42,11 @@ class InstitutionModel extends Model {
   @Column(DataType.JSON)
   details!: Record<string, any>;
 
+  @AllowNull(true)
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  hasPharmacy!: boolean;
+
   @ForeignKey(() => InstitutionModel)
   @AllowNull(true)
   @Column(DataType.UUID)
