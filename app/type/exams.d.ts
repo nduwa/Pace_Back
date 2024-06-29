@@ -9,6 +9,16 @@ export interface IExam {
   name: string;
   price: number;
   createdAt: Date;
+
+  institutionExam?: IInstitutionExam[];
 }
 
-export type IExamRequest = Omit<IExam, "id" | "createdAt" | "isOnMarket">;
+export interface IInstitutionExam {
+  id: string;
+  institutionId: string;
+  examId: string;
+  price: number;
+  createdAt: Date;
+}
+
+export type IExamRequest = Omit<IExam, "id" | "createdAt" | "institutionExam">;

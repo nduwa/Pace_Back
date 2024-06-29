@@ -11,7 +11,10 @@ import {
   DataType,
   DeletedAt,
   Unique,
+  HasOne,
+  HasMany,
 } from "sequelize-typescript";
+import InstitutionExams from "./InstututionExams";
 
 @Table({
   tableName: "exams",
@@ -39,6 +42,9 @@ class ExamModel extends Model {
   @DeletedAt
   @Column(DataType.DATE)
   deletedAt!: Date;
+
+  @HasMany(() => InstitutionExams)
+  institutionExam!: InstitutionExams[];
 
   @CreatedAt
   @Default(Sequelize.fn("NOW"))

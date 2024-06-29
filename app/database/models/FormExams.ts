@@ -65,10 +65,6 @@ class FormExams extends Model {
   @Column(DataType.STRING)
   comment!: string;
 
-  @AllowNull(false)
-  @Column(DataType.FLOAT)
-  price!: number;
-
   @DeletedAt
   @Column(DataType.DATE)
   deletedAt!: Date;

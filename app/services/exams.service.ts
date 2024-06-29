@@ -3,6 +3,8 @@ import CustomError from "../utils/CustomError";
 import { Paged } from "../type";
 import { IExam, IExamRequest } from "../type/exams";
 import ExamModel from "../database/models/ExamModel";
+import InstitutionExams from "../database/models/InstututionExams";
+import { IPriceChange } from "../type/drugs";
 
 class ExamService {
   public static async getOne(id: string): Promise<IExam | null> {
@@ -10,6 +12,7 @@ class ExamService {
   }
 
   public static async getAll(
+    institutionId: string | null,
     limit: number,
     offset: number,
     searchq: string | undefined
@@ -20,6 +23,15 @@ class ExamService {
       where: {
         ...queryOptions,
       },
+
+      include: [
+        {
+          model: InstitutionExams,
+          as: "institutionExam",
+          required: false,
+          where: { institutionId },
+        },
+      ],
       ...TimestampsNOrder,
 
       limit,
@@ -66,9 +78,47 @@ class ExamService {
     return data as unknown as IExam[];
   }
 
-  public static async getNPaged(): Promise<IExam[]> {
-    const data = await ExamModel.findAll();
+  public static async getNPaged(
+    institutionId: string | null
+  ): Promise<IExam[]> {
+    const data = await ExamModel.findAll({
+      include: [
+        {
+          model: InstitutionExams,
+          as: "institutionExam",
+          required: false,
+          where: { institutionId },
+        },
+      ],
+    });
     return data as unknown as IExam[];
+  }
+
+  public static async updatePrice(
+    data: IPriceChange,
+    institutionId: string,
+    examId: string
+  ) {
+    const [priceInDB, created] = await InstitutionExams.findOrCreate({
+      where: {
+        examId,
+        institutionId,
+      },
+      defaults: { price: data.price, examId, institutionId },
+    });
+
+    if (!created) {
+      await InstitutionExams.update(
+        {
+          price: data.price,
+        },
+        {
+          where: { id: priceInDB.id },
+        }
+      );
+    }
+
+    return true;
   }
 }
 
