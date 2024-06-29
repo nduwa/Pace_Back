@@ -48,6 +48,10 @@ class FormModel extends Model {
   @Column(DataType.STRING)
   at!: string;
 
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  from!: string;
+
   @Default(true)
   @Column(DataType.BOOLEAN)
   isOpen!: boolean;

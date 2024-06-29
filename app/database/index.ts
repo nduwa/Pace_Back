@@ -9,6 +9,7 @@ import FormExams from "./models/FormExams";
 import FormModel from "./models/FormModel";
 import InstitutionModel from "./models/Institution";
 import InstitutionDrugs from "./models/InstututionDrugs";
+import InstitutionExams from "./models/InstututionExams";
 import InvoiceConsultations from "./models/InvoiceConsultations";
 import InvoiceDrugsModel from "./models/InvoiceDrugsModel";
 import InvoiceExams from "./models/InvoiceExams";
@@ -51,6 +52,7 @@ const models = [
 
   ExamModel,
   Consultations,
+  InstitutionExams,
 
   FormModel,
   FormExams,

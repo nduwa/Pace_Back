@@ -42,6 +42,9 @@ import InvoiceModel from "../database/models/InvoiceModel";
 import InvoiceDrugsModel from "../database/models/InvoiceDrugsModel";
 import InvoiceExams from "../database/models/InvoiceExams";
 import InvoiceConsultations from "../database/models/InvoiceConsultations";
+import InstitutionExams from "../database/models/InstututionExams";
+import { examPrice } from "../utils/helperFunctions";
+import InstitutionModel from "../database/models/Institution";
 
 class FormService {
   public static async getAll(
@@ -202,7 +205,11 @@ class FormService {
 
   public static async addExam(formId: string, data: FormAddExam) {
     const form = await FormModel.findByPk(formId);
+    if (form == null) throw new CustomError("Form not found");
+
     const exam = await ExamModel.findByPk(data.examId);
+
+    if (exam == null) throw new CustomError("Exam not found");
 
     const [addedExam] = await FormExams.findOrCreate({
       where: { formId, examId: data.examId },
@@ -210,7 +217,6 @@ class FormService {
         formId,
         examId: data.examId,
         patientId: form?.patientId,
-        price: exam?.price,
       },
     });
 
@@ -312,6 +318,7 @@ class FormService {
   }
 
   public static async sendFormTo(formId: string, data: sendFormRequest) {
+    const form = await FormModel.findByPk(formId);
     const { to } = data;
     const consultation = await Consultations.findOne({
       where: { label: to },
@@ -319,22 +326,27 @@ class FormService {
     if (consultation) {
       this.addConsultation(formId, consultation.id);
     }
-    let update: { [key: string]: any } = { at: to, isOpen: true };
+    let update: { [key: string]: any } = {
+      at: to,
+      from: form?.at,
+      isOpen: true,
+    };
     if (data.to === "ARCHIVE") {
       update.isOpen = false;
     }
 
-    console.log(update);
     return await FormModel.update({ ...update }, { where: { id: formId } });
   }
 
   public static async getLocations(institutionId: string) {
     const consultations = await ConsultationService.getAllNPaged(institutionId);
 
+    const institution = await InstitutionModel.findByPk(institutionId);
+    const pharmacy = institution?.hasPharmacy === true ? ["PHARMACY"] : [];
     return [
       ...consultations.map((c) => c.label),
       "LABORATORY",
-      "PHARMACY",
+      ...pharmacy,
       "COUNTER",
       "RECEIPTION",
       "ARCHIVE",
@@ -457,7 +469,20 @@ class FormService {
         formId,
         invoiceId: { [Op.is]: null },
       },
-      include: ["exam"],
+      include: [
+        {
+          model: ExamModel,
+          as: "exam",
+          include: [
+            {
+              model: InstitutionExams,
+              as: "institutionExam",
+              required: false,
+              where: { institutionId },
+            },
+          ],
+        },
+      ],
     }).then((exam) => {
       invoiceExams = exam
         .filter((ex) => ex.institutionId == institutionId)
@@ -465,7 +490,7 @@ class FormService {
           return {
             id: ex.examId,
             exam: ex.exam,
-            price: ex.exam.price,
+            price: examPrice(ex.exam),
           };
         });
     });

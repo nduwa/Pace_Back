@@ -9,6 +9,7 @@ export interface IForm {
   patientId: string;
   formNO: string;
   at: string;
+  from: string;
   isOpen: boolean;
   details: {
     temperature: number | null;
