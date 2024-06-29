@@ -38,7 +38,7 @@ class Transactions extends Model {
   user!: DrugModel;
 
   @ForeignKey(() => InstitutionModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   institutionId!: string;
 

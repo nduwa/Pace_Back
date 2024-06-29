@@ -32,7 +32,9 @@ export class TransactionController extends Controller {
     @Inject() currentPage: number,
     @Inject() limit: number,
     @Inject() searchq: string | undefined,
-    @Inject() type: string | undefined
+    @Inject() type: string | undefined,
+    @Inject() startDate: string | undefined,
+    @Inject() endDate: string | undefined
   ): Promise<IPaged<ITransactionResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
     const transactions = await TransactionService.getAll(
@@ -40,11 +42,15 @@ export class TransactionController extends Controller {
       pageSize,
       offset,
       searchq,
-      type
+      type,
+      startDate,
+      endDate
     );
 
     const filtersUsed: ITransactionResponse = {
       type: type ?? "all",
+      startDate: startDate ?? "",
+      endDate: endDate ?? "all",
       rows: transactions.data as unknown as ITransactionDTO[],
     };
     return {

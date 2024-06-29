@@ -45,12 +45,12 @@ export class FormController extends Controller {
       pageSize,
       offset,
       at,
-      isOpen ?? "yes"
+      isOpen
     );
 
     const filtersUsed: IFormResponse = {
       at: at ?? "all",
-      isOpen: isOpen ?? "yes",
+      isOpen: isOpen ?? "all",
       rows: forms.data as unknown as IFormDTO[],
     };
     return {

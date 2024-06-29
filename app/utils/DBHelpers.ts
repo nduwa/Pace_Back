@@ -30,3 +30,30 @@ export const Paginations = (
 
   return { page, pageSize, offset };
 };
+
+export const DatesOpt = (
+  startDate: string | undefined,
+  endDate: string | undefined
+) => {
+  let endDateStr = endDate;
+  if (startDate && endDate && startDate == endDate) {
+    endDateStr = undefined;
+  }
+  if (endDateStr) {
+    const date = new Date(endDateStr);
+
+    // Adding one day
+    const nextDay = new Date(date);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    // Formatting to yyyy-mm-dd
+    endDateStr = nextDay.toISOString().split("T")[0];
+  }
+
+  return {
+    [Op.and]: [
+      startDate ? { createdAt: { [Op.gte]: startDate } } : {},
+      endDateStr ? { createdAt: { [Op.lte]: endDateStr } } : {},
+    ],
+  };
+};

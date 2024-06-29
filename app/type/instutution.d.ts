@@ -62,6 +62,8 @@ export interface ITransactionDTO extends ITransaction {
 
 export interface ITransactionResponse {
   type: string;
+  startDate: string;
+  endDate: string;
   rows: ITransactionDTO[];
 }
 
