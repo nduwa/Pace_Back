@@ -36,6 +36,11 @@ class InvoiceDrugsModel extends Model {
   @Column(DataType.UUID)
   drugId!: string;
 
+  @ForeignKey(() => InstitutionDrugs)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  institutionDrugId!: string;
+
   @ForeignKey(() => PatientsModel)
   @AllowNull(true)
   @Column(DataType.UUID)
@@ -55,6 +60,11 @@ class InvoiceDrugsModel extends Model {
   @AllowNull(false)
   @Column(DataType.FLOAT)
   totalPrice!: number;
+
+  @AllowNull(true)
+  @Default(null)
+  @Column(DataType.BOOLEAN)
+  isGiven!: boolean;
 
   @ForeignKey(() => InvoiceModel)
   @AllowNull(false)

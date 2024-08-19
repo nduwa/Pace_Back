@@ -69,4 +69,28 @@ invoicesRouter.get(
   }
 );
 
+invoicesRouter.get(
+  "/:drugId/remove-drug",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await InvoiceController.removeDrug(req.params.drugId);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+invoicesRouter.get(
+  "/:drugId/give-drug",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await InvoiceController.giveDrug(req.params.drugId);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
 export default invoicesRouter;

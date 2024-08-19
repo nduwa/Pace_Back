@@ -15,6 +15,7 @@ import { Paginations } from "../utils/DBHelpers";
 import { IPaged } from "../type";
 import FormService from "../services/form.service";
 import {
+  IAvailableMed,
   IForm,
   IFormConsultationRequest,
   IFormDTO,
@@ -88,6 +89,11 @@ export class FormController extends Controller {
     return await FormService.delete(id);
   }
 
+  @Delete("/invoice-drug/{id}")
+  public static async removeDrugFromInvoice(@Path() id: string): Promise<void> {
+    return await FormService.removeDrugFromInvoice(id);
+  }
+
   @Post("/{id}/consultation")
   public static async consultation(
     @Body() data: IFormConsultationRequest,
@@ -122,8 +128,8 @@ export class FormController extends Controller {
     return await FormService.getLocations(institutionId as string);
   }
 
-  @Post("/{id}/give-drugs")
-  public static async giveDrugs(
+  @Post("/{id}/invoice-drugs")
+  public static async invoiceDrugs(
     @Body() data: ICreateInvoiceDTO,
     @Inject() institutionId: string | null,
     @Inject() userId: string
@@ -156,6 +162,18 @@ export class FormController extends Controller {
     @Body() data: IFormInvoiceRequest
   ): Promise<boolean> {
     const response = await FormService.saveInvoice(data, id);
+    return response;
+  }
+
+  @Get("/{id}/available-med")
+  public static async getAvailableMedForForm(
+    @Path() id: string,
+    @Inject() institutionId: string | null
+  ): Promise<IAvailableMed> {
+    const response = await FormService.getAvailableMedForForm(
+      id,
+      institutionId as string
+    );
     return response;
   }
 }

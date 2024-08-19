@@ -53,7 +53,7 @@ class DrugModel extends Model {
 
   @AllowNull(false)
   @Column(DataType.BOOLEAN)
-  isOnMarket!: number;
+  isOnMarket!: boolean;
 
   @DeletedAt
   @Column(DataType.DATE)

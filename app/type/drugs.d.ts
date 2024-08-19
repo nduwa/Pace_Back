@@ -148,6 +148,8 @@ export interface IInvoiceDrug {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  isGiven: boolean;
+  institutionDrugId: string;
   createdAt: Date;
   updatedAt: Date;
 
@@ -203,6 +205,11 @@ export interface ICreateInvoiceDTO {
   name: string;
   phone: string;
   patientId: string;
+  drugs: IInvoiceDrugCreateDTO[];
+}
+
+export interface IAddDrugsToInvoice {
+  formId?: string;
   drugs: IInvoiceDrugCreateDTO[];
 }
 
