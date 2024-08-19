@@ -11,5 +11,6 @@
     "moduleResolution": "node",
     "types": ["node"]
   },
-  "include": ["app"]
+  "include": ["app"],
+  "exclude": ["node_modules", "dist"]
 }
