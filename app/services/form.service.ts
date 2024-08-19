@@ -4,6 +4,7 @@ import { Paged } from "../type";
 import {
   FormAddDrug,
   FormAddExam,
+  IAvailableMed,
   IForm,
   IFormConsultation,
   IFormConsultationRequest,
@@ -15,9 +16,11 @@ import {
   IFormInvoiceData,
   IFormInvoiceRequest,
   IFormRequest,
+  IGiveDrugs,
   IInvoiceConsultationData,
   IInvoiceDrugData,
   IInvoiceExamData,
+  IdrugOnInvoice,
   sendFormRequest,
 } from "../type/form";
 import FormModel from "../database/models/FormModel";
@@ -29,6 +32,7 @@ import DrugModel from "../database/models/DrugModel";
 import FormDrugs from "../database/models/FormDrugs";
 import ConsultationService from "./consultation.service";
 import {
+  IAddDrugsToInvoice,
   ICreateInvoiceDTO,
   IInvoice,
   IInvoiceConsultation,
@@ -45,6 +49,8 @@ import InvoiceConsultations from "../database/models/InvoiceConsultations";
 import InstitutionExams from "../database/models/InstututionExams";
 import { examPrice } from "../utils/helperFunctions";
 import InstitutionModel from "../database/models/Institution";
+import InstitutionDrugs from "../database/models/InstututionDrugs";
+import DrugService from "./drug.service";
 
 class FormService {
   public static async getAll(
@@ -358,58 +364,7 @@ class FormService {
     userId: string,
     institutionId: string
   ): Promise<IInvoiceDTO> {
-    const patientId =
-      data.patientId && data.patientId.length > 0 ? data.patientId : undefined;
-
-    const { formId } = data;
-
-    const prescribedDrugs = await FormDrugs.findAll({
-      where: { formId },
-      include: ["drug"],
-    });
-
-    //   check quantity
-
-    let error: string | undefined = undefined;
-
-    await Promise.all(
-      data.drugs.map(async (drug, index) => {
-        const drugJSON = prescribedDrugs.find(
-          (d) => d.id == drug.drug
-        ) as unknown as IFormDrugDTO;
-
-        const requiredQuantity = drugJSON.quantity - drugJSON.givenQuantitty;
-
-        if (drug.qty > requiredQuantity) {
-          error = `${drugJSON?.drug?.designation} requires only ${requiredQuantity}`;
-        }
-      })
-    );
-
-    if (error) {
-      throw new CustomError(error, 400);
-    }
-
     let Invoice = await InvoiceService.create(data, userId, institutionId);
-    await InvoiceModel.update(
-      { type: "CLINICAL_RECORD" },
-      { where: { id: Invoice.id } }
-    );
-
-    const existingInvoice = await InvoiceModel.findOne({
-      where: { formId, institutionId, isOpen: true, published: false },
-    });
-    if (existingInvoice !== null) {
-      // move drugs
-      await InvoiceDrugsModel.update(
-        { invoiceId: existingInvoice.id },
-        { where: { formId, invoiceId: Invoice.id } }
-      );
-      await InvoiceModel.destroy({ where: { id: Invoice.id } });
-      Invoice = (await InvoiceService.getOne(
-        existingInvoice.id
-      )) as IInvoiceDTO;
-    }
 
     return Invoice;
   }
@@ -596,6 +551,189 @@ class FormService {
     );
 
     return true;
+  }
+
+  public static async getAvailableMedForForm(
+    formId: string,
+    institutionId: string
+  ) {
+    const form = await FormModel.findByPk(formId, {
+      include: [{ model: FormDrugs, as: "drugs", include: ["drug"] }],
+    });
+
+    if (!form) throw new CustomError("Form not found");
+
+    let drugs: IAvailableMed = {
+      addToInvoice: [],
+      alreadyOnInvoice: [],
+    };
+    const formDrugs = form.drugs.filter((d) => d.quantity > d.givenQuantity);
+    await Promise.all(
+      formDrugs.map(async (formDrug) => {
+        const possibleDrugs = await InstitutionDrugs.findAll({
+          where: {
+            drugId: formDrug.drugId,
+            institutionId: institutionId,
+            quantity: { [Op.gt]: 0 },
+          },
+          include: ["drug"],
+        });
+        const possibleDrugsWithPrices = await DrugService.getPrices(
+          possibleDrugs
+        );
+        const formD = formDrug as unknown as IFormDrug;
+        drugs.addToInvoice.push({
+          quantity: formDrug.quantity - formDrug.givenQuantity,
+          formDrug: formD,
+          formDrugId: formD.id,
+          drug: formDrug.drug,
+          drugsAvailable: possibleDrugsWithPrices,
+        });
+      })
+    );
+
+    let invoice = await InvoiceModel.findAll({
+      where: { institutionId, formId },
+      include: [{ model: InvoiceDrugsModel, as: "drugs", include: ["drug"] }],
+    });
+
+    await Promise.all(
+      invoice?.map(async (inv) => {
+        let d: IdrugOnInvoice[] = [];
+
+        await Promise.all(
+          inv.drugs.map(async (drug) => {
+            const formDrug = await FormDrugs.findOne({
+              where: { formId, drugId: drug.drugId },
+            });
+
+            d.push({
+              id: drug.drug.id,
+              drug: drug.drug,
+              unitPrice: drug.unitPrice,
+              quantity: drug.quantity,
+              totalPrice: drug.totalPrice,
+              formDrug: formDrug as unknown as IFormDrug,
+              invoiceDrug: drug,
+            });
+          })
+        );
+
+        if (d.length > 0) {
+          drugs.alreadyOnInvoice.push({ invoice: inv, data: d });
+        }
+      })
+    );
+
+    const alreadyOnInvoice = drugs.alreadyOnInvoice.flatMap((i) =>
+      i.data.map((d) => d?.drug?.id)
+    );
+    drugs.addToInvoice = drugs.addToInvoice.filter(
+      (i) => !alreadyOnInvoice.includes(i.drug.id)
+    );
+
+    return drugs;
+  }
+
+  // public static async addDrugsToInvoice(
+  //   data: IAddDrugsToInvoice,
+  //   userId: string,
+  //   institutionId: string,
+  //   formId: string,
+  // ): Promise<IInvoiceDTO> {
+
+  //   const form = await FormModel.findByPk(formId, {include: ['patient']});
+
+  //   const invoice = await InvoiceModel.findOrCreate({where: {formId, institutionId, published: false}, defaults: {
+  //     formId: formId,
+  //     institutionId,
+  //     userId,
+  //     published: false,
+  //     patientId: form?.patientId,
+  //     name: form?.patient.name,
+  //     phone: form?.patient.phone,
+  //   }});
+
+  //   const prescribedDrugs = await FormDrugs.findAll({
+  //     where: { formId },
+  //     include: ["drug"],
+  //   });
+
+  //   //   check quantity
+
+  //   let error: string | undefined = undefined;
+
+  //   await Promise.all(
+  //     data.drugs.map(async (drug, index) => {
+  //       const drugJSON = prescribedDrugs.find(
+  //         (d) => d.id == drug.drug
+  //       ) as unknown as IFormDrugDTO;
+
+  //       const requiredQuantity = drugJSON.quantity - drugJSON.givenQuantitty;
+
+  //       if (drug.qty > requiredQuantity) {
+  //         error = `${drugJSON?.drug?.designation} requires only ${requiredQuantity}`;
+  //       }
+  //     })
+  //   );
+
+  //   if (error) {
+  //     throw new CustomError(error, 400);
+  //   }
+
+  //   await Promise.all(
+  //     data.drugs.map(async (drug, index) => {
+
+  //       const institution
+  //       const drugJSON = prescribedDrugs.find(
+  //         (d) => d.id == drug.drug
+  //       ) as unknown as IFormDrugDTO;
+
+  //       const requiredQuantity = drugJSON.quantity - drugJSON.givenQuantitty;
+
+  //       if (drug.qty > requiredQuantity) {
+  //         error = `${drugJSON?.drug?.designation} requires only ${requiredQuantity}`;
+  //       }
+  //     })
+  //   );
+
+  //   const existingInvoice = await InvoiceModel.findOne({
+  //     where: { formId, institutionId, isOpen: true, published: false },
+  //   });
+  //   if (existingInvoice !== null) {
+  //     // move drugs
+  //     await InvoiceDrugsModel.update(
+  //       { invoiceId: existingInvoice.id },
+  //       { where: { formId, invoiceId: Invoice.id } }
+  //     );
+  //     await InvoiceModel.destroy({ where: { id: Invoice.id } });
+  //     Invoice = (await InvoiceService.getOne(
+  //       existingInvoice.id
+  //     )) as IInvoiceDTO;
+  //   }
+
+  //   return Invoice;
+  // }
+
+  public static async removeDrugFromInvoice(drugId: string) {
+    const invoiceDrug = await InvoiceDrugsModel.findByPk(drugId, {
+      include: ["invoice"],
+    });
+
+    if (!invoiceDrug) throw new CustomError("Not found");
+    if (invoiceDrug?.invoice.published)
+      throw new CustomError("Invoice has alredy been saved");
+
+    await InvoiceDrugsModel.destroy({ where: { id: drugId } });
+
+    await InvoiceModel.update(
+      { totalCost: invoiceDrug?.invoice.totalCost - invoiceDrug?.totalPrice },
+      { where: { id: invoiceDrug.invoiceId } }
+    );
+  }
+
+  public static async giveDrugs(data: IGiveDrugs, formId: string) {
+    const form = await FormModel.findByPk(formId);
   }
 }
 

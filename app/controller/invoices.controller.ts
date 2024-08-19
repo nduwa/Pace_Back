@@ -63,6 +63,15 @@ export class InvoiceController extends Controller {
     return await InvoiceService.getOne(id);
   }
 
+  @Get("/{drugId}/remove-drug")
+  public static async removeDrug(@Path() drugId: string): Promise<boolean> {
+    return await InvoiceService.removeDrug(drugId);
+  }
+  @Get("/{drugId}/remove-drug")
+  public static async giveDrug(@Path() drugId: string): Promise<boolean> {
+    return await InvoiceService.giveDrug(drugId);
+  }
+
   @Post()
   public static async create(
     @Body() data: ICreateInvoiceDTO,

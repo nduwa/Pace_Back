@@ -29,17 +29,18 @@ formsRouter.get(
 );
 
 formsRouter.post(
-  "/:id/give-drugs",
+  "/:id/invoice-drugs",
   validate(createInvoiceSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await FormController.giveDrugs(
+      const response = await FormController.invoiceDrugs(
         req.body,
         req.user?.institutionId as string,
         req?.user?.id as unknown as string
       );
       return res.status(200).json(response);
     } catch (error) {
+      console.error(error);
       return next(error);
     }
   }
@@ -104,6 +105,20 @@ formsRouter.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await FormController.delete(req.params.id);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+formsRouter.delete(
+  "/invoice-drug/:id",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await FormController.removeDrugFromInvoice(
+        req.params.id
+      );
       return res.status(200).json(response);
     } catch (error) {
       return next(error);
@@ -193,6 +208,21 @@ formsRouter.get(
         req.params.id,
         req.user?.institutionId as string | null,
         req.user?.id as string
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+formsRouter.get(
+  "/:id/available-med",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await FormController.getAvailableMedForForm(
+        req.params.id,
+        req.user?.institutionId as string | null
       );
       return res.status(200).json(response);
     } catch (error) {

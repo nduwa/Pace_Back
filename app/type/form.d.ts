@@ -1,5 +1,11 @@
 import { IUser } from "./auth";
-import { IDrug, IInvoice, IPatient } from "./drugs";
+import {
+  IDrug,
+  IInstitutionDrug,
+  IInvoice,
+  IInvoiceDrug,
+  IPatient,
+} from "./drugs";
 import { IExam } from "./exams";
 import { IConsultation, IInstitution } from "./instutution";
 
@@ -79,7 +85,7 @@ export interface IFormExamDTO extends IFormExam {
 
 export interface IFormDrug {
   id: string;
-  examId: string;
+  drugId: string;
   patientId: string;
   formId: string;
   userId: string | null;
@@ -163,4 +169,35 @@ export interface IFormInvoiceRequest {
   invoiceConsultations: IInvoiceConsultationData[];
   invoiceExams: IInvoiceExamData[];
   invoiceDrugs: IInvoiceDrugData[];
+}
+
+export type IdrugOnInvoice = {
+  id: string;
+  drug?: IDrug;
+  formDrug: IFormDrug;
+  invoiceDrug: IInvoiceDrug;
+
+  unitPrice: number;
+  quantity: number;
+  totalPrice: number;
+};
+
+export interface IAvailableMed {
+  addToInvoice: {
+    formDrugId: string;
+    quantity: number;
+    drug: IDrug;
+    formDrug: IFormDrug;
+    drugsAvailable: IInstitutionDrug[];
+  }[];
+
+  alreadyOnInvoice: {
+    invoice?: IInvoice | null;
+    data: IdrugOnInvoice[];
+  }[];
+}
+
+export interface IGiveDrugs {
+  formId: string;
+  drugIds: string[];
 }
