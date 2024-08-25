@@ -87,4 +87,13 @@ export class ExamController extends Controller {
   ): Promise<boolean> {
     return await ExamService.updatePrice(data, institutionId, id);
   }
+
+  @Put("/{id}/insurance-prices")
+  public static async updateInsurancePrice(
+    @Body() data: IPriceChange,
+    @Inject() institutionId: string,
+    @Path() id: string
+  ): Promise<boolean> {
+    return await ExamService.updateInsurancePrice(data, institutionId, id);
+  }
 }

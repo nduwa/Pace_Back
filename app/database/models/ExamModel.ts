@@ -11,10 +11,10 @@ import {
   DataType,
   DeletedAt,
   Unique,
-  HasOne,
   HasMany,
 } from "sequelize-typescript";
 import InstitutionExams from "./InstututionExams";
+import InsuranceExams from "./InsuranceExams";
 
 @Table({
   tableName: "exams",
@@ -45,6 +45,9 @@ class ExamModel extends Model {
 
   @HasMany(() => InstitutionExams)
   institutionExam!: InstitutionExams[];
+
+  @HasMany(() => InsuranceExams)
+  insuranceExam!: InsuranceExams[];
 
   @CreatedAt
   @Default(Sequelize.fn("NOW"))

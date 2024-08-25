@@ -11,9 +11,18 @@ export interface IExam {
   createdAt: Date;
 
   institutionExam?: IInstitutionExam[];
+  insuranceExam?: IInsuranceExam[];
 }
 
 export interface IInstitutionExam {
+  id: string;
+  institutionId: string;
+  examId: string;
+  price: number;
+  createdAt: Date;
+}
+
+export interface IInsuranceExam {
   id: string;
   institutionId: string;
   examId: string;

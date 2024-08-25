@@ -323,7 +323,10 @@ class FormService {
     return this.getOne(formId);
   }
 
-  public static async sendFormTo(formId: string, data: sendFormRequest) {
+  public static async sendFormTo(
+    formId: string,
+    data: sendFormRequest
+  ): Promise<number> {
     const form = await FormModel.findByPk(formId);
     const { to } = data;
     const consultation = await Consultations.findOne({
@@ -341,7 +344,12 @@ class FormService {
       update.isOpen = false;
     }
 
-    return await FormModel.update({ ...update }, { where: { id: formId } });
+    const [res] = await FormModel.update(
+      { ...update },
+      { where: { id: formId } }
+    );
+
+    return res;
   }
 
   public static async getLocations(institutionId: string) {

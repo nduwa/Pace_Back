@@ -20,16 +20,6 @@ export const updateDrug = z.object({
   }),
 });
 
-export const importDrug = z.object({
-  body: z.object({
-    drug_code: z.string(),
-    description: z.string(),
-    designation: z.string(),
-    instruction: z.string(),
-    drugCategory: z.string(),
-  }),
-});
-
 export const drugStockSchema = z.object({
   body: z.object({
     drugId: z.string().uuid("Invalid drug ID"),

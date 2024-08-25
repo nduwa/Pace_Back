@@ -1,12 +1,20 @@
 import CustomError, { catchSequelizeError } from "../utils/CustomError";
 import readXlsxFile from "read-excel-file/node";
-import {
-  drugCategory,
-  importDrug,
-} from "../middleware/validations/drug.schema";
+import { drugCategory } from "../middleware/validations/drug.schema";
 import DrugModel from "../database/models/DrugModel";
 import fs from "fs";
 import DrugCategory from "../database/models/DrugCategory";
+import {
+  importDrug,
+  importExam,
+  importInsurancePrice,
+} from "../middleware/validations/import.schema";
+import ExamModel from "../database/models/ExamModel";
+import InsuranceExams from "../database/models/InsuranceExams";
+import InsuranceDrugs from "../database/models/InsuranceDrugs";
+import InstitutionExams from "../database/models/InstututionExams";
+import InstitutionDrugs from "../database/models/InstututionDrugs";
+import { Op } from "sequelize";
 
 class ImportService {
   public static async importDrugs(
@@ -23,9 +31,12 @@ class ImportService {
       // Remove the header row
       rows.shift();
 
-      const notInserted: string[] = [];
+      let notInserted: string[] = [],
+        succeded = 0,
+        total = 0;
 
       for (const row of rows) {
+        total += 1;
         const data = {
           drug_code: this.nullToEmpty(row[1]),
           description: this.nullToEmpty(row[2]),
@@ -36,7 +47,7 @@ class ImportService {
 
         const validateData = importDrug.safeParse({ body: data });
         if (validateData.success) {
-          const [user, created] = await DrugModel.findOrCreate({
+          const [r, created] = await DrugModel.findOrCreate({
             where: { drug_code: data.drug_code, institutionId },
             defaults: {
               ...data,
@@ -51,15 +62,68 @@ class ImportService {
             defaults: { name: data.drugCategory },
           });
 
-          if (!created) {
-            DrugModel.update(
-              {
-                ...data,
-                isOnMarket: true,
-                institutionId,
-              },
-              { where: { drug_code: data.drug_code, institutionId } }
-            );
+          if (created) {
+            succeded += 1;
+          } else {
+            notInserted.push(`${row[1]}: Drug code already exists`);
+          }
+        } else {
+          notInserted.push(`${row[1]} : Validation error`);
+        }
+      }
+
+      fs.unlinkSync(file.path);
+
+      return {
+        message: "Data imported successfully",
+        failed: notInserted,
+        succeded,
+        total,
+      };
+    } catch (err: any) {
+      catchSequelizeError({ item: "Drug", error: err });
+    }
+  }
+
+  public static async importExams(file: Express.Multer.File): Promise<any> {
+    if (!file || !file.path) {
+      throw new CustomError("Invalid file");
+    }
+
+    try {
+      const rows = await readXlsxFile(file.path);
+
+      // Remove the header row
+      rows.shift();
+
+      let notInserted: string[] = [],
+        succeded = 0,
+        total = 0;
+
+      for (const row of rows) {
+        total += 1;
+
+        const data = {
+          exam_code: this.nullToEmpty(row[1]),
+          description: this.nullToEmpty(row[3]),
+          name: this.nullToEmpty(row[2]),
+          price: this.nullToEmpty(row[4]),
+        };
+
+        const validateData = importExam.safeParse({ body: data });
+        if (validateData.success) {
+          const [r, created] = await ExamModel.findOrCreate({
+            where: { exam_code: data.exam_code },
+            defaults: {
+              ...data,
+            },
+            // transaction: transaction,
+          });
+
+          if (created) {
+            succeded += 1;
+          } else {
+            notInserted.push(`${row[1]} : Exam code already exists`);
           }
         } else {
           notInserted.push(`${row[1]} : ${row[1]}`);
@@ -68,9 +132,176 @@ class ImportService {
 
       fs.unlinkSync(file.path);
 
-      return { message: "Data imported successfully", failed: notInserted };
+      return {
+        message: "Data imported successfully",
+        failed: notInserted,
+        succeded,
+        total,
+      };
     } catch (err: any) {
-      catchSequelizeError({ item: "Drug", error: err });
+      catchSequelizeError({ item: "Exam", error: err });
+    }
+  }
+
+  public static async importInsurancePrice(
+    file: Express.Multer.File,
+    institutionId: string | null,
+    type: string = "EXAM"
+  ): Promise<any> {
+    if (!file || !file.path) {
+      throw new CustomError("Invalid file");
+    }
+
+    try {
+      const rows = await readXlsxFile(file.path);
+
+      // Remove the header row
+      rows.shift();
+
+      let notInserted: string[] = [],
+        succeded = 0,
+        total = 0;
+
+      for (const row of rows) {
+        total += 1;
+        const data = {
+          code: this.nullToEmpty(row[1]),
+          name: this.nullToEmpty(row[2]),
+          price: this.nullToEmpty(row[3]),
+        };
+
+        const validateData = importInsurancePrice.safeParse({ body: data });
+        if (validateData.success) {
+          let base =
+            type == "EXAM"
+              ? await ExamModel.findOne({ where: { exam_code: data.code } })
+              : await DrugModel.findOne({ where: { drug_code: data.code } });
+          if (base) {
+            let [r, created] =
+              type == "EXAM"
+                ? await InsuranceExams.findOrCreate({
+                    where: { examId: base.id, institutionId },
+                    defaults: { examId: base.id, ...data, institutionId },
+                  })
+                : await InsuranceDrugs.findOrCreate({
+                    where: { drugId: base.id, institutionId },
+                    defaults: { examId: base.id, ...data, institutionId },
+                  });
+
+            if (!created) {
+              r.update(
+                {
+                  ...data,
+                },
+                { where: { id: r.id } }
+              );
+            }
+
+            succeded += 1;
+          } else {
+            notInserted.push(`${row[1]} : Not found`);
+          }
+        } else {
+          notInserted.push(`${row[1]} : Validation error`);
+        }
+      }
+
+      fs.unlinkSync(file.path);
+
+      return {
+        message: "Data imported successfully",
+        failed: notInserted,
+        succeded,
+        total,
+      };
+    } catch (err: any) {
+      catchSequelizeError({ item: "Import", error: err });
+    }
+  }
+
+  public static async importInstitutionPrice(
+    file: Express.Multer.File,
+    institutionId: string | null,
+    type: string = "EXAM"
+  ): Promise<any> {
+    if (!file || !file.path) {
+      throw new CustomError("Invalid file");
+    }
+
+    try {
+      const rows = await readXlsxFile(file.path);
+
+      // Remove the header row
+      rows.shift();
+
+      let notInserted: string[] = [],
+        succeded = 0,
+        total = 0;
+
+      for (const row of rows) {
+        total += 1;
+        const data = {
+          code: this.nullToEmpty(row[1]),
+          name: this.nullToEmpty(row[2]),
+          price: this.nullToEmpty(row[3]),
+        };
+
+        const validateData = importInsurancePrice.safeParse({ body: data });
+        if (validateData.success) {
+          let base =
+            type == "EXAM"
+              ? await ExamModel.findOne({ where: { exam_code: data.code } })
+              : await DrugModel.findOne({ where: { drug_code: data.code } });
+          if (base) {
+            if (type == "EXAM") {
+              const [priceInDB, created] = await InstitutionExams.findOrCreate({
+                where: {
+                  examId: base.id,
+                  institutionId,
+                },
+                defaults: { price: data.price, examId: base.id, institutionId },
+              });
+
+              if (!created) {
+                await InstitutionExams.update(
+                  { price: data.price },
+                  { where: { id: priceInDB.id } }
+                );
+              }
+            } else {
+              await InstitutionDrugs.update(
+                {
+                  price: data.price,
+                },
+                {
+                  where: {
+                    quantity: { [Op.gt]: 0 },
+                    institutionId,
+                    drugId: base.id,
+                  },
+                }
+              );
+            }
+
+            succeded += 1;
+          } else {
+            notInserted.push(`${row[1]} : Not found`);
+          }
+        } else {
+          notInserted.push(`${row[1]} : Validation error`);
+        }
+      }
+
+      fs.unlinkSync(file.path);
+
+      return {
+        message: "Data imported successfully",
+        failed: notInserted,
+        succeded,
+        total,
+      };
+    } catch (err: any) {
+      catchSequelizeError({ item: "Import", error: err });
     }
   }
 

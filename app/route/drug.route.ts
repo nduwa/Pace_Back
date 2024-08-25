@@ -132,6 +132,25 @@ drugsRouter.put(
   }
 );
 
+drugsRouter.put(
+  "/:id/insurance-prices",
+  isInstitution,
+  allowedPermissions("INSURANCE_PRICES"),
+  validate(priceSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugController.updateInsurancePrice(
+        req.body,
+        req.user?.institutionId as string,
+        req.params.id
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
 drugsRouter.get(
   "/:id",
   allowedPermissions("VIEW_MEDECINES"),

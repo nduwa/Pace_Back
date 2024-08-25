@@ -12,8 +12,12 @@ const appPersmissions = [
     permissions: ["VIEW_EXAMS", "UPDATE_EXAMS"],
   },
   {
+    group: "INSURANCE",
+    permissions: ["INSURANCE_PRICES", "VIEW_MEDECINES", "VIEW_EXAMS"],
+  },
+  {
     group: "SUDO",
-    permissions: ["ALL_PERMISSIONS", "IMPORT_MEDECINES"],
+    permissions: ["ALL_PERMISSIONS", "IMPORT_MEDECINES", "IMPORT_EXAMS"],
   },
   {
     group: "ADMIN",
@@ -57,7 +61,7 @@ const commonGroups = ["USERS", "TRANSACTIONS"];
 export const permissionBasedOnInstitution = {
   PHARMACY: [...commonGroups, "MEDECINES", "PATIENTS"],
   CLINIC: [...commonGroups, "PATIENTS", "EXAMS", "CLINIC"],
-  INSURANCE: [...commonGroups, "MEDECINES"],
+  INSURANCE: [...commonGroups, "INSURANCE"],
   ADMIN: [...commonGroups, "INSTITUTIONS", "PATIENTS", "EXAMS"],
 };
 

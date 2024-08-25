@@ -116,4 +116,23 @@ examRouter.put(
   }
 );
 
+examRouter.put(
+  "/:id/insurance-prices",
+  isInstitution,
+  allowedPermissions("INSURANCE_PRICES"),
+  validate(priceSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await ExamController.updateInsurancePrice(
+        req.body,
+        req.user?.institutionId as string,
+        req.params.id
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
 export default examRouter;
