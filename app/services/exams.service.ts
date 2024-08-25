@@ -5,6 +5,7 @@ import { IExam, IExamRequest } from "../type/exams";
 import ExamModel from "../database/models/ExamModel";
 import InstitutionExams from "../database/models/InstututionExams";
 import { IPriceChange } from "../type/drugs";
+import InsuranceExams from "../database/models/InsuranceExams";
 
 class ExamService {
   public static async getOne(id: string): Promise<IExam | null> {
@@ -17,7 +18,7 @@ class ExamService {
     offset: number,
     searchq: string | undefined
   ): Promise<Paged<IExam[]>> {
-    let queryOptions = QueryOptions(["name", "exam_code", "name"], searchq);
+    let queryOptions = QueryOptions(["name", "exam_code"], searchq);
 
     const data = await ExamModel.findAll({
       where: {
@@ -31,7 +32,14 @@ class ExamService {
           required: false,
           where: { institutionId },
         },
+        {
+          model: InsuranceExams,
+          as: "insuranceExam",
+          required: false,
+          where: { institutionId },
+        },
       ],
+
       ...TimestampsNOrder,
 
       limit,
@@ -109,6 +117,33 @@ class ExamService {
 
     if (!created) {
       await InstitutionExams.update(
+        {
+          price: data.price,
+        },
+        {
+          where: { id: priceInDB.id },
+        }
+      );
+    }
+
+    return true;
+  }
+
+  public static async updateInsurancePrice(
+    data: IPriceChange,
+    institutionId: string,
+    examId: string
+  ) {
+    const [priceInDB, created] = await InsuranceExams.findOrCreate({
+      where: {
+        examId,
+        institutionId,
+      },
+      defaults: { price: data.price, examId, institutionId },
+    });
+
+    if (!created) {
+      await InsuranceExams.update(
         {
           price: data.price,
         },

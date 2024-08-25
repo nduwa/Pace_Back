@@ -99,7 +99,7 @@ export class FormController extends Controller {
     @Body() data: IFormConsultationRequest,
     @Path() id: string,
     @Inject() userId: string
-  ) {
+  ): Promise<IFormDTO> {
     return await FormService.consultation(data, id, userId);
   }
 
@@ -109,7 +109,7 @@ export class FormController extends Controller {
     @Path() id: string,
     @Inject() userId: string,
     @Inject() institutionId: string
-  ) {
+  ): Promise<IFormDTO> {
     return await FormService.examination(data, id, userId, institutionId);
   }
 
@@ -117,7 +117,7 @@ export class FormController extends Controller {
   public static async sendForm(
     @Body() data: sendFormRequest,
     @Path() id: string
-  ) {
+  ): Promise<number> {
     return await FormService.sendFormTo(id, data);
   }
 

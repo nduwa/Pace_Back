@@ -10,6 +10,8 @@ import FormModel from "./models/FormModel";
 import InstitutionModel from "./models/Institution";
 import InstitutionDrugs from "./models/InstututionDrugs";
 import InstitutionExams from "./models/InstututionExams";
+import InsuranceDrugs from "./models/InsuranceDrugs";
+import InsuranceExams from "./models/InsuranceExams";
 import InvoiceConsultations from "./models/InvoiceConsultations";
 import InvoiceDrugsModel from "./models/InvoiceDrugsModel";
 import InvoiceExams from "./models/InvoiceExams";
@@ -40,6 +42,8 @@ const models = [
   DrugPurchasesModel,
   InstitutionDrugs,
   DrugCategory,
+  InsuranceExams,
+  InsuranceDrugs,
 
   Transactions,
 

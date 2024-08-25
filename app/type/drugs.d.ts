@@ -24,6 +24,16 @@ export interface IDrug {
 
   createdAt: Date;
   totalQuantity?: number;
+
+  insuranceDrug?: IInsuranceDrug[];
+}
+
+export interface IInsuranceDrug {
+  id: string;
+  institutionId: string;
+  drugId: string;
+  price: number;
+  createdAt: Date;
 }
 
 export type IDrugRequest = Omit<IDrug, "id" | "createdAt" | "isOnMarket">;

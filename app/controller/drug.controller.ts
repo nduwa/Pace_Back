@@ -146,4 +146,13 @@ export class DrugController extends Controller {
   ): Promise<boolean> {
     return await DrugService.updatePrice(data, institutionId, id);
   }
+
+  @Put("/{id}/insurance-prices")
+  public static async updateInsurancePrice(
+    @Body() data: IPriceChange,
+    @Inject() institutionId: string,
+    @Path() id: string
+  ): Promise<boolean> {
+    return await DrugService.updateInsurancePrice(data, institutionId, id);
+  }
 }

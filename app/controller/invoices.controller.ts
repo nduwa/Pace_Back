@@ -67,7 +67,7 @@ export class InvoiceController extends Controller {
   public static async removeDrug(@Path() drugId: string): Promise<boolean> {
     return await InvoiceService.removeDrug(drugId);
   }
-  @Get("/{drugId}/remove-drug")
+  @Get("/{drugId}/give-drug")
   public static async giveDrug(@Path() drugId: string): Promise<boolean> {
     return await InvoiceService.giveDrug(drugId);
   }

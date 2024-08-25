@@ -14,6 +14,7 @@ import {
 } from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
+import InsuranceDrugs from "../database/models/InsuranceDrugs";
 
 class DrugService {
   public static async getAll(
@@ -47,7 +48,15 @@ class DrugService {
     };
 
     const data = await DrugModel.findAll({
-      include: ["institution"],
+      include: [
+        "institution",
+        {
+          model: InsuranceDrugs,
+          as: "insuranceDrug",
+          required: false,
+          where: { institutionId },
+        },
+      ],
       where: {
         ...queryOptions,
       },
@@ -362,6 +371,33 @@ class DrugService {
         },
       }
     );
+
+    return true;
+  }
+
+  public static async updateInsurancePrice(
+    data: IPriceChange,
+    institutionId: string,
+    drugId: string
+  ) {
+    const [priceInDB, created] = await InsuranceDrugs.findOrCreate({
+      where: {
+        drugId,
+        institutionId,
+      },
+      defaults: { price: data.price, drugId, institutionId },
+    });
+
+    if (!created) {
+      await InsuranceDrugs.update(
+        {
+          price: data.price,
+        },
+        {
+          where: { id: priceInDB.id },
+        }
+      );
+    }
 
     return true;
   }

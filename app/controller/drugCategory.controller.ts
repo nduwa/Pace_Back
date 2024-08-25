@@ -21,7 +21,7 @@ import {
   IDrugCategoryResponse,
 } from "../type/drugs";
 
-@Tags("Drugs")
+@Tags("Drugs category")
 @Route("api/drug-categories")
 @Security("jwtAuth")
 export class DrugCategoryController extends Controller {

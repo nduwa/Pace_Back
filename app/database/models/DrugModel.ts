@@ -14,8 +14,10 @@ import {
   UpdatedAt,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 import InstitutionModel from "./Institution";
+import InsuranceDrugs from "./InsuranceDrugs";
 
 @Table({
   tableName: "drugs",
@@ -71,5 +73,8 @@ class DrugModel extends Model {
 
   @BelongsTo(() => InstitutionModel)
   institution!: InstitutionModel;
+
+  @HasMany(() => InsuranceDrugs)
+  insuranceDrug!: InsuranceDrugs[];
 }
 export default DrugModel;
