@@ -53,7 +53,6 @@ importRouter.post(
 
 importRouter.post(
   "/insurance-prices/:type",
-  isInstitution,
   allowedPermissions("INSURANCE_PRICES"),
   uploadExcel.single("file"),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -78,7 +77,6 @@ importRouter.post(
 
 importRouter.post(
   "/institution-prices/:type",
-  isInstitution,
   allowedPermissions("INSTITUTION_ADMIN"),
   uploadExcel.single("file"),
   async (req: Request, res: Response, next: NextFunction) => {

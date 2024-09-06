@@ -28,15 +28,25 @@ export interface IDrug {
   insuranceDrug?: IInsuranceDrug[];
 }
 
-export interface IInsuranceDrug {
+export interface IInsuranceDrug
+  extends Pick<
+    IDrug,
+    "description" | "designation" | "drugCategory" | "instruction"
+  > {
   id: string;
-  institutionId: string;
-  drugId: string;
+  drugId: string | null;
   price: number;
   createdAt: Date;
+
+  drug?: IDrug;
 }
 
-export type IDrugRequest = Omit<IDrug, "id" | "createdAt" | "isOnMarket">;
+export interface IDrugRequest
+  extends Omit<IDrug, "id" | "createdAt" | "isOnMarket"> {
+  price?: number;
+  drugId?: string;
+  type?: string;
+}
 
 export interface IDrugDTO extends IDrug {
   institution?: IInstitution;

@@ -7,6 +7,7 @@ import DrugCategory from "../database/models/DrugCategory";
 import {
   importDrug,
   importExam,
+  importInsuranceDrug,
   importInsurancePrice,
 } from "../middleware/validations/import.schema";
 import ExamModel from "../database/models/ExamModel";
@@ -39,10 +40,10 @@ class ImportService {
         total += 1;
         const data = {
           drug_code: this.nullToEmpty(row[1]),
-          description: this.nullToEmpty(row[2]),
-          designation: this.nullToEmpty(row[3]),
-          instruction: this.nullToEmpty(row[4]).toUpperCase(),
-          drugCategory: this.nullToEmpty(row[5]).toUpperCase(),
+          designation: this.nullToEmpty(row[2]),
+          drugCategory: this.nullToEmpty(row[3]).toUpperCase(),
+          description: "",
+          instruction: "",
         };
 
         const validateData = importDrug.safeParse({ body: data });
@@ -152,6 +153,10 @@ class ImportService {
       throw new CustomError("Invalid file");
     }
 
+    if (type != "EXAM") {
+      return await this.importInsuranceDrugs(file);
+    }
+
     try {
       const rows = await readXlsxFile(file.path);
 
@@ -216,6 +221,66 @@ class ImportService {
       };
     } catch (err: any) {
       catchSequelizeError({ item: "Import", error: err });
+    }
+  }
+
+  public static async importInsuranceDrugs(
+    file: Express.Multer.File
+  ): Promise<any> {
+    if (!file || !file.path) {
+      throw new CustomError("Invalid file");
+    }
+
+    try {
+      const rows = await readXlsxFile(file.path);
+
+      // Remove the header row
+      rows.shift();
+      let notInserted: string[] = [],
+        succeded = 0,
+        total = 0;
+
+      for (const row of rows) {
+        total += 1;
+
+        const data = {
+          drug_code: this.nullToEmpty(row[2]),
+          description: this.nullToEmpty(row[3]),
+          designation: this.nullToEmpty(row[4]),
+          instruction: this.nullToEmpty(row[5]).toUpperCase(),
+          drugCategory: this.nullToEmpty(row[6]).toUpperCase(),
+          price: this.nullToEmpty(row[7]).toUpperCase(),
+        };
+
+        const validateData = importInsuranceDrug.safeParse({ body: data });
+        if (validateData.success) {
+          const [user, created] = await InsuranceDrugs.findOrCreate({
+            where: { drug_code: data.drug_code },
+            defaults: {
+              ...data,
+            },
+            // transaction: transaction,
+          });
+
+          DrugCategory.findOrCreate({
+            where: { name: data.drugCategory },
+            defaults: { name: data.drugCategory },
+          });
+          if (created) {
+            succeded += 1;
+          } else {
+            notInserted.push(`${row[2]} : Drug code already exists`);
+          }
+        } else {
+          // notInserted.push(`${row[2]} : Validation`);
+        }
+      }
+
+      fs.unlinkSync(file.path);
+
+      return { message: "Data imported successfully", failed: notInserted };
+    } catch (err: any) {
+      catchSequelizeError({ item: "Drug", error: err });
     }
   }
 

@@ -11,26 +11,39 @@ module.exports = {
       },
       drugId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "drugs",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
-      },
-      institutionId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "institutions",
-        },
         onDelete: "CASCADE",
-        onUpdate: "CASCADE",
+      },
+      drug_code: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      designation: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      instruction: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      drugCategory: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       price: {
         type: Sequelize.DOUBLE,
         allowNull: true,
+        default: 0,
       },
       deletedAt: {
         type: Sequelize.DATE,

@@ -13,8 +13,8 @@ import {
   AllowNull,
   ForeignKey,
   BelongsTo,
+  Unique,
 } from "sequelize-typescript";
-import InstitutionModel from "./Institution";
 import DrugModel from "./DrugModel";
 
 @Table({
@@ -28,25 +28,38 @@ class InsuranceDrugs extends Model {
   id!: string;
 
   @ForeignKey(() => DrugModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   drugId!: string;
 
   @BelongsTo(() => DrugModel, {
-    onDelete: "RESTRICT",
+    onDelete: "CASCADE",
     hooks: true,
   })
   drug!: DrugModel;
 
-  @ForeignKey(() => InstitutionModel)
   @AllowNull(false)
-  @Column(DataType.UUID)
-  institutionId!: string;
-
-  @BelongsTo(() => InstitutionModel)
-  institution!: InstitutionModel;
+  @Unique(true)
+  @Column(DataType.STRING)
+  drug_code!: string;
 
   @AllowNull(true)
+  @Column(DataType.TEXT)
+  description!: string;
+
+  @AllowNull(true)
+  @Column(DataType.TEXT)
+  designation!: string;
+
+  @AllowNull(true)
+  @Column(DataType.TEXT)
+  instruction!: string;
+
+  @Column(DataType.STRING)
+  drugCategory!: string;
+
+  @AllowNull(true)
+  @Default(0)
   @Column(DataType.DOUBLE)
   price!: number;
 
