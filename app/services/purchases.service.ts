@@ -46,6 +46,7 @@ class PurchaseService {
           totalPrice: drug.unitPrice * drug.qty,
           purchaseId: purchase.id,
           quantity: drug.qty ?? 1,
+          insuranceDrugId: drug.insuranceDrug == "" ? null : drug.insuranceDrug,
           institutionId,
         }));
 
@@ -90,6 +91,7 @@ class PurchaseService {
         const purchase = x[index] as DrugPurchasesModel;
         const drugData = {
           drugId: purchase.drugId,
+          insuranceDrugId: purchase.insuranceDrugId,
           batchNumber: purchase.batchNumber,
           expireDate: purchase.expireDate,
           quantity: purchase.quantity,
@@ -101,6 +103,7 @@ class PurchaseService {
         const [institutionDrug, created] = await InstitutionDrugs.findOrCreate({
           where: {
             drugId: purchase.drugId,
+            insuranceDrugId: purchase.insuranceDrugId,
             institutionId: purchase.institutionId,
             batchNumber: purchase.batchNumber,
           },

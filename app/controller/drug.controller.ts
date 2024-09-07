@@ -20,9 +20,12 @@ import {
   IDrugResponse,
   IInstitutionDrug,
   IInstitutionDrugResponse,
+  IInsuranceDrug,
+  IMatchPrices,
   IPriceChange,
 } from "../type/drugs";
 import DrugService from "../services/drug.service";
+import InsuranceDrugs from "../database/models/InsuranceDrugs";
 
 @Tags("Drugs")
 @Route("api/drugs")
@@ -124,6 +127,18 @@ export class DrugController extends Controller {
     @Inject() institutionId: string | null
   ): Promise<IDrugDTO[]> {
     return await DrugService.getAllNPaged(institutionId);
+  }
+
+  @Get("/insurance-drugs/all")
+  public static async insuranceDrugsAll(): Promise<IInsuranceDrug[]> {
+    return await DrugService.getAllInsuranceDrugsNPaged();
+  }
+
+  @Post("/insurance-drugs/matching")
+  public static async insurancePriceMatching(
+    @Body() data: IMatchPrices[]
+  ): Promise<boolean> {
+    return await DrugService.insurancePriceMatching(data);
   }
 
   @Get("/institution/all")

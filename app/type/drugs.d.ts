@@ -60,6 +60,7 @@ export interface IDrugResponse {
 
 export interface IPurchaseDrugDTO {
   drug: string;
+  insuranceDrug: string;
   qty: number;
   unitPrice: number;
   sellingPrice: number;
@@ -100,6 +101,7 @@ export interface IInstitutionDrug {
   institutionId: string;
   purchaseId: string;
   drugPurchaseId: string;
+  insuranceDrugId: string | null;
   batchNumber: string | null;
   expireDate: Date | null;
   itemNo: string;
@@ -112,8 +114,13 @@ export interface IInstitutionDrug {
 
   totalQuantity?: number;
   drug?: IDrug;
+  insuranceDrug?: IInsuranceDrug;
 }
 
+export interface IMatchPrices {
+  id: string;
+  drugId: string;
+}
 export interface IPatient {
   id: string;
   name: string;

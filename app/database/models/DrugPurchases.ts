@@ -19,6 +19,7 @@ import DrugModel from "./DrugModel";
 import InstitutionModel from "./Institution";
 import PurchasesModel from "./PurchasesModel";
 import InstitutionDrugs from "./InstututionDrugs";
+import InsuranceDrugs from "./InsuranceDrugs";
 
 @Table({
   tableName: "drug_purchases",
@@ -37,6 +38,15 @@ class DrugPurchasesModel extends Model {
 
   @BelongsTo(() => DrugModel)
   drug!: DrugModel;
+
+  @ForeignKey(() => InsuranceDrugs)
+  @AllowNull(true)
+  @Default(null)
+  @Column(DataType.UUID)
+  insuranceDrugId!: string;
+
+  @BelongsTo(() => InsuranceDrugs)
+  insuranceDrug!: InsuranceDrugs;
 
   @AllowNull(false)
   @Column(DataType.INTEGER)

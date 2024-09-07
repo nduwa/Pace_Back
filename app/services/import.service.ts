@@ -26,6 +26,8 @@ class ImportService {
       throw new CustomError("Invalid file");
     }
 
+    console.log("importing here");
+
     try {
       const rows = await readXlsxFile(file.path);
 
@@ -47,26 +49,30 @@ class ImportService {
         };
 
         const validateData = importDrug.safeParse({ body: data });
-        if (validateData.success) {
-          const [r, created] = await DrugModel.findOrCreate({
-            where: { drug_code: data.drug_code, institutionId },
-            defaults: {
-              ...data,
-              isOnMarket: true,
-              institutionId,
-            },
-            // transaction: transaction,
-          });
+        if (validateData.success && data.drug_code !== "DRUG_CODE") {
+          try {
+            const [r, created] = await DrugModel.findOrCreate({
+              where: { drug_code: data.drug_code },
+              defaults: {
+                ...data,
+                isOnMarket: true,
+                institutionId,
+              },
+              // transaction: transaction,
+            });
 
-          DrugCategory.findOrCreate({
-            where: { name: data.drugCategory },
-            defaults: { name: data.drugCategory },
-          });
+            DrugCategory.findOrCreate({
+              where: { name: data.drugCategory },
+              defaults: { name: data.drugCategory },
+            });
 
-          if (created) {
-            succeded += 1;
-          } else {
-            notInserted.push(`${row[1]}: Drug code already exists`);
+            if (created) {
+              succeded += 1;
+            } else {
+              notInserted.push(`${row[1]}: Drug code already exists`);
+            }
+          } catch (e) {
+            console.log("error:", data);
           }
         } else {
           notInserted.push(`${row[1]} : Validation error`);

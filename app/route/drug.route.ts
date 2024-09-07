@@ -137,6 +137,30 @@ drugsRouter.get(
   }
 );
 
+drugsRouter.get(
+  "/insurance-prices/all",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugController.insuranceDrugsAll();
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+drugsRouter.post(
+  "/insurance-prices/matching",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await DrugController.insurancePriceMatching(req.body);
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
 drugsRouter.put(
   "/:id/prices",
   isInstitution,
