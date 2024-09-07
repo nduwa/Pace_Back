@@ -23,8 +23,9 @@ class DrugService {
     offset: number,
     searchq: string | undefined,
     isOnMarket: string | undefined,
-    drugCategory: string | undefined
-  ): Promise<Paged<DrugModel[]>> {
+    drugCategory: string | undefined,
+    type: string = "drugs"
+  ): Promise<Paged<DrugModel[] | InsuranceDrugs[]>> {
     let queryOptions = QueryOptions(
       ["designation", "drugCategory", "drug_code", "instruction"],
       searchq
@@ -36,43 +37,67 @@ class DrugService {
 
     const drugCategoryOpt =
       drugCategory && drugCategory != "all" ? { drugCategory } : {};
-    const isOnMarketOpt =
-      isOnMarket && isOnMarket != "all"
-        ? { isOnMarket: isOnMarket == "no" ? false : true }
-        : {};
 
     queryOptions = {
-      [Op.and]: [queryOptions, institutionOpt],
+      [Op.and]: [queryOptions, type == "drugs" ? institutionOpt : {}],
       ...drugCategoryOpt,
-      ...isOnMarketOpt,
     };
 
-    const data = await DrugModel.findAll({
-      include: [
-        "institution",
-        {
-          model: InsuranceDrugs,
-          as: "insuranceDrug",
-          required: false,
-          where: { institutionId },
+    if (type == "drugs") {
+      queryOptions = {
+        [Op.and]: [queryOptions, type == "drugs" ? institutionOpt : {}],
+        ...drugCategoryOpt,
+      };
+      const data = await DrugModel.findAll({
+        include: [
+          "institution",
+          {
+            model: InsuranceDrugs,
+            as: "insuranceDrug",
+            required: false,
+          },
+        ],
+        where: {
+          ...queryOptions,
         },
-      ],
-      where: {
-        ...queryOptions,
-      },
-      ...TimestampsNOrder,
-      order: [["drug_code", "ASC"]],
-      limit,
-      offset,
-    });
+        ...TimestampsNOrder,
+        order: [["drug_code", "ASC"]],
+        limit,
+        offset,
+      });
 
-    const totalItems = await DrugModel.count({
-      where: {
-        ...queryOptions,
-      },
-    });
+      const totalItems = await DrugModel.count({
+        where: {
+          ...queryOptions,
+        },
+      });
 
-    return { data, totalItems };
+      return { data, totalItems };
+    } else {
+      queryOptions = {
+        ...queryOptions,
+        ...drugCategoryOpt,
+      };
+
+      const data = await InsuranceDrugs.findAll({
+        include: ["drug"],
+        where: {
+          ...queryOptions,
+        },
+        ...TimestampsNOrder,
+        order: [["drug_code", "ASC"]],
+        limit,
+        offset,
+      });
+
+      const totalItems = await InsuranceDrugs.count({
+        where: {
+          ...queryOptions,
+        },
+      });
+
+      return { data, totalItems };
+    }
   }
 
   public static async getInstitutionDrugs(
@@ -268,17 +293,25 @@ class DrugService {
     institutionId: string | null,
     data: IDrugRequest
   ): Promise<IDrug> {
-    const existingDrug = await DrugModel.findOne({
-      where: { drug_code: data.drug_code, institutionId },
-    });
+    const existingDrug =
+      data.type && data.type != "drug"
+        ? await InsuranceDrugs.findOne({
+            where: { drug_code: data.drug_code },
+          })
+        : await DrugModel.findOne({
+            where: { drug_code: data.drug_code, institutionId },
+          });
 
     if (existingDrug) throw new CustomError("Drug Code already exist", 409);
 
-    const createDrug = await DrugModel.create({
-      ...data,
-      institutionId,
-      isOnMarket: true,
-    });
+    const createDrug =
+      data.type && data.type != "drug"
+        ? await InsuranceDrugs.create({ ...data })
+        : await DrugModel.create({
+            ...data,
+            institutionId,
+            isOnMarket: true,
+          });
     const drug = createDrug.toJSON();
 
     return drug;
@@ -286,12 +319,22 @@ class DrugService {
 
   public static async update(id: string, data: IDrugRequest): Promise<boolean> {
     try {
-      const existingDrug = await DrugModel.findOne({
-        where: { drug_code: data.drug_code, id: { [Op.ne]: id } },
-      });
-      if (existingDrug) throw new CustomError("Drug Code already exist", 409);
+      if (!data.type || data.type == "drug") {
+        const existingDrug = await DrugModel.findOne({
+          where: { drug_code: data.drug_code, id: { [Op.ne]: id } },
+        });
+        if (existingDrug) throw new CustomError("Drug Code already exist", 409);
 
-      await DrugModel.update({ ...data }, { where: { id: id } });
+        await DrugModel.update({ ...data }, { where: { id: id } });
+      } else {
+        console.log("insurance edit");
+        const existingDrug = await InsuranceDrugs.findOne({
+          where: { drug_code: data.drug_code, id: { [Op.ne]: id } },
+        });
+        if (existingDrug) throw new CustomError("Drug Code already exist", 409);
+
+        await InsuranceDrugs.update({ ...data }, { where: { id: id } });
+      }
       return true;
     } catch (error) {
       return false;

@@ -11,11 +11,20 @@ export const importExam = z.object({
 
 export const importDrug = z.object({
   body: z.object({
-    drug_code: z.string(),
+    drug_code: z.string().min(1, "Required"),
+    designation: z.string().min(1),
+    drugCategory: z.string().min(1),
+  }),
+});
+
+export const importInsuranceDrug = z.object({
+  body: z.object({
+    drug_code: z.string().min(1),
     description: z.string(),
-    designation: z.string(),
+    designation: z.string().min(1),
     instruction: z.string(),
     drugCategory: z.string(),
+    price: z.coerce.number(),
   }),
 });
 

@@ -35,7 +35,8 @@ export class DrugController extends Controller {
     @Inject() limit: number,
     @Inject() searchq: string | undefined,
     @Inject() isOnMarket: string | undefined,
-    @Inject() drugCategory: string | undefined
+    @Inject() drugCategory: string | undefined,
+    @Inject() type: string | undefined
   ): Promise<IPaged<IDrugResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
     const drugs = await DrugService.getAll(
@@ -44,7 +45,8 @@ export class DrugController extends Controller {
       offset,
       searchq,
       isOnMarket,
-      drugCategory
+      drugCategory,
+      type
     );
 
     const filtersUsed: IDrugResponse = {
