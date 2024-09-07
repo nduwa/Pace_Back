@@ -19,6 +19,7 @@ import {
 } from "sequelize-typescript";
 import DrugModel from "./DrugModel";
 import InstitutionModel from "./Institution";
+import InsuranceDrugs from "./InsuranceDrugs";
 
 @Table({
   tableName: "institution_drugs",
@@ -40,6 +41,15 @@ class InstitutionDrugs extends Model {
     hooks: true,
   })
   drug!: DrugModel;
+
+  @ForeignKey(() => InsuranceDrugs)
+  @AllowNull(true)
+  @Default(null)
+  @Column(DataType.UUID)
+  insuranceDrugId!: string;
+
+  @BelongsTo(() => InsuranceDrugs)
+  insuranceDrug!: InsuranceDrugs;
 
   @ForeignKey(() => InstitutionModel)
   @AllowNull(false)

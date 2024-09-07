@@ -9,12 +9,15 @@ import {
   IDrugPurchase,
   IDrugRequest,
   IInstitutionDrug,
+  IInsuranceDrug,
+  IMatchPrices,
   IPriceChange,
   IPurchaseDrugDTO,
 } from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
 import InsuranceDrugs from "../database/models/InsuranceDrugs";
+import { boolean } from "zod";
 
 class DrugService {
   public static async getAll(
@@ -207,6 +210,26 @@ class DrugService {
     return drugs as unknown as IDrugDTO[];
   }
 
+  public static async getAllInsuranceDrugsNPaged(): Promise<IInsuranceDrug[]> {
+    const drugs = await InsuranceDrugs.findAll({
+      include: ["drug"],
+      order: [["drug_code", "ASC"]],
+    });
+
+    return drugs as unknown as IInsuranceDrug[];
+  }
+
+  public static async insurancePriceMatching(
+    data: IMatchPrices[]
+  ): Promise<boolean> {
+    await Promise.all(
+      data.map(async (d) => {
+        await InsuranceDrugs.update({ ...d }, { where: { id: d.id } });
+      })
+    );
+    return true;
+  }
+
   public static async getAllInstitutionNPaged(
     institutionId: string | null
   ): Promise<IInstitutionDrug[]> {
@@ -242,6 +265,7 @@ class DrugService {
         [Sequelize.fn("max", Sequelize.col("price")), "price"],
       ],
       group: ["drugId"],
+      include: ["insuranceDrug"],
     });
 
     let drugPrices: { [key: string]: number } = {};
@@ -327,7 +351,7 @@ class DrugService {
 
         await DrugModel.update({ ...data }, { where: { id: id } });
       } else {
-        console.log("insurance edit");
+        console.log("insurance edit", data);
         const existingDrug = await InsuranceDrugs.findOne({
           where: { drug_code: data.drug_code, id: { [Op.ne]: id } },
         });
