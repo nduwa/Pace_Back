@@ -20,6 +20,7 @@ import InstitutionModel from "./Institution";
 import InvoiceModel from "./InvoiceModel";
 import InstitutionDrugs from "./InstututionDrugs";
 import PatientsModel from "./PatientsModel";
+import InsuranceDrugs from "./InsuranceDrugs";
 
 @Table({
   tableName: "invoice_drugs",
@@ -32,7 +33,7 @@ class InvoiceDrugsModel extends Model {
   id!: string;
 
   @ForeignKey(() => DrugModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   drugId!: string;
 
@@ -40,6 +41,11 @@ class InvoiceDrugsModel extends Model {
   @AllowNull(false)
   @Column(DataType.UUID)
   institutionDrugId!: string;
+
+  @ForeignKey(() => InsuranceDrugs)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  insuranceDrugId!: string;
 
   @ForeignKey(() => PatientsModel)
   @AllowNull(true)
@@ -61,6 +67,12 @@ class InvoiceDrugsModel extends Model {
   @Column(DataType.FLOAT)
   totalPrice!: number;
 
+  @Column(DataType.FLOAT)
+  patientCost!: number;
+
+  @Column(DataType.FLOAT)
+  insuranceCost!: number;
+
   @AllowNull(true)
   @Default(null)
   @Column(DataType.BOOLEAN)
@@ -81,6 +93,9 @@ class InvoiceDrugsModel extends Model {
 
   @BelongsTo(() => InvoiceModel)
   invoice!: InvoiceModel;
+
+  @BelongsTo(() => InsuranceDrugs)
+  insuranceDrug!: InsuranceDrugs;
 
   @DeletedAt
   @Column(DataType.DATE)

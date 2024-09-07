@@ -156,12 +156,15 @@ export interface IPatientsResponse {
 export interface IInvoice {
   id: string;
   patientId: string | null;
+  insuranceId: string | null;
   institutionId: string;
   note: string;
   name: string;
   phone: string;
   invoiceNO: string;
   totalCost: number;
+  patientCost: number;
+  insuranceCost: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -175,6 +178,8 @@ export interface IInvoiceDrug {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  patientCost: number;
+  insuranceCost: number;
   isGiven: boolean;
   institutionDrugId: string;
   createdAt: Date;
@@ -190,6 +195,8 @@ export interface IInvoiceExam {
   examId: string;
   invoiceId: string;
   price: number;
+  patientCost: number;
+  insuranceCost: number;
   createdAt: Date;
   updatedAt: Date;
 
@@ -203,6 +210,8 @@ export interface IInvoiceConsultation {
   consultationId: string;
   invoiceId: string;
   price: number;
+  patientCost: number;
+  insuranceCost: number;
   createdAt: Date;
   updatedAt: Date;
 
@@ -212,6 +221,7 @@ export interface IInvoiceConsultation {
 export interface IInvoiceDTO extends IInvoice {
   patient?: IPatient;
   institution?: IInstitution;
+  insurance?: IInstitution;
   drugs?: IInvoiceDrug[];
   exams?: IInvoiceDrug[];
   consultations?: IInvoiceDrug[];
@@ -227,6 +237,7 @@ export interface IInvoiceDrugCreateDTO {
 }
 export interface ICreateInvoiceDTO {
   formId?: string;
+  insuranceId?: string;
   published?: boolean;
   note: string;
   name: string;
@@ -247,6 +258,7 @@ export interface IDrugPurchase {
   drugId: string;
   institutionId: string;
   purchaseId: string;
+  insuranceDrugId: string | null;
   batchNumber: string | null;
   expireDate: Date | null;
   unitPrice: number;

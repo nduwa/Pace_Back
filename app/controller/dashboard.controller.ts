@@ -1,29 +1,6 @@
-import {
-  Route,
-  Controller,
-  Post,
-  Tags,
-  Body,
-  Security,
-  Inject,
-  Get,
-  Put,
-  Path,
-} from "tsoa";
-import {
-  IAssignPermissionsRequest,
-  ICreateUser,
-  IRegister,
-  IUpdateUser,
-  IUser,
-  IUserWithPermissions,
-  IUsersResponse,
-  UserReponse,
-} from "../type/auth";
-import UserService from "../services/user.service";
+import { Route, Controller, Tags, Security, Inject, Get } from "tsoa";
+import { IUser } from "../type/auth";
 import { DatesOpt, Paginations } from "../utils/DBHelpers";
-import RolesService from "../services/role.service";
-import { IPaged } from "../type";
 import { IInstitution } from "../type/instutution";
 import InstitutionModel from "../database/models/Institution";
 import DrugModel from "../database/models/DrugModel";
@@ -65,14 +42,8 @@ export class DashboardController extends Controller {
         })
       : await UserModel.count({ where: { institutionId: { [Op.is]: null } } });
 
-    const drugsInStock = await InstitutionDrugs.count({
+    let drugsInStockCount = await InstitutionDrugs.count({
       where: { institutionId },
-      group: ["drugId"],
-    });
-
-    let drugsInStockCount = 0;
-    drugsInStock.forEach((item) => {
-      drugsInStockCount += 1;
     });
 
     const openFormsCounts = await FormModel.count({ where: { isOpen: true } });

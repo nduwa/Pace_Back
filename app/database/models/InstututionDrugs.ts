@@ -32,7 +32,7 @@ class InstitutionDrugs extends Model {
   id!: string;
 
   @ForeignKey(() => DrugModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   drugId!: string;
 

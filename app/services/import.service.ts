@@ -26,8 +26,6 @@ class ImportService {
       throw new CustomError("Invalid file");
     }
 
-    console.log("importing here");
-
     try {
       const rows = await readXlsxFile(file.path);
 
@@ -319,10 +317,15 @@ class ImportService {
 
         const validateData = importInsurancePrice.safeParse({ body: data });
         if (validateData.success) {
-          let base =
+          let base: ExamModel | InsuranceDrugs | DrugModel | null =
             type == "EXAM"
               ? await ExamModel.findOne({ where: { exam_code: data.code } })
               : await DrugModel.findOne({ where: { drug_code: data.code } });
+          if (type !== "EXAM" && base == null)
+            base = await InsuranceDrugs.findOne({
+              where: { drug_code: data.code },
+            });
+
           if (base) {
             if (type == "EXAM") {
               const [priceInDB, created] = await InstitutionExams.findOrCreate({
@@ -348,7 +351,10 @@ class ImportService {
                   where: {
                     quantity: { [Op.gt]: 0 },
                     institutionId,
-                    drugId: base.id,
+                    [Op.or]: [
+                      { drugId: base.id },
+                      { insuranceDrugId: base.id },
+                    ],
                   },
                 }
               );
