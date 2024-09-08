@@ -55,6 +55,11 @@ class InvoiceModel extends Model {
   @Column(DataType.UUID)
   formId!: string;
 
+  @ForeignKey(() => InstitutionModel)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  insuranceId!: string;
+
   @AllowNull(true)
   @Column(DataType.STRING)
   note!: string;
@@ -67,8 +72,14 @@ class InvoiceModel extends Model {
   @Column(DataType.STRING)
   phone!: string;
 
-  @Column(DataType.INTEGER)
+  @Column(DataType.FLOAT)
   totalCost!: number;
+
+  @Column(DataType.FLOAT)
+  patientCost!: number;
+
+  @Column(DataType.FLOAT)
+  insuranceCost!: number;
 
   @Default(true)
   @Column(DataType.BOOLEAN)
@@ -100,8 +111,11 @@ class InvoiceModel extends Model {
   @BelongsTo(() => UserModel)
   user!: UserModel;
 
-  @BelongsTo(() => InstitutionModel)
+  @BelongsTo(() => InstitutionModel, "institutionId")
   institution!: InstitutionModel;
+
+  @BelongsTo(() => InstitutionModel, "insuranceId")
+  insurance!: InstitutionModel;
 
   @DeletedAt
   @Column(DataType.DATE)

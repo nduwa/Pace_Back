@@ -167,7 +167,9 @@ class InstitutionService {
   }
 
   public static async getByType(type: string): Promise<IInstitutionDTO[]> {
-    const data = await InstitutionModel.findAll({ where: { type } });
+    const data = await InstitutionModel.findAll({
+      where: { institutionType: type },
+    });
     return data as unknown as IInstitutionDTO[];
   }
 

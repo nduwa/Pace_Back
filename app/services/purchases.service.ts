@@ -1,6 +1,7 @@
 import {
   IAdjustPurchaseDTO,
   ICreatePurchaseDTO,
+  IDrugPurchase,
   IPurchase,
 } from "../type/drugs";
 import db from "../config/db.config";
@@ -11,6 +12,8 @@ import InstitutionDrugs from "../database/models/InstututionDrugs";
 import { Paged } from "../type";
 import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import DrugModel from "../database/models/DrugModel";
+import InsuranceDrugs from "../database/models/InsuranceDrugs";
+import { Op } from "sequelize";
 
 class PurchaseService {
   public static async createPurchase(
@@ -36,19 +39,39 @@ class PurchaseService {
           },
           { transaction: t }
         );
+        let drugsAdded: Partial<IDrugPurchase>[] = [];
+        const drugIds = data.drugs.map((d) => d.drug);
+        const insuranceDrugs = await InsuranceDrugs.findAll({
+          where: { id: { [Op.in]: drugIds } },
+        });
 
-        const drugsAdded = data.drugs.map((drug) => ({
-          drugId: drug.drug,
-          unitPrice: drug.unitPrice,
-          sellingPrice: drug.sellingPrice,
-          batchNumber: drug.batchNumber,
-          expireDate: drug.expireDate,
-          totalPrice: drug.unitPrice * drug.qty,
-          purchaseId: purchase.id,
-          quantity: drug.qty ?? 1,
-          insuranceDrugId: drug.insuranceDrug == "" ? null : drug.insuranceDrug,
-          institutionId,
-        }));
+        data.drugs.map((drug) => {
+          const insuranceDrug = insuranceDrugs.find((d) => d.id == drug.drug);
+          let drugId: { [key: string]: string | null } = {
+            drugId: drug.drug,
+            insuranceDrugId: null,
+          };
+          if (insuranceDrug)
+            drugId = {
+              drugId: insuranceDrug.drugId,
+              insuranceDrugId: drug.drug,
+            };
+
+          drugsAdded.push({
+            unitPrice: drug.unitPrice,
+            sellingPrice: drug.sellingPrice,
+            batchNumber: drug.batchNumber,
+            expireDate: drug.expireDate,
+            totalPrice: drug.unitPrice * drug.qty,
+            purchaseId: purchase.id,
+            quantity: drug.qty ?? 1,
+
+            institutionId,
+            ...drugId,
+          });
+        });
+
+        console.log(drugsAdded);
 
         await DrugPurchasesModel.bulkCreate(drugsAdded, { transaction: t });
 
@@ -142,7 +165,9 @@ class PurchaseService {
     const data = await PurchasesModel.findAll({
       ...TimestampsNOrder,
       where: { ...queryOptions },
-      include: [{ model: DrugPurchasesModel, include: [DrugModel] }],
+      include: [
+        { model: DrugPurchasesModel, include: [DrugModel, InsuranceDrugs] },
+      ],
       limit,
       order: [["purchaseNO", "DESC"]],
       offset,
@@ -160,7 +185,7 @@ class PurchaseService {
       include: [
         {
           model: DrugPurchasesModel,
-          include: [{ model: DrugModel }],
+          include: [{ model: DrugModel }, { model: InsuranceDrugs }],
         },
       ],
     });

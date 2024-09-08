@@ -48,6 +48,12 @@ class InvoiceExams extends Model {
   @Column(DataType.FLOAT)
   price!: number;
 
+  @Column(DataType.FLOAT)
+  patientCost!: number;
+
+  @Column(DataType.FLOAT)
+  insuranceCost!: number;
+
   @ForeignKey(() => InvoiceModel)
   @AllowNull(false)
   @Column(DataType.UUID)

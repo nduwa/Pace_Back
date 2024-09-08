@@ -110,7 +110,10 @@ class DrugService {
     listType: string,
     drug: string | undefined
   ): Promise<Paged<IInstitutionDrug[]>> {
-    const drugOpt = drug && drug != "all" ? { drugId: drug } : {};
+    const drugOpt =
+      drug && drug != "all"
+        ? { [Op.or]: [{ drugId: drug }, { insuranceDrugId: drug }] }
+        : {};
 
     let queryOptions = { institutionId, quantity: { [Op.gte]: 0 }, ...drugOpt };
 
@@ -136,9 +139,14 @@ class DrugService {
 
     data.forEach((drug) => {
       const item = drug.toJSON() as unknown as IInstitutionDrug;
-      const drugId = item?.drug?.id;
+      const drugId = item.drugId;
+      const insuranceDrugId = item.insuranceDrugId;
 
-      const index = result.findIndex((drug) => drug.drugId == drugId);
+      const index = result.findIndex((drug) =>
+        insuranceDrugId !== null
+          ? (drug.insuranceDrugId = insuranceDrugId)
+          : drug.drugId == drugId
+      );
 
       if (index == -1) {
         result.push({
@@ -173,7 +181,7 @@ class DrugService {
     const data = (await InstitutionDrugs.findAll({
       where: { ...queryOptions },
       ...TimestampsNOrder,
-      include: ["drug"],
+      include: ["drug", "insuranceDrug"],
       order: ["expireDate"],
       limit,
       offset,
@@ -210,6 +218,23 @@ class DrugService {
     return drugs as unknown as IDrugDTO[];
   }
 
+  public static async getAllWithNoInsuranceNPaged(): Promise<IDrugDTO[]> {
+    const drugs = await DrugModel.findAll({
+      include: [
+        {
+          model: InsuranceDrugs,
+          required: false, // This makes it a LEFT JOIN
+          where: {
+            id: null, // Only select rows where there's no corresponding entry in InsuranceDrugModel
+          },
+        },
+      ],
+      order: [["drug_code", "ASC"]],
+    });
+
+    return drugs as unknown as IDrugDTO[];
+  }
+
   public static async getAllInsuranceDrugsNPaged(): Promise<IInsuranceDrug[]> {
     const drugs = await InsuranceDrugs.findAll({
       include: ["drug"],
@@ -236,13 +261,14 @@ class DrugService {
     const data = await InstitutionDrugs.findAll({
       where: { institutionId, quantity: { [Op.gte]: 0 } },
       ...TimestampsNOrder,
-      include: ["drug"],
+      attributes: { include: ["price"] },
+      include: ["drug", "insuranceDrug"],
       order: ["price", "expireDate"],
     });
 
-    const result = await this.getPrices(data);
+    // const result = await this.getPrices(data);
 
-    return result;
+    return data as unknown as IInstitutionDrug[];
   }
 
   public static async getPrices(
@@ -262,22 +288,20 @@ class DrugService {
       },
       attributes: [
         "drugId",
-        [Sequelize.fn("max", Sequelize.col("price")), "price"],
+        [Sequelize.fn("max", Sequelize.col("price")), "maxPrice"], // Max price per group
       ],
-      group: ["drugId"],
-      include: ["insuranceDrug"],
     });
 
     let drugPrices: { [key: string]: number } = {};
     for (const record of highPrices) {
-      drugPrices[record.drugId] = record.price;
+      drugPrices[record.insuranceDrugId ?? record.drugId] = record.price;
     }
 
     const result: IInstitutionDrug[] = drugs.map((drug) => {
       const drugJSON = alreadyJSON ? drug : (drug as InstitutionDrugs).toJSON();
       return {
         ...drugJSON,
-        price: drugPrices[drug.drugId],
+        price: drugPrices[drug.insuranceDrugId ?? drug.drugId],
       };
     });
 
@@ -407,7 +431,7 @@ class DrugService {
     const data = await DrugPurchasesModel.findAll({
       ...TimestampsNOrder,
       where: { institutionId },
-      include: ["purchase", "drug"],
+      include: ["purchase", "drug", "insuranceDrug"],
       limit,
       offset,
     });
@@ -434,7 +458,7 @@ class DrugService {
         where: {
           quantity: { [Op.gt]: 0 },
           institutionId,
-          drugId,
+          id: drugId,
         },
       }
     );

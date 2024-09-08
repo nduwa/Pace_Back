@@ -129,6 +129,11 @@ export class DrugController extends Controller {
     return await DrugService.getAllNPaged(institutionId);
   }
 
+  @Get("/no-insurance/all")
+  public static async noInsuranceAll(): Promise<IDrugDTO[]> {
+    return await DrugService.getAllWithNoInsuranceNPaged();
+  }
+
   @Get("/insurance-drugs/all")
   public static async insuranceDrugsAll(): Promise<IInsuranceDrug[]> {
     return await DrugService.getAllInsuranceDrugsNPaged();

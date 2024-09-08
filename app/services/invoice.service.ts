@@ -32,6 +32,9 @@ class InvoiceService {
         data.patientId && data.patientId.length > 0
           ? data.patientId
           : undefined;
+      const insuranceUse = data.insuranceId && data.insuranceId.length > 0;
+
+      console.log(insuranceUse ? data.insuranceId : null);
 
       let createdInvoice: InvoiceModel;
       if (data.formId) {
@@ -41,6 +44,7 @@ class InvoiceService {
             ...data,
             drugs: undefined,
             institutionId,
+            insuranceId: insuranceUse ? data.insuranceId : null,
             formId: data.formId,
             patientId,
             name: data.name,
@@ -61,6 +65,7 @@ class InvoiceService {
             patientId,
             userId: userId,
             institutionId,
+            insuranceId: insuranceUse ? data.insuranceId : null,
             published: true,
             totalCost: 0,
           },
@@ -74,9 +79,7 @@ class InvoiceService {
 
       const requestedDrugs = await InstitutionDrugs.findAll({
         where: { id: { [Op.in]: requestedDrugsIds } },
-        include: ["drug"],
-      }).then(async (drugs) => {
-        return DrugService.getPrices(drugs);
+        include: ["drug", "insuranceDrug"],
       });
 
       //   check quantity
@@ -98,7 +101,7 @@ class InvoiceService {
       if (error) {
         throw new CustomError(error, 400);
       }
-
+      console.log("quntity checked");
       // Check prescription
       if (data.formId) {
         const prescribedDrugs = await FormDrugs.findAll({
@@ -130,7 +133,9 @@ class InvoiceService {
         }
       }
 
-      let totalCost = 0;
+      let totalCost = 0,
+        totalPatientCost = 0,
+        totalInsuranceCost = 0;
       if (requestedDrugs.length !== data.drugs.length)
         throw new CustomError("Something went wrong");
 
@@ -176,7 +181,13 @@ class InvoiceService {
           }
 
           if (quantityGiven) {
-            const cost = requestedDrugs[index].price * quantityGiven;
+            const price = requestedDrugs[index].price;
+            const insurancePrice = insuranceUse
+              ? requestedDrugs[index].insuranceDrug?.price || 0
+              : 0;
+            const cost = price * quantityGiven;
+            const insuranceCost = insurancePrice * quantityGiven;
+            const patientCost = cost - insuranceCost;
 
             await InvoiceDrugsModel.create(
               {
@@ -185,7 +196,10 @@ class InvoiceService {
                 patientId,
                 quantity: quantityGiven,
                 unitPrice: requestedDrugs[index].price,
+                insuranceDrugId: requestedDrugs[index].insuranceDrugId,
                 totalPrice: cost,
+                patientCost,
+                insuranceCost,
                 invoiceId: createdInvoice.id,
                 institutionDrugId: requestedDrugs[index].id,
                 isGiven: createdInvoice.published ? true : null,
@@ -196,6 +210,8 @@ class InvoiceService {
             );
 
             totalCost += cost;
+            totalPatientCost += patientCost;
+            totalInsuranceCost += insuranceCost;
           }
         })
       );
@@ -203,6 +219,8 @@ class InvoiceService {
       await InvoiceModel.update(
         {
           totalCost: totalCost,
+          patientCost: totalPatientCost,
+          insuranceCost: totalInsuranceCost,
         },
         {
           where: { id: createdInvoice.id },
@@ -306,11 +324,16 @@ class InvoiceService {
     return InvoiceModel.findByPk(id, {
       include: [
         "patient",
+        "insurance",
         {
           model: UserModel,
           as: "user",
         },
-        { model: InvoiceDrugsModel, as: "drugs", include: ["drug"] },
+        {
+          model: InvoiceDrugsModel,
+          as: "drugs",
+          include: ["drug", "insuranceDrug"],
+        },
         { model: InvoiceExams, as: "exams", include: ["exam"] },
         {
           model: InvoiceConsultations,
@@ -347,14 +370,21 @@ class InvoiceService {
 
   static includeStatement = [
     "patient",
+    "insurance",
     {
       model: UserModel,
       as: "user",
+      attributes: ["id", "name", "phone", "institutionId"],
     },
-    { model: InvoiceDrugsModel, as: "drugs", include: ["drug"] },
+    {
+      model: InvoiceDrugsModel,
+      as: "drugs",
+      include: ["drug", "insuranceDrug"],
+    },
     {
       model: InstitutionModel,
       as: "institution",
+      attributes: ["id", "name", "institutionId", "institutionType"],
       include: ["parentInstitution"],
     },
   ];
