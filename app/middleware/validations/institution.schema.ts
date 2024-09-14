@@ -11,8 +11,9 @@ export const institutionSchema = z.object({
       phone: z.string().min(10, "Invalid phone number"),
     }),
     details: z.object({
-      location: z.string().min(1, "Location is required"),
-      TIN: z.string().min(1, "Invalid TIN"),
+      location: z.string(),
+      TIN: z.string(),
+      percentage: z.coerce.number().optional(),
     }),
   }),
 });

@@ -136,6 +136,10 @@ class InvoiceService {
       let totalCost = 0,
         totalPatientCost = 0,
         totalInsuranceCost = 0;
+
+      let insuranceUsed = data.insuranceId?.length
+        ? await InstitutionModel.findByPk(data.insuranceId)
+        : undefined;
       if (requestedDrugs.length !== data.drugs.length)
         throw new CustomError("Something went wrong");
 
@@ -184,6 +188,7 @@ class InvoiceService {
             const hasInsuranceCost =
                 requestedDrugs[index]?.insuranceDrug !== null,
               selectedDrug = requestedDrugs[index];
+            const insurancePercentage = insuranceUsed?.details?.percentage ?? 0;
 
             const unitPrice =
               (insuranceUse && hasInsuranceCost
@@ -193,7 +198,7 @@ class InvoiceService {
             const cost = unitPrice * quantity;
             const insuranceCost =
               insuranceUse && hasInsuranceCost
-                ? (unitPrice * 85) / 100 || 0
+                ? (unitPrice * insurancePercentage) / 100 || 0
                 : 0;
             const insuranceTotalCost = parseFloat(
               (insuranceCost * quantity).toFixed(2)
@@ -231,9 +236,9 @@ class InvoiceService {
 
       await InvoiceModel.update(
         {
-          totalCost: totalCost,
-          patientCost: totalPatientCost,
-          insuranceCost: totalInsuranceCost,
+          totalCost: parseFloat(totalCost.toFixed(2)),
+          patientCost: parseFloat(totalPatientCost.toFixed(2)),
+          insuranceCost: parseFloat(totalInsuranceCost.toFixed(2)),
         },
         {
           where: { id: createdInvoice.id },
