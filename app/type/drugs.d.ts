@@ -157,6 +157,7 @@ export interface IInvoice {
   id: string;
   patientId: string | null;
   insuranceId: string | null;
+  insuranceCard: string | null;
   institutionId: string;
   note: string;
   name: string;
@@ -238,6 +239,7 @@ export interface IInvoiceDrugCreateDTO {
 export interface ICreateInvoiceDTO {
   formId?: string;
   insuranceId?: string;
+  insuranceCard?: string;
   published?: boolean;
   note: string;
   name: string;

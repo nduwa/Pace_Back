@@ -34,8 +34,6 @@ class InvoiceService {
           : undefined;
       const insuranceUse = data.insuranceId && data.insuranceId.length > 0;
 
-      console.log(insuranceUse ? data.insuranceId : null);
-
       let createdInvoice: InvoiceModel;
       if (data.formId) {
         const [inv] = await InvoiceModel.findOrCreate({
@@ -45,6 +43,7 @@ class InvoiceService {
             drugs: undefined,
             institutionId,
             insuranceId: insuranceUse ? data.insuranceId : null,
+            insuranceCard: insuranceUse ? data.insuranceCard : null,
             formId: data.formId,
             patientId,
             name: data.name,
@@ -66,6 +65,7 @@ class InvoiceService {
             userId: userId,
             institutionId,
             insuranceId: insuranceUse ? data.insuranceId : null,
+            insuranceCard: insuranceUse ? data.insuranceCard : null,
             published: true,
             totalCost: 0,
           },
@@ -181,13 +181,26 @@ class InvoiceService {
           }
 
           if (quantityGiven) {
-            const price = requestedDrugs[index].price;
-            const insurancePrice = insuranceUse
-              ? requestedDrugs[index].insuranceDrug?.price || 0
-              : 0;
-            const cost = price * quantityGiven;
-            const insuranceCost = insurancePrice * quantityGiven;
-            const patientCost = cost - insuranceCost;
+            const hasInsuranceCost =
+                requestedDrugs[index]?.insuranceDrug !== null,
+              selectedDrug = requestedDrugs[index];
+
+            const unitPrice =
+              (insuranceUse && hasInsuranceCost
+                ? selectedDrug?.insuranceDrug?.price
+                : selectedDrug?.price) || 0;
+            const quantity = drug.qty;
+            const cost = unitPrice * quantity;
+            const insuranceCost =
+              insuranceUse && hasInsuranceCost
+                ? (unitPrice * 85) / 100 || 0
+                : 0;
+            const insuranceTotalCost = parseFloat(
+              (insuranceCost * quantity).toFixed(2)
+            );
+            const patientTotalCost = parseFloat(
+              (cost - insuranceTotalCost).toFixed(2)
+            );
 
             await InvoiceDrugsModel.create(
               {
@@ -198,8 +211,8 @@ class InvoiceService {
                 unitPrice: requestedDrugs[index].price,
                 insuranceDrugId: requestedDrugs[index].insuranceDrugId,
                 totalPrice: cost,
-                patientCost,
-                insuranceCost,
+                patientCost: patientTotalCost,
+                insuranceCost: insuranceTotalCost,
                 invoiceId: createdInvoice.id,
                 institutionDrugId: requestedDrugs[index].id,
                 isGiven: createdInvoice.published ? true : null,
@@ -210,8 +223,8 @@ class InvoiceService {
             );
 
             totalCost += cost;
-            totalPatientCost += patientCost;
-            totalInsuranceCost += insuranceCost;
+            totalPatientCost += patientTotalCost;
+            totalInsuranceCost += insuranceTotalCost;
           }
         })
       );

@@ -85,7 +85,7 @@ class FormService {
       where: queryOptions,
       ...TimestampsNOrder,
       limit,
-      include: ["patient"],
+      include: ["patient", "insurance"],
       offset,
     })) as unknown as IFormDTO[];
 
@@ -133,6 +133,7 @@ class FormService {
       include: [
         "patient",
         "institution",
+        "insurance",
         { model: FormDrugs, as: "drugs", include: ["drug"] },
         { model: FormExams, as: "exams", include: ["exam"] },
         {
@@ -162,8 +163,12 @@ class FormService {
     institutionId: string | null,
     data: IFormRequest
   ): Promise<IForm> {
+    const insuranceUse = data.insuranceId && data.insuranceId.length > 0;
+
     const createForm = await FormModel.create({
       ...data,
+      insuranceId: insuranceUse ? data.insuranceId : null,
+      insuranceCard: insuranceUse ? data.insuranceCard : null,
       institutionId,
     });
     let form = createForm.toJSON();
