@@ -30,7 +30,7 @@ class InstitutionService {
     searchq: string | undefined,
     type: string | undefined
   ): Promise<Paged<InstitutionModel[]>> {
-    let queryOptions = QueryOptions(["name"], searchq);
+    let queryOptions = QueryOptions(["name", "institutionType"], searchq);
 
     const typeOpt = type && type != "all" ? { institutionType: type } : {};
 

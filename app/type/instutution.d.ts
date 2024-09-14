@@ -13,6 +13,7 @@ export interface IInstitution {
   details: {
     location: string;
     TIN: string;
+    percentage: number;
   };
 
   institutionId?: string | null;
@@ -73,6 +74,7 @@ export interface ICreateBranch {
   details: {
     location: string;
     TIN: string;
+    percentage: number;
   };
 }
 
