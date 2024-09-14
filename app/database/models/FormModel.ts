@@ -44,6 +44,15 @@ class FormModel extends Model {
   @Column(DataType.UUID)
   patientId!: string;
 
+  @ForeignKey(() => InstitutionModel)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  insuranceId!: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  insuranceCard!: string;
+
   @AllowNull(true)
   @Column(DataType.STRING)
   at!: string;
@@ -90,6 +99,9 @@ class FormModel extends Model {
 
   @BelongsTo(() => PatientsModel)
   patient!: PatientsModel;
+
+  @BelongsTo(() => InstitutionModel, "insuranceId")
+  insurance!: InstitutionModel;
 
   @BeforeCreate
   static async generateUniqueNumber(instance: IForm) {

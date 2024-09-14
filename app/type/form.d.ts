@@ -12,6 +12,8 @@ import { IConsultation, IInstitution } from "./instutution";
 export interface IForm {
   id: string;
   institutionId: string;
+  insuranceId: string | null;
+  insuranceCard: string | null;
   patientId: string;
   formNO: string;
   at: string;
@@ -36,6 +38,7 @@ export interface IFormResponse {
 export interface IFormDTO extends IForm {
   patient?: IPatient;
   institution?: IInstitution;
+  insurance?: IInstitution;
   drugs?: IFormDrugDTO[];
   exams?: IFormExamDTO[];
   consultations?: IFormConsultationDTO[];
@@ -106,7 +109,10 @@ export interface IFormDrugDTO extends IFormDrug {
 }
 
 export interface IFormRequest
-  extends Pick<IForm, "patientId" | "details" | "at"> {}
+  extends Pick<
+    IForm,
+    "patientId" | "details" | "at" | "insuranceId" | "insuranceCard"
+  > {}
 
 export type FormAddDrug = {
   drugId: string;

@@ -62,6 +62,10 @@ class InvoiceModel extends Model {
 
   @AllowNull(true)
   @Column(DataType.STRING)
+  insuranceCard!: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
   note!: string;
 
   @AllowNull(true)
