@@ -9,7 +9,8 @@ import {
   Response,
 } from "tsoa";
 import CustomError from "../utils/CustomError";
-import ImportService from "../services/import.service";
+import ImportService from "../services/import/drugs.import";
+import ServicesImportService from "../services/import/services.import";
 
 @Tags("Import")
 @Security("jwtAuth")
@@ -73,6 +74,26 @@ export class ImportController extends Controller {
         file,
         institutionId,
         type
+      );
+      return result;
+    } catch (err: any) {
+      throw new CustomError("Error during file upload", err);
+    }
+  }
+
+  @Post("service-acts/{level}")
+  @Response(200, "Services and acts imported successfully")
+  public static async importServicesAndActs(
+    @UploadedFile() file: Express.Multer.File,
+    @Inject() institutionId: string,
+    @Inject() level: string
+  ): Promise<any> {
+    console.log("import");
+    try {
+      const result = await ServicesImportService.importServicesAndActs(
+        file,
+        institutionId,
+        level
       );
       return result;
     } catch (err: any) {

@@ -28,13 +28,15 @@ class InstitutionService {
     limit: number,
     offset: number,
     searchq: string | undefined,
-    type: string | undefined
+    type: string | undefined,
+    level: string | undefined
   ): Promise<Paged<InstitutionModel[]>> {
     let queryOptions = QueryOptions(["name", "institutionType"], searchq);
 
     const typeOpt = type && type != "all" ? { institutionType: type } : {};
+    const levelOpt = level && level != "all" ? { level: level } : {};
 
-    queryOptions = { ...queryOptions, ...typeOpt };
+    queryOptions = { ...queryOptions, ...typeOpt, ...levelOpt };
 
     const data = await InstitutionModel.findAll({
       where: {

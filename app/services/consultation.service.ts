@@ -29,6 +29,7 @@ class ConsultationService {
     const data = await Consultations.findAll({
       where: queryOptions,
       ...TimestampsNOrder,
+      include: ["service"],
       limit,
       offset,
     });
@@ -55,6 +56,7 @@ class ConsultationService {
       where: {
         [Op.or]: [{ institutionId: null }, { institutionId: institutionId }],
       },
+      include: ["service"],
     });
 
     return consultations as unknown as IConsultationDTO[];
@@ -87,6 +89,46 @@ class ConsultationService {
 
   public static async delete(id: string): Promise<number> {
     return await Consultations.destroy({ where: { id: id } });
+  }
+
+  public static async assignServices(
+    institutionId: string | null,
+    data: IConsultationRequest
+  ): Promise<boolean> {
+    let existingConsultations = await Consultations.findAll({
+      where: { institutionId },
+      include: ["service"],
+    });
+
+    const existingConsultationsIds = existingConsultations.map(
+      (service) => service.serviceId
+    );
+    const updatedConsultationsIds = data.services.map((s) => s.serviceId) || [];
+
+    const servicesToDelete = existingConsultationsIds.filter(
+      (service) => !updatedConsultationsIds.includes(service)
+    );
+
+    await Consultations.destroy({
+      where: {
+        institutionId,
+        serviceId: { [Op.in]: servicesToDelete },
+      },
+    });
+
+    await Promise.all(
+      updatedConsultationsIds.map(async (serviceId) => {
+        await Consultations.findOrCreate({
+          where: { serviceId: serviceId, institutionId },
+          defaults: {
+            serviceId: serviceId,
+            institutionId,
+          },
+        });
+      })
+    );
+
+    return true;
   }
 }
 

@@ -2,15 +2,11 @@ import { z } from "zod";
 
 export const consultationSchema = z.object({
   body: z.object({
-    label: z
-      .string({
-        required_error: "Type is required",
+    services: z.array(
+      z.object({
+        serviceId: z.string(),
+        id: z.string().optional(),
       })
-      .min(1),
-    price: z
-      .number({
-        required_error: "Amount is required",
-      })
-      .min(0.1),
+    ),
   }),
 });

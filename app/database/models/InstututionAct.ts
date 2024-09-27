@@ -10,37 +10,45 @@ import {
   Sequelize,
   DataType,
   DeletedAt,
+  AllowNull,
   ForeignKey,
   BelongsTo,
 } from "sequelize-typescript";
 import InstitutionModel from "./Institution";
-import Service from "./Services";
+import ServiceAct from "./ServiceAct";
 
 @Table({
-  tableName: "consultations",
-  paranoid: true,
+  tableName: "institution_acts",
+  paranoid: false,
 })
-class Consultations extends Model {
+class InstitutionAct extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
-  @Default(null)
-  @Column(DataType.STRING)
-  label!: string;
+  @ForeignKey(() => ServiceAct)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  serviceActId!: string;
 
-  @Default(0)
-  @Column(DataType.FLOAT)
-  price!: number;
+  @BelongsTo(() => ServiceAct, {
+    onDelete: "CASCADE",
+    hooks: true,
+  })
+  act!: ServiceAct;
 
   @ForeignKey(() => InstitutionModel)
+  @AllowNull(false)
   @Column(DataType.UUID)
   institutionId!: string;
 
-  @ForeignKey(() => Service)
-  @Column(DataType.UUID)
-  serviceId!: string;
+  @BelongsTo(() => InstitutionModel)
+  institution!: InstitutionModel;
+
+  @AllowNull(true)
+  @Column(DataType.DOUBLE)
+  price!: number;
 
   @DeletedAt
   @Column(DataType.DATE)
@@ -55,12 +63,6 @@ class Consultations extends Model {
   @Default(Sequelize.fn("NOW"))
   @Column(DataType.DATE)
   updatedAt!: Date;
-
-  @BelongsTo(() => InstitutionModel)
-  institution!: InstitutionModel;
-
-  @BelongsTo(() => Service)
-  service!: Service;
 }
 
-export default Consultations;
+export default InstitutionAct;

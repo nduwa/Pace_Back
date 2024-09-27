@@ -4,6 +4,7 @@ export interface IInstitution {
   id: string;
   name: string;
   institutionType: string;
+  level: string;
   hasPharmacy: boolean;
   admin: {
     name: string;
@@ -24,7 +25,7 @@ export interface IInstitution {
 export interface IInstitutionRequest
   extends Omit<
     IInstitution,
-    "id" | "createdAt" | "institutionType" | "hasPharmacy"
+    "id" | "createdAt" | "institutionType" | "hasPharmacy" | "level"
   > {
   institutionType?: string | null;
   hasPharmacy?: boolean;
@@ -93,7 +94,9 @@ export interface IConsultation {
 
 export type IConsultationDTO = IConsultation;
 
-export type IConsultationRequest = Pick<IConsultation, "price" | "label">;
+export interface IConsultationRequest {
+  services: { id?: string; serviceId: string }[];
+}
 
 export interface IConsultationResponse {
   rows: IConsultation[];

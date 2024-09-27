@@ -8,6 +8,7 @@ import FormDrugs from "./models/FormDrugs";
 import FormExams from "./models/FormExams";
 import FormModel from "./models/FormModel";
 import InstitutionModel from "./models/Institution";
+import InstitutionAct from "./models/InstututionAct";
 import InstitutionDrugs from "./models/InstututionDrugs";
 import InstitutionExams from "./models/InstututionExams";
 import InsuranceDrugs from "./models/InsuranceDrugs";
@@ -22,6 +23,8 @@ import PurchasesModel from "./models/PurchasesModel";
 import ResetToken from "./models/ResetToken";
 import RolePermissions from "./models/RolePermissions";
 import RolesModel from "./models/RolesModel";
+import ServiceAct from "./models/ServiceAct";
+import Service from "./models/Services";
 import Transactions from "./models/Transactions";
 import UserInstitutions from "./models/UserInstitutions";
 import UserModel from "./models/UserModel";
@@ -62,6 +65,10 @@ const models = [
   FormExams,
   FormDrugs,
   FormConsultations,
+
+  Service,
+  ServiceAct,
+  InstitutionAct,
 ];
 
 export default models;
