@@ -9,6 +9,7 @@ import {
   Get,
   Path,
   Delete,
+  Put,
 } from "tsoa";
 
 import { Paginations } from "../utils/DBHelpers";
@@ -82,6 +83,14 @@ export class FormController extends Controller {
   ): Promise<IForm> {
     const response = await FormService.create(institutionId as string, data);
     return response;
+  }
+
+  @Put("/{id}")
+  public static async update(
+    @Body() data: IFormRequest,
+    @Path() id: string
+  ): Promise<boolean> {
+    return await FormService.update(id, data);
   }
 
   @Delete("/{id}")

@@ -96,8 +96,6 @@ class ServiceService {
 
     queryOptions = { ...queryOptions, ...institutionOpt };
 
-    console.log(queryOptions);
-
     const data = await ServiceModel.findAll({ where: queryOptions });
     return data as unknown as IService[];
   }

@@ -1,4 +1,4 @@
-import { Op, Sequelize } from "sequelize";
+import { Op, Sequelize, where } from "sequelize";
 import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import { Paged } from "../type";
 import Consultations from "../database/models/Consultations";
@@ -98,6 +98,7 @@ class ConsultationService {
     let existingConsultations = await Consultations.findAll({
       where: { institutionId },
       include: ["service"],
+      paranoid: false,
     });
 
     const existingConsultationsIds = existingConsultations.map(
@@ -109,22 +110,41 @@ class ConsultationService {
       (service) => !updatedConsultationsIds.includes(service)
     );
 
-    await Consultations.destroy({
-      where: {
-        institutionId,
-        serviceId: { [Op.in]: servicesToDelete },
-      },
-    });
+    await Consultations.update(
+      { deletedAt: new Date() },
+      {
+        where: {
+          institutionId,
+          serviceId: { [Op.in]: servicesToDelete },
+        },
+        paranoid: false,
+      }
+    );
 
     await Promise.all(
       updatedConsultationsIds.map(async (serviceId) => {
-        await Consultations.findOrCreate({
+        const [r, created] = await Consultations.findOrCreate({
           where: { serviceId: serviceId, institutionId },
           defaults: {
             serviceId: serviceId,
             institutionId,
           },
+          paranoid: false,
         });
+
+        if (!created && r.deletedAt) {
+          console.log("setting to null");
+          const [rows] = await Consultations.update(
+            { deletedAt: null },
+            {
+              where: {
+                id: r.id,
+              },
+              paranoid: false,
+            }
+          );
+          console.log(rows);
+        }
       })
     );
 
