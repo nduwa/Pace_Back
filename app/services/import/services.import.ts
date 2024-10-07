@@ -90,12 +90,15 @@ class ServicesImportService {
             data.label = this.nullToEmpty(row[0]);
             console.log("service", data.label);
 
-            const created = await Service.create({
-              ...serviceData,
+            const [created] = await Service.findOrCreate({
+              where: { label: serviceData.label, level },
+              defaults: {
+                ...serviceData,
 
-              assignDuringOrientation: ["LABORATORY", "LABORATOIRE"].includes(
-                data.label || ""
-              ),
+                assignDuringOrientation: ["LABORATORY", "LABORATOIRE"].includes(
+                  data.label || ""
+                ),
+              },
             });
             createdServices.push(created.toJSON() as unknown as IService);
             service = created.toJSON();
@@ -125,12 +128,28 @@ class ServicesImportService {
         }
       }
 
+      // Step 1: Find the relevant records
+      const actsToUpdate = await ServiceAct.findAll({
+        where: {
+          institutionId: null,
+          id: { [Op.notIn]: updatedActs },
+        },
+        include: [
+          {
+            model: Service,
+            as: "service",
+            where: { level },
+            required: true,
+          },
+        ],
+      });
+
+      // Step 2: Update the records
       await ServiceAct.update(
         { price: 0 },
         {
           where: {
-            institutionId: null,
-            id: { [Op.notIn]: updatedActs },
+            id: actsToUpdate.map((act) => act.id),
           },
         }
       );
@@ -155,15 +174,6 @@ class ServicesImportService {
               );
 
               const inBetween = nextCreatedServices.slice(0, nextWithDot);
-
-              console.log(label + " after dot");
-
-              console.log("next", nextCreatedServices[nextWithDot]);
-              console.log("between", inBetween);
-
-              console.log();
-              console.log();
-              console.log();
 
               await Promise.all(
                 inBetween.map(async (ser) => {

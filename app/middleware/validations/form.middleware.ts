@@ -45,7 +45,7 @@ export const sendFromSchema = z.object({
   }),
 });
 
-const IInvoiceExamDataSchema = z.object({
+const IInvoiceActDataSchema = z.object({
   id: z.string(),
   price: z.number(),
 });
@@ -65,7 +65,7 @@ const IInvoiceDrugDataSchema = z.object({
 export const formInvoiceRequestSchema = z.object({
   body: z.object({
     invoiceConsultations: z.array(IInvoiceConsultationDataSchema),
-    invoiceExams: z.array(IInvoiceExamDataSchema),
+    invoiceExams: z.array(IInvoiceActDataSchema),
     invoiceDrugs: z.array(IInvoiceDrugDataSchema),
   }),
 });

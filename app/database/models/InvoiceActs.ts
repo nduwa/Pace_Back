@@ -13,36 +13,34 @@ import {
   AllowNull,
   ForeignKey,
   BelongsTo,
-  HasMany,
 } from "sequelize-typescript";
-import DrugModel from "./DrugModel";
 import InstitutionModel from "./Institution";
 import InvoiceModel from "./InvoiceModel";
 import PatientsModel from "./PatientsModel";
-import ExamModel from "./ExamModel";
+import ServiceAct from "./ServiceAct";
 
 @Table({
-  tableName: "invoice_exams",
+  tableName: "invoice_acts",
   paranoid: true,
 })
-class InvoiceExams extends Model {
+class InvoiceActs extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
-  @ForeignKey(() => ExamModel)
+  @ForeignKey(() => ServiceAct)
   @AllowNull(false)
   @Column(DataType.UUID)
-  examId!: string;
+  serviceActId!: string;
 
   @ForeignKey(() => PatientsModel)
   @AllowNull(true)
   @Column(DataType.UUID)
   patientId!: string;
 
-  @BelongsTo(() => ExamModel)
-  exam!: ExamModel;
+  @BelongsTo(() => ServiceAct)
+  act!: ServiceAct;
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
@@ -85,4 +83,4 @@ class InvoiceExams extends Model {
   updatedAt!: Date;
 }
 
-export default InvoiceExams;
+export default InvoiceActs;

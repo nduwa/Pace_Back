@@ -17,24 +17,24 @@ import {
 import InvoiceModel from "./InvoiceModel";
 import PatientsModel from "./PatientsModel";
 import FormModel from "./FormModel";
-import UserModel from "./UserModel";
-import ExamModel from "./ExamModel";
 import InstitutionModel from "./Institution";
+import ServiceAct from "./ServiceAct";
+import FormConsultations from "./FormConsultations";
 
 @Table({
-  tableName: "form_exams",
+  tableName: "form_acts",
   paranoid: true,
 })
-class FormExams extends Model {
+class FormActs extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
-  @ForeignKey(() => ExamModel)
+  @ForeignKey(() => ServiceAct)
   @AllowNull(false)
   @Column(DataType.UUID)
-  examId!: string;
+  serviceActId!: string;
 
   @ForeignKey(() => PatientsModel)
   @AllowNull(false)
@@ -45,6 +45,11 @@ class FormExams extends Model {
   @AllowNull(false)
   @Column(DataType.UUID)
   formId!: string;
+
+  @ForeignKey(() => FormConsultations)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  formConsultationId!: string;
 
   @ForeignKey(() => InstitutionModel)
   @AllowNull(true)
@@ -60,7 +65,7 @@ class FormExams extends Model {
 
   @AllowNull(true)
   @Column(DataType.BOOLEAN)
-  result!: boolean;
+  done!: boolean;
 
   @Column(DataType.STRING)
   comment!: string;
@@ -82,8 +87,8 @@ class FormExams extends Model {
   @BelongsTo(() => InvoiceModel)
   invoice!: InvoiceModel;
 
-  @BelongsTo(() => ExamModel)
-  exam!: ExamModel;
+  @BelongsTo(() => ServiceAct)
+  act!: ServiceAct;
 }
 
-export default FormExams;
+export default FormActs;

@@ -155,6 +155,7 @@ export interface IPatientsResponse {
 
 export interface IInvoice {
   id: string;
+  formId: string | null;
   patientId: string | null;
   insuranceId: string | null;
   insuranceCard: string | null;
@@ -173,6 +174,7 @@ export interface IInvoice {
 export interface IInvoiceDrug {
   id: string;
   patientId: string | null;
+  formDrugId: string | null;
   institutionId: string;
   drugId: string;
   invoiceId: string;
@@ -189,7 +191,7 @@ export interface IInvoiceDrug {
   drug?: IDrug;
 }
 
-export interface IInvoiceExam {
+export interface IInvoiceAct {
   id: string;
   patientId: string | null;
   institutionId: string;
@@ -235,6 +237,7 @@ export interface IInvoiceResponse {
 export interface IInvoiceDrugCreateDTO {
   drug: string;
   qty: number;
+  formDrugId: string | null;
 }
 export interface ICreateInvoiceDTO {
   formId?: string;
