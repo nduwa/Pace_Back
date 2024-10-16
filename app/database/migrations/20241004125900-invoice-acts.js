@@ -85,18 +85,18 @@ module.exports = {
     await queryInterface.dropTable("invoice_acts");
 
     await queryInterface.createTable(
-      "invoice_exams",
+      "invoice_acts",
       {
         id: {
           type: Sequelize.UUID,
           primaryKey: true,
           defaultValue: Sequelize.UUIDV4,
         },
-        examId: {
+        serviceActId: {
           type: Sequelize.UUID,
           allowNull: false,
           references: {
-            model: "exams",
+            model: "acts",
             key: "id",
           },
           onUpdate: "CASCADE",

@@ -26,6 +26,7 @@ import {
   IFormRequest,
   IFormResponse,
   sendFormRequest,
+  IFormPrescriptionRequest,
 } from "../type/form";
 import { ICreateInvoiceDTO, IInvoice } from "../type/drugs";
 
@@ -110,6 +111,15 @@ export class FormController extends Controller {
     @Inject() userId: string
   ): Promise<IFormDTO> {
     return await FormService.consultation(data, id, userId);
+  }
+
+  @Post("/{id}/prescription")
+  public static async prescription(
+    @Body() data: IFormPrescriptionRequest,
+    @Path() id: string,
+    @Inject() userId: string
+  ): Promise<IFormDTO> {
+    return await FormService.prescription(data, id, userId);
   }
 
   @Post("/{id}/examination")

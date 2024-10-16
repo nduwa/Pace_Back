@@ -13,7 +13,6 @@ import {
   AllowNull,
   ForeignKey,
   BelongsTo,
-  HasMany,
 } from "sequelize-typescript";
 import DrugModel from "./DrugModel";
 import InstitutionModel from "./Institution";
@@ -103,6 +102,9 @@ class InvoiceDrugsModel extends Model {
 
   @BelongsTo(() => InsuranceDrugs)
   insuranceDrug!: InsuranceDrugs;
+
+  @BelongsTo(() => FormDrugs)
+  formDrug!: FormDrugs;
 
   @DeletedAt
   @Column(DataType.DATE)

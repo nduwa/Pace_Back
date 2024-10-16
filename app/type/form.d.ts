@@ -2,12 +2,14 @@ import { IUser } from "./auth";
 import {
   IDrug,
   IInstitutionDrug,
+  IInsuranceDrug,
   IInvoice,
   IInvoiceDrug,
   IPatient,
 } from "./drugs";
 import { IExam } from "./exams";
 import { IConsultation, IInstitution } from "./instutution";
+import { IServiceAct } from "./service";
 
 export interface IForm {
   id: string;
@@ -133,6 +135,8 @@ export type IFormConsultationRequest = {
   acts: FormAddAct[];
 };
 
+export type IFormPrescriptionRequest = Pick<IFormConsultationRequest, "drugs">;
+
 export type IFormActRequest = {
   id: string;
   consultationId: string;
@@ -149,8 +153,12 @@ export type sendFormRequest = {
 
 export type IInvoiceActData = {
   id: string;
-  exam?: IExam;
+  paid?: boolean;
+
+  act?: any;
   price: number;
+  patientCost: number;
+  insuranceCost: number;
 };
 
 export type IInvoiceConsultationData = {
@@ -161,10 +169,15 @@ export type IInvoiceConsultationData = {
 
 export type IInvoiceDrugData = {
   id: string;
+  paid: boolean;
+  formDrugId?: string;
   drug?: IDrug;
   unitPrice: number;
   quantity: number;
   totalPrice: number;
+  totalCost: number;
+  patientCost: number;
+  insuranceCost: number;
 };
 
 export interface IFormInvoiceData {
@@ -184,12 +197,15 @@ export interface IFormInvoiceRequest {
 export type IdrugOnInvoice = {
   id: string;
   drug?: IDrug;
+  insuranceDrug?: IInsuranceDrug;
   formDrug: IFormDrug;
   invoiceDrug: IInvoiceDrug;
 
   unitPrice: number;
   quantity: number;
   totalPrice: number;
+  patientCost: number;
+  insuranceCost: number;
 };
 
 export interface IAvailableMed {
@@ -197,6 +213,8 @@ export interface IAvailableMed {
     formDrugId: string;
     quantity: number;
     drug: IDrug;
+    insuranceDrug?: IInsuranceDrug;
+
     formDrug: IFormDrug;
     drugsAvailable: IInstitutionDrug[];
   }[];

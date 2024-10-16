@@ -71,8 +71,6 @@ class PurchaseService {
           });
         });
 
-        console.log(drugsAdded);
-
         await DrugPurchasesModel.bulkCreate(drugsAdded, { transaction: t });
 
         return purchase;
