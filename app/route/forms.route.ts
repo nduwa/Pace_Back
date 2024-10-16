@@ -158,7 +158,11 @@ formsRouter.post(
   "/:id/send-form",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await FormController.sendForm(req.body, req.params.id);
+      const response = await FormController.sendForm(
+        req.body,
+        req.params.id,
+        req.user?.id as string
+      );
       return res.status(200).json(response);
     } catch (error) {
       return next(error);

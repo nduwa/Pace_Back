@@ -135,9 +135,10 @@ export class FormController extends Controller {
   @Post("/{id}/send-form")
   public static async sendForm(
     @Body() data: sendFormRequest,
-    @Path() id: string
+    @Path() id: string,
+    @Inject() userId: string
   ): Promise<number> {
-    return await FormService.sendFormTo(id, data);
+    return await FormService.sendFormTo(id, data, userId);
   }
 
   @Get("/locations")

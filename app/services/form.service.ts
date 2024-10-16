@@ -201,7 +201,7 @@ class FormService {
     });
     let form = createForm.toJSON();
 
-    await this.sendFormTo(form.id, { to: form.at });
+    await this.sendFormTo(form.id, { to: form.at }, "");
 
     return form;
   }
@@ -219,10 +219,18 @@ class FormService {
     return await FormModel.destroy({ where: { id: id } });
   }
 
-  public static async addConsultation(formId: string, consultationId: string) {
+  public static async addConsultation(
+    formId: string,
+    consultationId: string,
+    userId: string | null,
+    acts?: string[]
+  ) {
+    const user = userId?.length ? userId : null;
     const form = await FormModel.findByPk(formId);
+    if (form == null) throw new CustomError("Form not found");
+
     const consultation = await Consultations.findByPk(consultationId);
-    const [cons] = await FormConsultations.findOrCreate({
+    const [cons, created] = await FormConsultations.findOrCreate({
       where: { formId, consultationId },
       defaults: {
         formId,
@@ -230,8 +238,26 @@ class FormService {
         patientId: form?.patientId,
         price: consultation?.price,
         verdict: "",
+        sentBy: user,
       },
     });
+
+    if (created) {
+      await Promise.all(
+        acts?.map(async (act) => {
+          await this.addAct(
+            form?.id,
+            cons.id,
+            {
+              serviceActId: act,
+              done: false,
+              comment: "",
+            },
+            user
+          );
+        }) || []
+      );
+    }
 
     return cons.toJSON();
   }
@@ -240,7 +266,7 @@ class FormService {
     formId: string,
     formConsultationId: string,
     data: FormAddAct,
-    userId: string
+    userId: string | null
   ) {
     const form = await FormModel.findByPk(formId, { include: ["patient"] });
     if (form == null) throw new CustomError("Form not found");
@@ -341,7 +367,9 @@ class FormService {
 
     const consultation = await this.addConsultation(
       formId,
-      data.consultationId
+      data.consultationId,
+      userId,
+      []
     );
 
     await FormConsultations.update(
@@ -497,7 +525,8 @@ class FormService {
 
   public static async sendFormTo(
     formId: string,
-    data: sendFormRequest
+    data: sendFormRequest,
+    userId: string
   ): Promise<number> {
     const form = await FormModel.findByPk(formId);
     const { to } = data;
@@ -514,7 +543,7 @@ class FormService {
       ],
     });
     if (consultation) {
-      this.addConsultation(formId, consultation.id);
+      this.addConsultation(formId, consultation.id, userId, data.acts);
     }
     let update: { [key: string]: any } = {
       at: to,

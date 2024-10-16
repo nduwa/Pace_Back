@@ -149,6 +149,7 @@ export type IFormActRequest = {
 
 export type sendFormRequest = {
   to: string;
+  acts?: [];
 };
 
 export type IInvoiceActData = {
