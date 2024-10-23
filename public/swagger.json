@@ -37,6 +37,9 @@
 					"institutionType": {
 						"type": "string"
 					},
+					"level": {
+						"type": "string"
+					},
 					"hasPharmacy": {
 						"type": "boolean"
 					},
@@ -61,6 +64,10 @@
 					},
 					"details": {
 						"properties": {
+							"percentage": {
+								"type": "number",
+								"format": "double"
+							},
 							"TIN": {
 								"type": "string"
 							},
@@ -69,6 +76,7 @@
 							}
 						},
 						"required": [
+							"percentage",
 							"TIN",
 							"location"
 						],
@@ -87,6 +95,7 @@
 					"id",
 					"name",
 					"institutionType",
+					"level",
 					"hasPharmacy",
 					"admin",
 					"details",
@@ -577,6 +586,343 @@
 			"ITransactionRequest": {
 				"$ref": "#/components/schemas/Omit_ITransaction.id-or-userId-or-institutionId_"
 			},
+			"IServiceAct": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"desc": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"serviceId": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"service": {
+						"$ref": "#/components/schemas/IService"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					}
+				},
+				"required": [
+					"id",
+					"label",
+					"desc",
+					"price",
+					"serviceId",
+					"institutionId",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IService": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"desc": {
+						"type": "string"
+					},
+					"level": {
+						"type": "string"
+					},
+					"assignDuringOrientation": {
+						"type": "boolean"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"acts": {
+						"items": {
+							"$ref": "#/components/schemas/IServiceAct"
+						},
+						"type": "array"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					}
+				},
+				"required": [
+					"id",
+					"label",
+					"desc",
+					"level",
+					"assignDuringOrientation",
+					"institutionId",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IServiceActResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IServiceAct"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IServiceActResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IServiceActResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IServiceAct.Exclude_keyofIServiceAct.createdAt-or-id__": {
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"desc": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"serviceId": {
+						"type": "string"
+					},
+					"service": {
+						"$ref": "#/components/schemas/IService"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					}
+				},
+				"required": [
+					"label",
+					"institutionId",
+					"desc",
+					"price",
+					"serviceId"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"IServiceActRequest": {
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"desc": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"serviceId": {
+						"type": "string"
+					},
+					"service": {
+						"$ref": "#/components/schemas/IService"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"label",
+					"institutionId",
+					"desc",
+					"price",
+					"serviceId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPriceChange": {
+				"properties": {
+					"price": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"price"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IServiceResponse": {
+				"properties": {
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/IService"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rows"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPaged_IServiceResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/IServiceResponse"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsPerPage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"totalItems",
+					"currentPage",
+					"itemsPerPage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_IService.Exclude_keyofIService.createdAt-or-id__": {
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"desc": {
+						"type": "string"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					},
+					"level": {
+						"type": "string"
+					},
+					"assignDuringOrientation": {
+						"type": "boolean"
+					},
+					"acts": {
+						"items": {
+							"$ref": "#/components/schemas/IServiceAct"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"label",
+					"institutionId",
+					"desc",
+					"level",
+					"assignDuringOrientation"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"IServiceRequest": {
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"institutionId": {
+						"type": "string"
+					},
+					"desc": {
+						"type": "string"
+					},
+					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					},
+					"level": {
+						"type": "string"
+					},
+					"assignDuringOrientation": {
+						"type": "boolean"
+					},
+					"acts": {
+						"items": {
+							"$ref": "#/components/schemas/IServiceAct"
+						},
+						"type": "array"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"label",
+					"institutionId",
+					"desc",
+					"level",
+					"assignDuringOrientation"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IPermission": {
 				"properties": {
 					"id": {
@@ -660,6 +1006,8 @@
 					"UPDATE_USERS",
 					"VIEW_EXAMS",
 					"UPDATE_EXAMS",
+					"VIEW_SERVICES",
+					"UPDATE_SERVICES",
 					"INSURANCE_PRICES",
 					"VIEW_MEDECINES",
 					"ALL_PERMISSIONS",
@@ -751,6 +1099,9 @@
 					"drug": {
 						"type": "string"
 					},
+					"insuranceDrug": {
+						"type": "string"
+					},
 					"qty": {
 						"type": "number",
 						"format": "double"
@@ -773,6 +1124,7 @@
 				},
 				"required": [
 					"drug",
+					"insuranceDrug",
 					"qty",
 					"unitPrice",
 					"sellingPrice",
@@ -842,36 +1194,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IInsuranceDrug": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"institutionId": {
-						"type": "string"
-					},
-					"drugId": {
-						"type": "string"
-					},
-					"price": {
-						"type": "number",
-						"format": "double"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					}
-				},
-				"required": [
-					"id",
-					"institutionId",
-					"drugId",
-					"price",
-					"createdAt"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"IDrug": {
 				"properties": {
 					"id": {
@@ -924,6 +1246,52 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IInsuranceDrug": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"designation": {
+						"type": "string"
+					},
+					"drugCategory": {
+						"type": "string"
+					},
+					"instruction": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"drugId": {
+						"type": "string",
+						"nullable": true
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"drug": {
+						"$ref": "#/components/schemas/IDrug"
+					}
+				},
+				"required": [
+					"description",
+					"designation",
+					"drugCategory",
+					"instruction",
+					"id",
+					"drugId",
+					"price",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IDrugPurchase": {
 				"properties": {
 					"id": {
@@ -937,6 +1305,10 @@
 					},
 					"purchaseId": {
 						"type": "string"
+					},
+					"insuranceDrugId": {
+						"type": "string",
+						"nullable": true
 					},
 					"batchNumber": {
 						"type": "string",
@@ -987,6 +1359,7 @@
 					"drugId",
 					"institutionId",
 					"purchaseId",
+					"insuranceDrugId",
 					"batchNumber",
 					"expireDate",
 					"unitPrice",
@@ -1044,6 +1417,14 @@
 						"type": "string",
 						"nullable": true
 					},
+					"insuranceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"insuranceCard": {
+						"type": "string",
+						"nullable": true
+					},
 					"institutionId": {
 						"type": "string"
 					},
@@ -1063,6 +1444,14 @@
 						"type": "number",
 						"format": "double"
 					},
+					"patientCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"insuranceCost": {
+						"type": "number",
+						"format": "double"
+					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time"
@@ -1075,12 +1464,16 @@
 				"required": [
 					"id",
 					"patientId",
+					"insuranceId",
+					"insuranceCard",
 					"institutionId",
 					"note",
 					"name",
 					"phone",
 					"invoiceNO",
 					"totalCost",
+					"patientCost",
+					"insuranceCost",
 					"createdAt",
 					"updatedAt"
 				],
@@ -1568,6 +1961,14 @@
 						"type": "number",
 						"format": "double"
 					},
+					"patientCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"insuranceCost": {
+						"type": "number",
+						"format": "double"
+					},
 					"isGiven": {
 						"type": "boolean"
 					},
@@ -1595,6 +1996,8 @@
 					"quantity",
 					"unitPrice",
 					"totalPrice",
+					"patientCost",
+					"insuranceCost",
 					"isGiven",
 					"institutionDrugId",
 					"createdAt",
@@ -1609,6 +2012,14 @@
 						"type": "string"
 					},
 					"patientId": {
+						"type": "string",
+						"nullable": true
+					},
+					"insuranceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"insuranceCard": {
 						"type": "string",
 						"nullable": true
 					},
@@ -1631,6 +2042,14 @@
 						"type": "number",
 						"format": "double"
 					},
+					"patientCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"insuranceCost": {
+						"type": "number",
+						"format": "double"
+					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time"
@@ -1643,6 +2062,9 @@
 						"$ref": "#/components/schemas/IPatient"
 					},
 					"institution": {
+						"$ref": "#/components/schemas/IInstitution"
+					},
+					"insurance": {
 						"$ref": "#/components/schemas/IInstitution"
 					},
 					"drugs": {
@@ -1667,12 +2089,16 @@
 				"required": [
 					"id",
 					"patientId",
+					"insuranceId",
+					"insuranceCard",
 					"institutionId",
 					"note",
 					"name",
 					"phone",
 					"invoiceNO",
 					"totalCost",
+					"patientCost",
+					"insuranceCost",
 					"createdAt",
 					"updatedAt"
 				],
@@ -1699,6 +2125,12 @@
 			"ICreateInvoiceDTO": {
 				"properties": {
 					"formId": {
+						"type": "string"
+					},
+					"insuranceId": {
+						"type": "string"
+					},
+					"insuranceCard": {
 						"type": "string"
 					},
 					"published": {
@@ -1744,6 +2176,9 @@
 					"institutionType": {
 						"type": "string"
 					},
+					"level": {
+						"type": "string"
+					},
 					"hasPharmacy": {
 						"type": "boolean"
 					},
@@ -1768,6 +2203,10 @@
 					},
 					"details": {
 						"properties": {
+							"percentage": {
+								"type": "number",
+								"format": "double"
+							},
 							"TIN": {
 								"type": "string"
 							},
@@ -1776,6 +2215,7 @@
 							}
 						},
 						"required": [
+							"percentage",
 							"TIN",
 							"location"
 						],
@@ -1809,6 +2249,7 @@
 					"id",
 					"name",
 					"institutionType",
+					"level",
 					"hasPharmacy",
 					"admin",
 					"details",
@@ -1871,6 +2312,9 @@
 					"institutionId": {
 						"type": "string"
 					},
+					"level": {
+						"type": "string"
+					},
 					"admin": {
 						"properties": {
 							"email": {
@@ -1892,6 +2336,10 @@
 					},
 					"details": {
 						"properties": {
+							"percentage": {
+								"type": "number",
+								"format": "double"
+							},
 							"TIN": {
 								"type": "string"
 							},
@@ -1900,6 +2348,7 @@
 							}
 						},
 						"required": [
+							"percentage",
 							"TIN",
 							"location"
 						],
@@ -1908,6 +2357,7 @@
 				},
 				"required": [
 					"name",
+					"level",
 					"admin",
 					"details"
 				],
@@ -1922,6 +2372,9 @@
 					"institutionId": {
 						"type": "string"
 					},
+					"level": {
+						"type": "string"
+					},
 					"admin": {
 						"properties": {
 							"email": {
@@ -1943,6 +2396,10 @@
 					},
 					"details": {
 						"properties": {
+							"percentage": {
+								"type": "number",
+								"format": "double"
+							},
 							"TIN": {
 								"type": "string"
 							},
@@ -1951,6 +2408,7 @@
 							}
 						},
 						"required": [
+							"percentage",
 							"TIN",
 							"location"
 						],
@@ -1966,6 +2424,7 @@
 				},
 				"required": [
 					"name",
+					"level",
 					"admin",
 					"details"
 				],
@@ -1982,6 +2441,10 @@
 					},
 					"details": {
 						"properties": {
+							"percentage": {
+								"type": "number",
+								"format": "double"
+							},
 							"TIN": {
 								"type": "string"
 							},
@@ -1990,6 +2453,7 @@
 							}
 						},
 						"required": [
+							"percentage",
 							"TIN",
 							"location"
 						],
@@ -2353,6 +2817,14 @@
 					"institutionId": {
 						"type": "string"
 					},
+					"insuranceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"insuranceCard": {
+						"type": "string",
+						"nullable": true
+					},
 					"patientId": {
 						"type": "string"
 					},
@@ -2407,6 +2879,9 @@
 					"institution": {
 						"$ref": "#/components/schemas/IInstitution"
 					},
+					"insurance": {
+						"$ref": "#/components/schemas/IInstitution"
+					},
 					"drugs": {
 						"items": {
 							"$ref": "#/components/schemas/IFormDrugDTO"
@@ -2429,6 +2904,8 @@
 				"required": [
 					"id",
 					"institutionId",
+					"insuranceId",
+					"insuranceCard",
 					"patientId",
 					"formNO",
 					"at",
@@ -2499,6 +2976,14 @@
 					"institutionId": {
 						"type": "string"
 					},
+					"insuranceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"insuranceCard": {
+						"type": "string",
+						"nullable": true
+					},
 					"patientId": {
 						"type": "string"
 					},
@@ -2551,6 +3036,8 @@
 				"required": [
 					"id",
 					"institutionId",
+					"insuranceId",
+					"insuranceCard",
 					"patientId",
 					"formNO",
 					"at",
@@ -2592,12 +3079,20 @@
 					},
 					"at": {
 						"type": "string"
+					},
+					"insuranceId": {
+						"type": "string"
+					},
+					"insuranceCard": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"details",
 					"patientId",
-					"at"
+					"at",
+					"insuranceId",
+					"insuranceCard"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -2920,6 +3415,10 @@
 					"drugPurchaseId": {
 						"type": "string"
 					},
+					"insuranceDrugId": {
+						"type": "string",
+						"nullable": true
+					},
 					"batchNumber": {
 						"type": "string",
 						"nullable": true
@@ -2961,6 +3460,9 @@
 					},
 					"drug": {
 						"$ref": "#/components/schemas/IDrug"
+					},
+					"insuranceDrug": {
+						"$ref": "#/components/schemas/IInsuranceDrug"
 					}
 				},
 				"required": [
@@ -2969,6 +3471,7 @@
 					"institutionId",
 					"purchaseId",
 					"drugPurchaseId",
+					"insuranceDrugId",
 					"batchNumber",
 					"expireDate",
 					"itemNo",
@@ -3135,15 +3638,15 @@
 					"name": {
 						"type": "string"
 					},
-					"exam_code": {
-						"type": "string"
+					"price": {
+						"type": "number",
+						"format": "double"
 					},
 					"description": {
 						"type": "string"
 					},
-					"price": {
-						"type": "number",
-						"format": "double"
+					"exam_code": {
+						"type": "string"
 					},
 					"insuranceExam": {
 						"items": {
@@ -3154,9 +3657,9 @@
 				},
 				"required": [
 					"name",
-					"exam_code",
+					"price",
 					"description",
-					"price"
+					"exam_code"
 				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
@@ -3167,19 +3670,6 @@
 			},
 			"IExamRequest": {
 				"$ref": "#/components/schemas/Omit_IExam.id-or-createdAt-or-institutionExam_"
-			},
-			"IPriceChange": {
-				"properties": {
-					"price": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"price"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"IDrugCategory": {
 				"properties": {
@@ -3423,16 +3913,16 @@
 					"description": {
 						"type": "string"
 					},
-					"drug_code": {
+					"designation": {
 						"type": "string"
 					},
-					"designation": {
+					"drugCategory": {
 						"type": "string"
 					},
 					"instruction": {
 						"type": "string"
 					},
-					"drugCategory": {
+					"drug_code": {
 						"type": "string"
 					},
 					"totalQuantity": {
@@ -3448,20 +3938,77 @@
 				},
 				"required": [
 					"description",
-					"drug_code",
 					"designation",
+					"drugCategory",
 					"instruction",
-					"drugCategory"
+					"drug_code"
 				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"Omit_IDrug.id-or-createdAt-or-isOnMarket_": {
-				"$ref": "#/components/schemas/Pick_IDrug.Exclude_keyofIDrug.id-or-createdAt-or-isOnMarket__",
-				"description": "Construct a type with the properties of T except for those in type K."
-			},
 			"IDrugRequest": {
-				"$ref": "#/components/schemas/Omit_IDrug.id-or-createdAt-or-isOnMarket_"
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"designation": {
+						"type": "string"
+					},
+					"drugCategory": {
+						"type": "string"
+					},
+					"instruction": {
+						"type": "string"
+					},
+					"drug_code": {
+						"type": "string"
+					},
+					"totalQuantity": {
+						"type": "number",
+						"format": "double"
+					},
+					"insuranceDrug": {
+						"items": {
+							"$ref": "#/components/schemas/IInsuranceDrug"
+						},
+						"type": "array"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"drugId": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"description",
+					"designation",
+					"drugCategory",
+					"instruction",
+					"drug_code"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IMatchPrices": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"drugId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"drugId"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"IConsultationResponse": {
 				"properties": {
@@ -4108,6 +4655,451 @@
 				},
 				"tags": [
 					"Transactions"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/service-acts": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IServiceActResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IServiceAct"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IServiceActRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/service-acts/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IServiceAct"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IServiceActRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/service-acts/all": {
+			"get": {
+				"operationId": "GetNPaged",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IServiceAct"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/service-acts/{id}/prices": {
+			"put": {
+				"operationId": "UpdatePrice",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Service Acts"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IPriceChange"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/services": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPaged_IServiceResponse_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Services"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IService"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Services"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IServiceRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/services/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IService"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Services"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Services"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IServiceRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Services"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/services/all": {
+			"get": {
+				"operationId": "GetNPaged",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IService"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Services"
 				],
 				"security": [
 					{
@@ -5535,6 +6527,49 @@
 				}
 			}
 		},
+		"/api/import/institution-prices/{type}": {
+			"post": {
+				"operationId": "ImportInstitutionPrice",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Import"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"file"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/forms": {
 			"get": {
 				"operationId": "GetAll",
@@ -6757,6 +7792,103 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/api/drugs/no-insurance/all": {
+			"get": {
+				"operationId": "NoInsuranceAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IDrugDTO"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/drugs/insurance-drugs/all": {
+			"get": {
+				"operationId": "InsuranceDrugsAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/IInsuranceDrug"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/drugs/insurance-drugs/matching": {
+			"post": {
+				"operationId": "InsurancePriceMatching",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Drugs"
+				],
+				"security": [
+					{
+						"jwtAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"$ref": "#/components/schemas/IMatchPrices"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/drugs/institution/all": {

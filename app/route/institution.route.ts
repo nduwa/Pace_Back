@@ -75,16 +75,14 @@ institutionRouter.get(
   allowedPermissions("VIEW_INSTITUTIONS"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { page } = req.query;
-      const { limit } = req.query;
-      const { searchq } = req.query;
-      const { type } = req.query;
+      const { page, limit, searchq, type, level } = req.query;
 
       const response = await InstitutionController.getAll(
         parseInt(page as string),
         limit as unknown as number,
         searchq as string,
-        type as string
+        type as string,
+        level as string
       );
       return res.status(200).json(response);
     } catch (error) {

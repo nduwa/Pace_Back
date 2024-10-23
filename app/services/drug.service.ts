@@ -12,12 +12,10 @@ import {
   IInsuranceDrug,
   IMatchPrices,
   IPriceChange,
-  IPurchaseDrugDTO,
 } from "../type/drugs";
 import DrugPurchasesModel from "../database/models/DrugPurchases";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
 import InsuranceDrugs from "../database/models/InsuranceDrugs";
-import { boolean } from "zod";
 
 class DrugService {
   public static async getAll(

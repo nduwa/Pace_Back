@@ -61,8 +61,11 @@ export class ConsultationController extends Controller {
   public static async create(
     @Body() data: IConsultationRequest,
     @Inject() institutionId: string | null
-  ): Promise<IConsultation> {
-    const response = await ConsultationService.create(institutionId, data);
+  ): Promise<boolean> {
+    const response = await ConsultationService.assignServices(
+      institutionId,
+      data
+    );
     return response;
   }
 

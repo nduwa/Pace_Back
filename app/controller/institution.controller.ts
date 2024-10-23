@@ -32,14 +32,16 @@ export class InstitutionController extends Controller {
     @Inject() currentPage: number,
     @Inject() limit: number,
     @Inject() searchq: string | undefined,
-    @Inject() type: string | undefined
+    @Inject() type: string | undefined,
+    @Inject() level: string | undefined
   ): Promise<IPaged<IInstitutionResponse>> {
     const { page, pageSize, offset } = Paginations(currentPage, limit);
     const institutions = await InstitutionService.getAll(
       pageSize,
       offset,
       searchq,
-      type
+      type,
+      level
     );
 
     const filtersUsed: IInstitutionResponse = {

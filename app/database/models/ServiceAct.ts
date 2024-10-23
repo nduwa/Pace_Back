@@ -12,35 +12,41 @@ import {
   DeletedAt,
   ForeignKey,
   BelongsTo,
+  AllowNull,
+  HasMany,
 } from "sequelize-typescript";
-import InstitutionModel from "./Institution";
 import Service from "./Services";
+import InstitutionAct from "./InstututionAct";
+import InstitutionModel from "./Institution";
 
 @Table({
-  tableName: "consultations",
-  paranoid: true,
+  tableName: "acts",
+  paranoid: false,
 })
-class Consultations extends Model {
+class ServiceAct extends Model {
   @Default(UUIDV4())
   @PrimaryKey
   @Column(DataType.UUID)
   id!: string;
 
-  @Default(null)
   @Column(DataType.STRING)
   label!: string;
 
-  @Default(0)
+  @Column(DataType.STRING)
+  desc!: string;
+
   @Column(DataType.FLOAT)
   price!: number;
 
-  @ForeignKey(() => InstitutionModel)
-  @Column(DataType.UUID)
-  institutionId!: string;
-
+  @AllowNull(true)
   @ForeignKey(() => Service)
   @Column(DataType.UUID)
   serviceId!: string;
+
+  @AllowNull(true)
+  @ForeignKey(() => InstitutionModel)
+  @Column(DataType.UUID)
+  institutionId!: string;
 
   @DeletedAt
   @Column(DataType.DATE)
@@ -56,11 +62,11 @@ class Consultations extends Model {
   @Column(DataType.DATE)
   updatedAt!: Date;
 
-  @BelongsTo(() => InstitutionModel)
-  institution!: InstitutionModel;
-
   @BelongsTo(() => Service)
   service!: Service;
+
+  @HasMany(() => InstitutionAct)
+  institutionAct!: InstitutionAct[];
 }
 
-export default Consultations;
+export default ServiceAct;

@@ -14,6 +14,8 @@ import examRouter from "./exam.route";
 import consultationsRouter from "./consultation.route";
 import formsRouter from "./forms.route";
 import dashboardRouter from "./dashboard.route";
+import serviceRouter from "./service.route";
+import serviceActRouter from "./serviceAct.route";
 
 const apiRouter = express.Router();
 
@@ -32,5 +34,7 @@ apiRouter.use("/exams", examRouter);
 apiRouter.use("/consultations", consultationsRouter);
 apiRouter.use("/forms", formsRouter);
 apiRouter.use("/dashboard", dashboardRouter);
+apiRouter.use("/services", serviceRouter);
+apiRouter.use("/service-acts", serviceActRouter);
 
 export default apiRouter;

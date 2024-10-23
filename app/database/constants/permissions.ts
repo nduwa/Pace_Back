@@ -12,6 +12,10 @@ const appPersmissions = [
     permissions: ["VIEW_EXAMS", "UPDATE_EXAMS"],
   },
   {
+    group: "SERVCES",
+    permissions: ["VIEW_SERVICES", "UPDATE_SERVICES"],
+  },
+  {
     group: "INSURANCE",
     permissions: ["INSURANCE_PRICES", "VIEW_MEDECINES", "VIEW_EXAMS"],
   },
@@ -60,9 +64,9 @@ const commonGroups = ["USERS", "TRANSACTIONS"];
 
 export const permissionBasedOnInstitution = {
   PHARMACY: [...commonGroups, "MEDECINES", "PATIENTS"],
-  CLINIC: [...commonGroups, "PATIENTS", "EXAMS", "CLINIC"],
+  CLINIC: [...commonGroups, "PATIENTS", "EXAMS", "CLINIC", "SERVICES"],
   INSURANCE: [...commonGroups, "INSURANCE"],
-  ADMIN: [...commonGroups, "INSTITUTIONS", "PATIENTS", "EXAMS"],
+  ADMIN: [...commonGroups, "INSTITUTIONS", "PATIENTS", "EXAMS", "SERVICES"],
 };
 
 export type PermissionGroups = typeof appPersmissions;

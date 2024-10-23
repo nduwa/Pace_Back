@@ -98,4 +98,28 @@ importRouter.post(
     }
   }
 );
+
+importRouter.post(
+  "/service-acts/:level",
+  allowedPermissions("INSURANCE_PRICES"),
+  uploadExcel.single("file"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const file = req.file;
+      if (!file) {
+        res.status(422).send({ message: "No file uploaded" });
+        return;
+      }
+
+      const response = await ImportController.importServicesAndActs(
+        file,
+        req.user?.institutionId as string,
+        req.params?.level as string
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
 export default importRouter;
