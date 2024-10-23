@@ -51,6 +51,12 @@ class FormConsultations extends Model {
   @Column(DataType.UUID)
   userId!: string;
 
+  @ForeignKey(() => UserModel)
+  @AllowNull(true)
+  @Default(null)
+  @Column(DataType.UUID)
+  sentBy!: string;
+
   @ForeignKey(() => InvoiceModel)
   @AllowNull(true)
   @Default(null)
@@ -86,8 +92,11 @@ class FormConsultations extends Model {
   @BelongsTo(() => Consultations)
   consultation!: Consultations;
 
-  @BelongsTo(() => UserModel)
+  @BelongsTo(() => UserModel, "userId")
   user!: UserModel;
+
+  @BelongsTo(() => UserModel, "sentBy")
+  sentByUser!: UserModel;
 }
 
 export default FormConsultations;
