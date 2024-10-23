@@ -37,22 +37,26 @@ class InvoiceService {
 
       let createdInvoice: InvoiceModel;
       if (data.formId) {
+        const invData = {
+          ...data,
+          drugs: undefined,
+          institutionId,
+          insuranceId: insuranceUse ? data.insuranceId : null,
+          insuranceCard: insuranceUse ? data.insuranceCard : null,
+          formId: data.formId,
+          patientId,
+          name: data.name,
+          userId,
+          phone: data.phone,
+          type: "CLINICAL_RECORD",
+          published: false,
+          totalCost: 0,
+        };
         const [inv] = await InvoiceModel.findOrCreate({
           where: { formId: data.formId, institutionId, published: false },
           defaults: {
-            ...data,
-            drugs: undefined,
-            institutionId,
-            insuranceId: insuranceUse ? data.insuranceId : null,
-            insuranceCard: insuranceUse ? data.insuranceCard : null,
-            formId: data.formId,
-            patientId,
-            name: data.name,
+            ...invData,
             userId,
-            phone: data.phone,
-            type: "CLINICAL_RECORD",
-            published: false,
-            totalCost: 0,
           },
           transaction: t,
         });
@@ -76,63 +80,6 @@ class InvoiceService {
         );
       }
 
-      const requestedDrugsIds = data.drugs.map((drug) => drug.drug);
-
-      const requestedDrugs = await InstitutionDrugs.findAll({
-        where: { id: { [Op.in]: requestedDrugsIds } },
-        include: ["drug", "insuranceDrug"],
-      });
-
-      //   check quantity
-
-      let error: string | undefined = undefined;
-
-      await Promise.all(
-        data.drugs.map(async (drug, index) => {
-          const drugJSON: IInstitutionDrug = requestedDrugs.find(
-            (d) => d.id == drug.drug
-          ) as unknown as IInstitutionDrug;
-
-          if (drug.qty > drugJSON.quantity) {
-            error = `${drugJSON?.drug?.designation} has insuficcient quantity`;
-          }
-        })
-      );
-
-      if (error) {
-        throw new CustomError(error, 400);
-      }
-      // Check prescription
-      if (data.formId) {
-        const prescribedDrugs = await FormDrugs.findAll({
-          where: { formId: data.formId },
-          include: ["drug"],
-        });
-
-        await Promise.all(
-          data.drugs.map(async (drug, index) => {
-            const InstitutionDrugJSON: IInstitutionDrug = requestedDrugs
-              .find((d) => d.id == drug.drug)
-              ?.toJSON() as unknown as IInstitutionDrug;
-
-            const drugJSON = prescribedDrugs
-              .find((d) => d.drugId == InstitutionDrugJSON.drugId)
-              ?.toJSON() as unknown as IFormDrugDTO;
-
-            const requiredQuantity =
-              drugJSON.quantity - drugJSON.givenQuantitty;
-
-            if (drug.qty > requiredQuantity) {
-              error = `${drugJSON?.drug?.designation} requires only ${requiredQuantity}`;
-            }
-          })
-        );
-
-        if (error) {
-          throw new CustomError(error, 400);
-        }
-      }
-
       let totalCost = 0,
         totalPatientCost = 0,
         totalInsuranceCost = 0;
@@ -140,105 +87,157 @@ class InvoiceService {
       let insuranceUsed = data.insuranceId?.length
         ? await InstitutionModel.findByPk(data.insuranceId)
         : undefined;
-      if (requestedDrugs.length !== data.drugs.length)
-        throw new CustomError("Something went wrong");
 
-      console.log("Giving items");
       await Promise.all(
         data.drugs.map(async (drug, index) => {
-          let quantityRemaining = drug.qty,
-            quantityGiven = 0;
-          const batchNumber = requestedDrugs[index].batchNumber,
-            drugId = requestedDrugs[index].drugId;
-          while (quantityRemaining > 0) {
-            const itemtogive = await InstitutionDrugs.findOne({
-              where: {
-                quantity: { [Op.gt]: 0 },
-                isAvailable: true,
-                institutionId,
-                drugId,
-                batchNumber,
-              },
-              transaction: t,
-            });
+          const InstitutionDrug = await InstitutionDrugs.findByPk(drug.drug, {
+            transaction: t,
+            include: ["drug", "insuranceDrug"],
+          });
 
-            const hasQuantity = itemtogive?.quantity || 0;
-            const availableToGive = Math.min(
-              hasQuantity,
-              Math.max(quantityRemaining, 0)
-            );
-            const remaining = hasQuantity - availableToGive;
+          if (InstitutionDrug) {
+            if (data.formId) {
+              const prescribedDrug = drug.formDrugId
+                ? await FormDrugs.findByPk(drug.formDrugId, {
+                    transaction: t,
+                  })
+                : null;
 
-            if (availableToGive) {
-              console.log("item ", itemtogive?.batchNumber);
-              console.log("giving ", availableToGive);
-              console.log("current ", itemtogive?.quantity);
-              console.log("remaining", remaining);
-              console.log();
-              console.log();
-              await InstitutionDrugs.update(
-                {
-                  quantity: remaining,
-                  isAvailble: remaining > 0,
-                },
-                {
-                  where: { id: itemtogive?.id },
-                  transaction: t,
+              if (prescribedDrug) {
+                const requiredQuantity =
+                  prescribedDrug.quantity - prescribedDrug.givenQuantity;
+
+                if (drug.qty > requiredQuantity) {
+                  throw new CustomError(
+                    `${InstitutionDrug?.drug?.designation} requires only ${requiredQuantity}`
+                  );
                 }
+              }
+            }
+
+            if (drug.qty > InstitutionDrug.quantity) {
+              throw new CustomError(
+                `${InstitutionDrug?.drug?.designation} has insuficcient quantity`
               );
             }
 
-            quantityRemaining -= availableToGive;
-            quantityGiven += availableToGive;
-          }
-
-          if (quantityGiven) {
-            const hasInsuranceCost =
-                requestedDrugs[index]?.insuranceDrug !== null,
-              selectedDrug = requestedDrugs[index];
-            const insurancePercentage = insuranceUsed?.details?.percentage ?? 0;
-
-            const unitPrice =
-              (insuranceUse && hasInsuranceCost
-                ? selectedDrug?.insuranceDrug?.price
-                : selectedDrug?.price) || 0;
-            const quantity = drug.qty;
-            const cost = unitPrice * quantity;
-            const insuranceCost =
-              insuranceUse && hasInsuranceCost
-                ? (unitPrice * insurancePercentage) / 100 || 0
-                : 0;
-            const insuranceTotalCost = parseFloat(
-              (insuranceCost * quantity).toFixed(2)
-            );
-            const patientTotalCost = parseFloat(
-              (cost - insuranceTotalCost).toFixed(2)
-            );
-
-            await InvoiceDrugsModel.create(
-              {
-                institutionId,
-                drugId,
-                patientId,
-                quantity: quantityGiven,
-                unitPrice: requestedDrugs[index].price,
-                insuranceDrugId: requestedDrugs[index].insuranceDrugId,
-                totalPrice: cost,
-                patientCost: patientTotalCost,
-                insuranceCost: insuranceTotalCost,
-                invoiceId: createdInvoice.id,
-                institutionDrugId: requestedDrugs[index].id,
-                isGiven: createdInvoice.published ? true : null,
-                formDrugId: drug.formDrugId?.length ? drug.formDrugId : null,
-              },
-              {
+            let quantityRemaining = drug.qty,
+              quantityGiven = 0;
+            const batchNumber = InstitutionDrug.batchNumber,
+              drugId = InstitutionDrug.drugId;
+            while (quantityRemaining > 0) {
+              const itemtogive = await InstitutionDrugs.findOne({
+                where: {
+                  quantity: { [Op.gt]: 0 },
+                  isAvailable: true,
+                  institutionId,
+                  drugId,
+                  batchNumber,
+                },
                 transaction: t,
-              }
-            );
+              });
 
-            totalCost += cost;
-            totalPatientCost += patientTotalCost;
-            totalInsuranceCost += insuranceTotalCost;
+              const hasQuantity = itemtogive?.quantity || 0;
+              const availableToGive = Math.min(
+                hasQuantity,
+                Math.max(quantityRemaining, 0)
+              );
+              const remaining = hasQuantity - availableToGive;
+
+              if (availableToGive) {
+                console.log(
+                  "item ",
+                  itemtogive?.id,
+                  itemtogive?.batchNumber,
+                  "giving ",
+                  availableToGive,
+                  "current ",
+                  itemtogive?.quantity,
+                  "remaining ",
+                  remaining
+                );
+                console.log();
+                console.log();
+                await InstitutionDrugs.update(
+                  {
+                    quantity: remaining,
+                    isAvailble: remaining > 0,
+                  },
+                  {
+                    where: { id: itemtogive?.id },
+                    transaction: t,
+                  }
+                );
+              }
+
+              quantityRemaining -= availableToGive;
+              quantityGiven += availableToGive;
+            }
+
+            if (quantityGiven) {
+              const hasInsuranceCost = InstitutionDrug?.insuranceDrug !== null,
+                selectedDrug = InstitutionDrug;
+              const insurancePercentage =
+                insuranceUsed?.details?.percentage ?? 0;
+
+              let unitPrice = drug.unitPrice,
+                cost = drug.totalPrice,
+                insuranceTotalCost = drug.insuranceCost,
+                patientTotalCost = drug.patientCost;
+
+              if (!unitPrice)
+                unitPrice =
+                  (insuranceUse && hasInsuranceCost
+                    ? selectedDrug?.insuranceDrug?.price
+                    : selectedDrug?.price) || 0;
+
+              console.log(unitPrice, insuranceUse, hasInsuranceCost);
+
+              const quantity = drug.qty;
+
+              if (!cost) cost = unitPrice * quantity;
+
+              if (!insuranceTotalCost) {
+                const insuranceCost =
+                  insuranceUse && hasInsuranceCost
+                    ? (unitPrice * insurancePercentage) / 100 || 0
+                    : 0;
+                insuranceTotalCost = parseFloat(
+                  (insuranceCost * quantity).toFixed(2)
+                );
+              }
+              if (!patientTotalCost)
+                patientTotalCost = parseFloat(
+                  (cost - insuranceTotalCost).toFixed(2)
+                );
+
+              await InvoiceDrugsModel.create(
+                {
+                  institutionId,
+                  drugId,
+                  patientId,
+                  quantity: quantityGiven,
+                  unitPrice: unitPrice,
+                  insuranceDrugId: InstitutionDrug.insuranceDrugId,
+                  totalPrice: cost,
+                  patientCost: patientTotalCost,
+                  insuranceCost: insuranceTotalCost,
+                  invoiceId: createdInvoice.id,
+                  institutionDrugId: InstitutionDrug.id,
+                  isGiven: createdInvoice.published ? true : null,
+                  formDrugId: drug.formDrugId?.length ? drug.formDrugId : null,
+                },
+                {
+                  transaction: t,
+                }
+              );
+
+              totalCost += cost;
+              totalPatientCost += patientTotalCost;
+              totalInsuranceCost += insuranceTotalCost;
+            }
+          } else {
+            throw new CustomError("Something went wrong");
           }
         })
       );
@@ -361,7 +360,7 @@ class InvoiceService {
           as: "drugs",
           include: ["drug", "insuranceDrug"],
         },
-        { model: InvoiceActs, as: "exams", include: ["exam"] },
+        { model: InvoiceActs, as: "acts", include: ["act"] },
         {
           model: InvoiceConsultations,
           as: "consultations",
@@ -464,6 +463,7 @@ class InvoiceService {
       const materialsGiven = await FormDrugs.findAll({
         where: { formId: invoice.formId, formConsultationId, isMaterial: true },
       });
+
       console.log("removing items");
       await Promise.all(
         materialsGiven.map(async (drug) => {
@@ -478,11 +478,19 @@ class InvoiceService {
                 formDrugId: drug.id,
               },
             });
-            if (givenDrug && institutionDrug) {
-              console.log("item", institutionDrug.batchNumber);
+            if (givenDrug && institutionDrug && !givenDrug.isGiven) {
+              console.log(
+                "item ",
+                institutionDrug.id,
+                institutionDrug.batchNumber,
+                "returning ",
+                givenDrug.quantity,
+                "current ",
+                institutionDrug.quantity
+              );
 
-              console.log("returning ", givenDrug.quantity);
-              console.log("current ", institutionDrug.quantity);
+              console.log();
+              console.log();
 
               await institutionDrug.update({
                 quantity: institutionDrug.quantity + givenDrug.quantity,

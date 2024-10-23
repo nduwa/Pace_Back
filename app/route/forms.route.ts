@@ -201,6 +201,22 @@ formsRouter.post(
 );
 
 formsRouter.post(
+  "/:id/prescription",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await FormController.prescription(
+        req.body,
+        req.params.id,
+        req.user?.id as string
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+formsRouter.post(
   "/:id/save-invoice",
   validate(formInvoiceRequestSchema),
   async (req: Request, res: Response, next: NextFunction) => {

@@ -64,8 +64,7 @@ const IInvoiceDrugDataSchema = z.object({
 
 export const formInvoiceRequestSchema = z.object({
   body: z.object({
-    invoiceConsultations: z.array(IInvoiceConsultationDataSchema),
-    invoiceExams: z.array(IInvoiceActDataSchema),
+    invoiceActs: z.array(IInvoiceActDataSchema),
     invoiceDrugs: z.array(IInvoiceDrugDataSchema),
   }),
 });

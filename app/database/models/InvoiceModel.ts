@@ -101,7 +101,7 @@ class InvoiceModel extends Model {
   drugs!: InvoiceDrugsModel[];
 
   @HasMany(() => InvoiceActs)
-  exams!: InvoiceActs[];
+  acts!: InvoiceActs[];
 
   @HasMany(() => InvoiceConsultations)
   consultations!: InvoiceConsultations[];

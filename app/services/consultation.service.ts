@@ -7,6 +7,7 @@ import {
   IConsultationDTO,
   IConsultationRequest,
 } from "../type/instutution";
+import Service from "../database/models/Services";
 
 class ConsultationService {
   public static async getAll(
@@ -56,7 +57,7 @@ class ConsultationService {
       where: {
         [Op.or]: [{ institutionId: null }, { institutionId: institutionId }],
       },
-      include: ["service"],
+      include: [{ model: Service, as: "service", include: ["acts"] }],
     });
 
     return consultations as unknown as IConsultationDTO[];
@@ -133,7 +134,6 @@ class ConsultationService {
         });
 
         if (!created && r.deletedAt) {
-          console.log("setting to null");
           const [rows] = await Consultations.update(
             { deletedAt: null },
             {
@@ -143,7 +143,6 @@ class ConsultationService {
               paranoid: false,
             }
           );
-          console.log(rows);
         }
       })
     );

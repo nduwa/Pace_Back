@@ -64,7 +64,7 @@ class FormDrugs extends Model {
   invoiceId!: string;
 
   @ForeignKey(() => FormConsultations)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   formConsultationId!: string;
 
