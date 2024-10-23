@@ -243,9 +243,10 @@ export interface IInvoiceDrugCreateDTO {
   qty: number;
   formDrugId: string | null;
   unitPrice?: number;
-  totalPrice?: number;
-  patientCost?: number;
-  insuranceCost?: number;
+  total?: number;
+
+  insuranceTotalCost?: number;
+  patientTotalCost?: number;
 }
 export interface ICreateInvoiceDTO {
   formId?: string;

@@ -145,19 +145,6 @@ class InvoiceService {
               const remaining = hasQuantity - availableToGive;
 
               if (availableToGive) {
-                console.log(
-                  "item ",
-                  itemtogive?.id,
-                  itemtogive?.batchNumber,
-                  "giving ",
-                  availableToGive,
-                  "current ",
-                  itemtogive?.quantity,
-                  "remaining ",
-                  remaining
-                );
-                console.log();
-                console.log();
                 await InstitutionDrugs.update(
                   {
                     quantity: remaining,
@@ -181,17 +168,15 @@ class InvoiceService {
                 insuranceUsed?.details?.percentage ?? 0;
 
               let unitPrice = drug.unitPrice,
-                cost = drug.totalPrice,
-                insuranceTotalCost = drug.insuranceCost,
-                patientTotalCost = drug.patientCost;
+                cost = drug.total,
+                insuranceTotalCost = drug.insuranceTotalCost,
+                patientTotalCost = drug.patientTotalCost;
 
               if (!unitPrice)
                 unitPrice =
                   (insuranceUse && hasInsuranceCost
                     ? selectedDrug?.insuranceDrug?.price
                     : selectedDrug?.price) || 0;
-
-              console.log(unitPrice, insuranceUse, hasInsuranceCost);
 
               const quantity = drug.qty;
 
@@ -203,12 +188,12 @@ class InvoiceService {
                     ? (unitPrice * insurancePercentage) / 100 || 0
                     : 0;
                 insuranceTotalCost = parseFloat(
-                  (insuranceCost * quantity).toFixed(2)
+                  (insuranceCost * quantity).toFixed(1)
                 );
               }
               if (!patientTotalCost)
                 patientTotalCost = parseFloat(
-                  (cost - insuranceTotalCost).toFixed(2)
+                  (cost - insuranceTotalCost).toFixed(1)
                 );
 
               await InvoiceDrugsModel.create(
@@ -244,9 +229,9 @@ class InvoiceService {
 
       await InvoiceModel.update(
         {
-          totalCost: parseFloat(totalCost.toFixed(2)),
-          patientCost: parseFloat(totalPatientCost.toFixed(2)),
-          insuranceCost: parseFloat(totalInsuranceCost.toFixed(2)),
+          totalCost: parseFloat(totalCost.toFixed(1)),
+          patientCost: parseFloat(totalPatientCost.toFixed(1)),
+          insuranceCost: parseFloat(totalInsuranceCost.toFixed(1)),
         },
         {
           where: { id: createdInvoice.id },
