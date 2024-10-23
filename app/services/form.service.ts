@@ -51,6 +51,7 @@ import { examPrice } from "../utils/helperFunctions";
 import InstitutionModel from "../database/models/Institution";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
 import DrugService from "./drug.service";
+import Service from "../database/models/Services";
 
 class FormService {
   public static async getAll(
@@ -139,7 +140,14 @@ class FormService {
         {
           model: FormConsultations,
           as: "consultations",
-          include: ["consultation"],
+          include: [
+            {
+              model: Consultations,
+              as: "consultation",
+              paranoid: false,
+              include: ["service"],
+            },
+          ],
         },
       ],
     });
@@ -173,13 +181,7 @@ class FormService {
     });
     let form = createForm.toJSON();
 
-    const consultation = await Consultations.findOne({
-      where: { label: data.at },
-    });
-    if (consultation) {
-      const cons = await this.addConsultation(form.id, consultation.id);
-      form = { ...form, consultations: [cons] };
-    }
+    await this.sendFormTo(form.id, { to: form.at });
 
     return form;
   }
@@ -335,7 +337,16 @@ class FormService {
     const form = await FormModel.findByPk(formId);
     const { to } = data;
     const consultation = await Consultations.findOne({
-      where: { label: to },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          where: {
+            label: to,
+          },
+          required: true,
+        },
+      ],
     });
     if (consultation) {
       this.addConsultation(formId, consultation.id);
@@ -363,8 +374,7 @@ class FormService {
     const institution = await InstitutionModel.findByPk(institutionId);
     const pharmacy = institution?.hasPharmacy === true ? ["PHARMACY"] : [];
     return [
-      ...consultations.map((c) => c.label),
-      "LABORATORY",
+      ...consultations.map((c) => c.service?.label || ""),
       ...pharmacy,
       "COUNTER",
       "RECEIPTION",
@@ -415,22 +425,22 @@ class FormService {
     });
     const consultationIds = consultations.map((cons) => cons.id);
 
-    await FormConsultations.findAll({
-      where: {
-        formId,
-        consultationId: { [Op.in]: consultationIds },
-        invoiceId: { [Op.is]: null },
-      },
-      include: ["consultation"],
-    }).then((cons) => {
-      invoiceConsultations = cons.map((c) => {
-        return {
-          id: c.consultationId,
-          consultation: c.consultation,
-          price: c.consultation.price,
-        };
-      });
-    });
+    // await FormConsultations.findAll({
+    //   where: {
+    //     formId,
+    //     consultationId: { [Op.in]: consultationIds },
+    //     invoiceId: { [Op.is]: null },
+    //   },
+    //   include: ["consultation"],
+    // }).then((cons) => {
+    //   invoiceConsultations = cons.map((c) => {
+    //     return {
+    //       id: c.consultationId,
+    //       consultation: c.consultation,
+    //       price: c.consultation.price,
+    //     };
+    //   });
+    // });
 
     await FormExams.findAll({
       where: {

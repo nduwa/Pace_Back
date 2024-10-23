@@ -1,4 +1,5 @@
 import { IUser, UserReponse } from "./auth";
+import { IService } from "./service";
 
 export interface IInstitution {
   id: string;
@@ -90,6 +91,8 @@ export interface IConsultation {
   price: number;
   label: string;
   createdAt: Date;
+
+  service?: IService;
 }
 
 export type IConsultationDTO = IConsultation;

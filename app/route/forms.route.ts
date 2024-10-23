@@ -100,6 +100,22 @@ formsRouter.post(
     }
   }
 );
+
+formsRouter.put(
+  "/:id",
+  validate(formSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await FormController.update(
+        req.body,
+        req.params.id as string
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
 formsRouter.delete(
   "/:id",
   async (req: Request, res: Response, next: NextFunction) => {
