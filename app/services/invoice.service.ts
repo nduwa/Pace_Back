@@ -4,6 +4,7 @@ import InvoiceModel from "../database/models/InvoiceModel";
 import {
   ICreateInvoiceDTO,
   IInstitutionDrug,
+  IInvoice,
   IInvoiceDTO,
 } from "../type/drugs";
 import CustomError, { catchSequelizeError } from "../utils/CustomError";
@@ -12,13 +13,13 @@ import UserModel from "../database/models/UserModel";
 import { Paged } from "../type";
 import { DatesOpt, TimestampsNOrder } from "../utils/DBHelpers";
 import InstitutionModel from "../database/models/Institution";
-import DrugService from "./drug.service";
-import InvoiceExams from "../database/models/InvoiceExams";
+import InvoiceActs from "../database/models/InvoiceActs";
 import InvoiceConsultations from "../database/models/InvoiceConsultations";
 import FormDrugs from "../database/models/FormDrugs";
 import { IFormDrugDTO } from "../type/form";
 import FormModel from "../database/models/FormModel";
 import db from "../config/db.config";
+import InsuranceDrugs from "../database/models/InsuranceDrugs";
 
 class InvoiceService {
   public static async create(
@@ -101,7 +102,6 @@ class InvoiceService {
       if (error) {
         throw new CustomError(error, 400);
       }
-      console.log("quntity checked");
       // Check prescription
       if (data.formId) {
         const prescribedDrugs = await FormDrugs.findAll({
@@ -111,13 +111,13 @@ class InvoiceService {
 
         await Promise.all(
           data.drugs.map(async (drug, index) => {
-            const InstitutionDrugJSON: IInstitutionDrug = requestedDrugs.find(
-              (d) => d.id == drug.drug
-            ) as unknown as IInstitutionDrug;
+            const InstitutionDrugJSON: IInstitutionDrug = requestedDrugs
+              .find((d) => d.id == drug.drug)
+              ?.toJSON() as unknown as IInstitutionDrug;
 
-            const drugJSON = prescribedDrugs.find(
-              (d) => d.drugId == InstitutionDrugJSON.drugId
-            ) as unknown as IFormDrugDTO;
+            const drugJSON = prescribedDrugs
+              .find((d) => d.drugId == InstitutionDrugJSON.drugId)
+              ?.toJSON() as unknown as IFormDrugDTO;
 
             const requiredQuantity =
               drugJSON.quantity - drugJSON.givenQuantitty;
@@ -143,6 +143,7 @@ class InvoiceService {
       if (requestedDrugs.length !== data.drugs.length)
         throw new CustomError("Something went wrong");
 
+      console.log("Giving items");
       await Promise.all(
         data.drugs.map(async (drug, index) => {
           let quantityRemaining = drug.qty,
@@ -168,7 +169,13 @@ class InvoiceService {
             );
             const remaining = hasQuantity - availableToGive;
 
-            if (availableToGive)
+            if (availableToGive) {
+              console.log("item ", itemtogive?.batchNumber);
+              console.log("giving ", availableToGive);
+              console.log("current ", itemtogive?.quantity);
+              console.log("remaining", remaining);
+              console.log();
+              console.log();
               await InstitutionDrugs.update(
                 {
                   quantity: remaining,
@@ -179,6 +186,7 @@ class InvoiceService {
                   transaction: t,
                 }
               );
+            }
 
             quantityRemaining -= availableToGive;
             quantityGiven += availableToGive;
@@ -221,6 +229,7 @@ class InvoiceService {
                 invoiceId: createdInvoice.id,
                 institutionDrugId: requestedDrugs[index].id,
                 isGiven: createdInvoice.published ? true : null,
+                formDrugId: drug.formDrugId?.length ? drug.formDrugId : null,
               },
               {
                 transaction: t,
@@ -352,7 +361,7 @@ class InvoiceService {
           as: "drugs",
           include: ["drug", "insuranceDrug"],
         },
-        { model: InvoiceExams, as: "exams", include: ["exam"] },
+        { model: InvoiceActs, as: "exams", include: ["exam"] },
         {
           model: InvoiceConsultations,
           as: "consultations",
@@ -443,6 +452,94 @@ class InvoiceService {
     })) as unknown as IInvoiceDTO[];
     const totalItems = await InvoiceModel.count({ where: { ...queryOptions } });
     return { data, totalItems };
+  }
+
+  public static async clearMaterialsOnInvoice(
+    formConsultationId: string | null,
+    invoice: IInvoice
+  ): Promise<IInvoiceDTO> {
+    return db.transaction(async (t) => {
+      // For each drug, remove its cost and also return quantity
+
+      const materialsGiven = await FormDrugs.findAll({
+        where: { formId: invoice.formId, formConsultationId, isMaterial: true },
+      });
+      console.log("removing items");
+      await Promise.all(
+        materialsGiven.map(async (drug) => {
+          if (drug.institutionDrugId !== null) {
+            const institutionDrug = await InstitutionDrugs.findByPk(
+              drug.institutionDrugId
+            );
+
+            const givenDrug = await InvoiceDrugsModel.findOne({
+              where: {
+                invoiceId: invoice.id,
+                formDrugId: drug.id,
+              },
+            });
+            if (givenDrug && institutionDrug) {
+              console.log("item", institutionDrug.batchNumber);
+
+              console.log("returning ", givenDrug.quantity);
+              console.log("current ", institutionDrug.quantity);
+
+              await institutionDrug.update({
+                quantity: institutionDrug.quantity + givenDrug.quantity,
+              });
+              console.log("new  ", institutionDrug.quantity);
+              console.log();
+              console.log();
+
+              await givenDrug.destroy();
+            }
+          }
+        })
+      );
+
+      return invoice;
+    });
+  }
+
+  public static async markMaterialsOnInvoiceGiven(
+    formConsultationId: string | null,
+    invoice: IInvoice
+  ): Promise<IInvoiceDTO> {
+    return db.transaction(async (t) => {
+      // For each drug, remove its cost and also return quantity
+
+      const materialsGiven = await FormDrugs.findAll({
+        where: { formId: invoice.id, formConsultationId, isMaterial: true },
+      });
+
+      await Promise.all(
+        materialsGiven.map(async (drug) => {
+          if (drug.institutionDrugId !== null) {
+            const institutionDrug = await InstitutionDrugs.findByPk(
+              drug.institutionDrugId
+            );
+
+            const givenDrug = await InvoiceDrugsModel.findOne({
+              where: {
+                invoiceId: invoice.id,
+                institutionDrugId: drug.institutionDrugId,
+              },
+            });
+            if (givenDrug && institutionDrug) {
+              await institutionDrug.increment("quantity", {
+                by: givenDrug.quantity,
+              });
+
+              await givenDrug.destroy();
+
+              await drug.destroy();
+            }
+          }
+        })
+      );
+
+      return invoice;
+    });
   }
 }
 

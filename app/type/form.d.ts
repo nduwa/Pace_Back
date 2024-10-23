@@ -40,7 +40,7 @@ export interface IFormDTO extends IForm {
   institution?: IInstitution;
   insurance?: IInstitution;
   drugs?: IFormDrugDTO[];
-  exams?: IFormExamDTO[];
+  acts?: IFormActDTO[];
   consultations?: IFormConsultationDTO[];
 }
 
@@ -64,7 +64,7 @@ export interface IFormConsultationDTO extends IFormConsultation {
   user?: IUser;
 }
 
-export interface IFormExam {
+export interface IFormAct {
   id: string;
   examId: string;
   patientId: string;
@@ -80,7 +80,7 @@ export interface IFormExam {
   updatedAt: Date;
 }
 
-export interface IFormExamDTO extends IFormExam {
+export interface IFormActDTO extends IFormAct {
   invoice?: IInvoice;
   exam?: IExam;
   user?: IUser;
@@ -118,23 +118,27 @@ export type FormAddDrug = {
   drugId: string;
   quantity: number;
   prescription: string;
+  isMaterial?: boolean;
 };
 
-export type FormAddExam = {
-  examId: string;
+export type FormAddAct = {
+  serviceActId: string;
+  done: boolean;
+  comment: string;
 };
 export type IFormConsultationRequest = {
   consultationId: string;
   verdict: string;
   drugs: FormAddDrug[];
-  exams: FormAddExam[];
+  acts: FormAddAct[];
 };
 
-export type IFormExamRequest = {
+export type IFormActRequest = {
   id: string;
-  exams: {
-    examId: string;
-    result: boolean;
+  consultationId: string;
+  acts: {
+    serviceActId: string;
+    done: boolean;
     comment: string;
   }[];
 };
@@ -143,7 +147,7 @@ export type sendFormRequest = {
   to: string;
 };
 
-export type IInvoiceExamData = {
+export type IInvoiceActData = {
   id: string;
   exam?: IExam;
   price: number;
@@ -167,13 +171,13 @@ export interface IFormInvoiceData {
   invoice: IInvoice;
   form: IForm;
   invoiceConsultations: IInvoiceConsultationData[];
-  invoiceExams: IInvoiceExamData[];
+  invoiceActs: IInvoiceActData[];
   invoiceDrugs: IInvoiceDrugData[];
 }
 
 export interface IFormInvoiceRequest {
   invoiceConsultations: IInvoiceConsultationData[];
-  invoiceExams: IInvoiceExamData[];
+  invoiceActs: IInvoiceActData[];
   invoiceDrugs: IInvoiceDrugData[];
 }
 

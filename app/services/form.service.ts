@@ -3,7 +3,7 @@ import { QueryOptions, TimestampsNOrder } from "../utils/DBHelpers";
 import { Paged } from "../type";
 import {
   FormAddDrug,
-  FormAddExam,
+  FormAddAct,
   IAvailableMed,
   IForm,
   IFormConsultation,
@@ -11,47 +11,52 @@ import {
   IFormDTO,
   IFormDrug,
   IFormDrugDTO,
-  IFormExam,
-  IFormExamRequest,
+  IFormAct,
+  IFormActRequest,
   IFormInvoiceData,
   IFormInvoiceRequest,
   IFormRequest,
   IGiveDrugs,
   IInvoiceConsultationData,
   IInvoiceDrugData,
-  IInvoiceExamData,
+  IInvoiceActData,
   IdrugOnInvoice,
   sendFormRequest,
 } from "../type/form";
 import FormModel from "../database/models/FormModel";
 import Consultations from "../database/models/Consultations";
 import FormConsultations from "../database/models/FormConsultations";
-import FormExams from "../database/models/FormExams";
+import FormActs from "../database/models/FormActs";
 import ExamModel from "../database/models/ExamModel";
 import DrugModel from "../database/models/DrugModel";
 import FormDrugs from "../database/models/FormDrugs";
 import ConsultationService from "./consultation.service";
 import {
-  IAddDrugsToInvoice,
   ICreateInvoiceDTO,
-  IInvoice,
   IInvoiceConsultation,
   IInvoiceDTO,
-  IInvoiceDrug,
-  IInvoiceExam,
+  IInvoiceAct,
+  IInvoiceDrugCreateDTO,
 } from "../type/drugs";
 import InvoiceService from "./invoice.service";
 import CustomError from "../utils/CustomError";
 import InvoiceModel from "../database/models/InvoiceModel";
 import InvoiceDrugsModel from "../database/models/InvoiceDrugsModel";
-import InvoiceExams from "../database/models/InvoiceExams";
+import InvoiceActs from "../database/models/InvoiceActs";
 import InvoiceConsultations from "../database/models/InvoiceConsultations";
 import InstitutionExams from "../database/models/InstututionExams";
-import { examPrice } from "../utils/helperFunctions";
+import { actPrice, examPrice } from "../utils/helperFunctions";
 import InstitutionModel from "../database/models/Institution";
 import InstitutionDrugs from "../database/models/InstututionDrugs";
 import DrugService from "./drug.service";
 import Service from "../database/models/Services";
+import ServiceAct from "../database/models/ServiceAct";
+import InstitutionAct from "../database/models/InstututionAct";
+import { IServiceAct } from "../type/service";
+import UserModel from "../database/models/UserModel";
+import InsuranceDrugs from "../database/models/InsuranceDrugs";
+import { IConsultation, IConsultationRequest } from "../type/instutution";
+import { IUser } from "../type/auth";
 
 class FormService {
   public static async getAll(
@@ -135,8 +140,8 @@ class FormService {
         "patient",
         "institution",
         "insurance",
-        { model: FormDrugs, as: "drugs", include: ["drug"] },
-        { model: FormExams, as: "exams", include: ["exam"] },
+        { model: FormDrugs, as: "drugs", include: ["drug", "insuranceDrug"] },
+        { model: FormActs, as: "acts", include: ["act"] },
         {
           model: FormConsultations,
           as: "consultations",
@@ -145,7 +150,13 @@ class FormService {
               model: Consultations,
               as: "consultation",
               paranoid: false,
-              include: ["service"],
+              include: [
+                {
+                  model: Service,
+                  as: "service",
+                  include: ["acts"],
+                },
+              ],
             },
           ],
         },
@@ -216,40 +227,65 @@ class FormService {
     return cons.toJSON();
   }
 
-  public static async addExam(formId: string, data: FormAddExam) {
-    const form = await FormModel.findByPk(formId);
+  public static async addAct(
+    formId: string,
+    formConsultationId: string,
+    data: FormAddAct
+  ) {
+    const form = await FormModel.findByPk(formId, { include: ["patient"] });
     if (form == null) throw new CustomError("Form not found");
 
-    const exam = await ExamModel.findByPk(data.examId);
+    const serviceAct = await ServiceAct.findByPk(data.serviceActId);
 
-    if (exam == null) throw new CustomError("Exam not found");
+    if (serviceAct == null) throw new CustomError("Act not found");
 
-    const [addedExam] = await FormExams.findOrCreate({
-      where: { formId, examId: data.examId },
+    const [addedAct, created] = await FormActs.findOrCreate({
+      where: { formId, serviceActId: data.serviceActId, formConsultationId },
       defaults: {
         formId,
-        examId: data.examId,
         patientId: form?.patientId,
+        formConsultationId,
+        ...data,
       },
     });
 
-    return addedExam.toJSON();
+    if (!created) {
+      await addedAct.update({ ...data });
+    }
+
+    return addedAct.toJSON();
   }
 
-  public static async addDrug(formId: string, data: FormAddDrug) {
+  public static async addDrug(
+    formId: string,
+    formConsultationId: string | null,
+    data: FormAddDrug
+  ): Promise<IFormDrug> {
     const form = await FormModel.findByPk(formId);
-    const drug = await DrugModel.findByPk(data.drugId);
+    const drug = await InstitutionDrugs.findByPk(data.drugId);
 
-    const [addedDrug] = await FormDrugs.findOrCreate({
-      where: { formId, drugId: data.drugId },
+    const drugData = {
+      formId,
+      drugId: drug?.drugId,
+      institutionDrugId: drug?.id,
+      insuranceDrugId: drug?.insuranceDrugId,
+      patientId: form?.patientId,
+      quantity: data.quantity,
+      prescription: data.prescription,
+      formConsultationId,
+      isMaterial: data.isMaterial,
+    };
+
+    const [addedDrug, created] = await FormDrugs.findOrCreate({
+      where: { formId, institutionDrugId: data.drugId, formConsultationId },
       defaults: {
-        formId,
-        drugId: data.drugId,
-        patientId: form?.patientId,
-        quantity: data.quantity,
-        prescription: data.prescription,
+        ...drugData,
       },
     });
+
+    if (!created) {
+      await addedDrug.update({ ...drugData });
+    }
 
     return addedDrug.toJSON();
   }
@@ -259,6 +295,11 @@ class FormService {
     formId: string,
     userId: string
   ) {
+    const form = await FormModel.findByPk(formId, { include: ["patient"] });
+    const user = await UserModel.findByPk(userId);
+
+    if (!form) throw new CustomError("Form not found");
+
     const consultation = await this.addConsultation(
       formId,
       data.consultationId
@@ -272,62 +313,101 @@ class FormService {
       { where: { id: consultation.id } }
     );
 
-    let drugIds: string[] = [],
-      examIds: string[] = [];
+    let actIds: string[] = [];
 
     await Promise.all(
-      data.drugs.map(async (drug) => {
-        await this.addDrug(formId, drug);
-        drugIds.push(drug.drugId);
+      data.acts.map(async (act) => {
+        actIds.push(act.serviceActId);
+        await this.addAct(formId, consultation.id, act);
       })
     );
 
-    await Promise.all(
-      data.exams.map(async (exam) => {
-        examIds.push(exam.examId);
-        await this.addExam(formId, exam);
-      })
-    );
+    await FormActs.destroy({
+      where: {
+        formId: formId,
+        serviceActId: { [Op.notIn]: actIds },
+        formConsultationId: consultation.id,
+      },
+    });
 
-    // Delete those that are not saved
-    await FormDrugs.destroy({
-      where: { formId: formId, drugId: { [Op.notIn]: drugIds } },
-    });
-    await FormExams.destroy({
-      where: { formId: formId, examId: { [Op.notIn]: examIds } },
-    });
+    await this.materials(
+      form as unknown as IFormDTO,
+      consultation,
+      data,
+      user as IUser
+    );
 
     return this.getOne(formId);
   }
 
-  public static async examination(
-    data: IFormExamRequest,
-    formId: string,
-    userId: string,
-    institutionId: string
+  public static async materials(
+    form: IFormDTO,
+    consultation: IConsultation,
+    data: IFormConsultationRequest,
+    user: IUser
   ) {
-    data.exams.forEach(async (exam) => {
-      const examData = await this.addExam(formId, exam);
-
-      const existingData = await FormExams.findOne({
-        where: { formId, examId: exam.examId },
-      });
-
-      const institution = exam.result == null ? null : institutionId;
-
-      await FormExams.update(
-        {
-          result: exam.result,
-          comment: exam.comment,
-          userId: existingData?.invoiceId == null ? userId : undefined,
-          institutionId:
-            existingData?.invoiceId == null ? institution : undefined,
-        },
-        { where: { id: examData.id } }
-      );
+    let priorInvoice = await InvoiceModel.findOne({
+      where: { formId: form.id, published: false },
     });
 
-    return this.getOne(formId);
+    if (priorInvoice) {
+      console.log("has invoice already");
+
+      await InvoiceService.clearMaterialsOnInvoice(
+        consultation.id,
+        priorInvoice
+      );
+    }
+    let drugIds: string[] = [],
+      formId = form.id;
+
+    const drugData: IInvoiceDrugCreateDTO[] = [];
+
+    await Promise.all(
+      data.drugs.map(async (drug) => {
+        const formDrug = await this.addDrug(formId, consultation.id, {
+          ...drug,
+          isMaterial: true,
+        });
+        drugIds.push(drug.drugId);
+        drugData.push({
+          drug: drug.drugId,
+          qty: drug.quantity,
+          formDrugId: formDrug.id,
+        });
+      })
+    );
+
+    const invoice = await InvoiceService.create(
+      {
+        formId: formId,
+        insuranceId: form?.insuranceId ?? undefined,
+        insuranceCard: form?.insuranceCard ?? undefined,
+        published: false,
+        note: "Materials",
+        name: form?.patient?.name || "",
+        phone: form?.patient?.phone || "",
+        patientId: form?.patientId,
+        drugs: drugData.map((d, index) => ({
+          drug: d.drug,
+          qty: d.qty,
+          formDrugId: d.formDrugId,
+        })),
+      },
+      user.id,
+      user?.institutionId as string
+    );
+
+    console.log("back to form");
+
+    // Delete those that are not saved
+    await FormDrugs.destroy({
+      where: {
+        formId: formId,
+        institutionDrugId: { [Op.notIn]: drugIds },
+        formConsultationId: consultation.id,
+      },
+    });
   }
 
   public static async sendFormTo(
@@ -398,19 +478,27 @@ class FormService {
     userId: string
   ): Promise<IFormInvoiceData> {
     let invoiceDrugs: IInvoiceDrugData[] = [],
-      invoiceExams: IInvoiceExamData[] = [],
+      invoiceActs: IInvoiceActData[] = [],
       invoiceConsultations: IInvoiceConsultationData[] = [];
     const form = await this.getOne(formId);
 
     let invoice = await InvoiceModel.findOne({
       where: { institutionId, formId, published: false },
-      include: [{ model: InvoiceDrugsModel, as: "drugs", include: ["drug"] }],
+      include: [
+        {
+          model: InvoiceDrugsModel,
+          as: "drugs",
+          include: ["drug", "insuranceDrug"],
+        },
+      ],
     }).then((inv) => {
       invoiceDrugs =
         inv?.drugs.map((drug) => {
           return {
-            id: drug.drug.id,
+            id: drug.institutionDrugId,
+            insuranceDrugId: drug.drug?.id,
             drug: drug.drug,
+            insuranceDrug: drug.insuranceDrug,
             unitPrice: drug.unitPrice,
             quantity: drug.quantity,
             totalPrice: drug.totalPrice,
@@ -420,55 +508,34 @@ class FormService {
       return inv;
     });
 
-    const consultations = await Consultations.findAll({
-      where: { institutionId },
-    });
-    const consultationIds = consultations.map((cons) => cons.id);
-
-    // await FormConsultations.findAll({
-    //   where: {
-    //     formId,
-    //     consultationId: { [Op.in]: consultationIds },
-    //     invoiceId: { [Op.is]: null },
-    //   },
-    //   include: ["consultation"],
-    // }).then((cons) => {
-    //   invoiceConsultations = cons.map((c) => {
-    //     return {
-    //       id: c.consultationId,
-    //       consultation: c.consultation,
-    //       price: c.consultation.price,
-    //     };
-    //   });
-    // });
-
-    await FormExams.findAll({
+    await FormActs.findAll({
       where: {
         formId,
         invoiceId: { [Op.is]: null },
       },
       include: [
         {
-          model: ExamModel,
-          as: "exam",
+          model: ServiceAct,
+          as: "act",
           include: [
             {
-              model: InstitutionExams,
-              as: "institutionExam",
+              model: InstitutionAct,
+              as: "institutionAct",
               required: false,
               where: { institutionId },
             },
           ],
         },
       ],
-    }).then((exam) => {
-      invoiceExams = exam
-        .filter((ex) => ex.institutionId == institutionId)
-        .map((ex) => {
+    }).then((acts) => {
+      invoiceActs = acts
+        .filter((a) => a.done)
+        .map((a) => {
+          console.log("act", actPrice(a.act as unknown as IServiceAct));
           return {
-            id: ex.examId,
-            exam: ex.exam,
-            price: examPrice(ex.exam),
+            id: a.serviceActId,
+            act: a.act,
+            price: actPrice(a.act as unknown as IServiceAct),
           };
         });
     });
@@ -492,7 +559,7 @@ class FormService {
       form,
 
       invoiceDrugs,
-      invoiceExams,
+      invoiceActs,
       invoiceConsultations,
     };
   }
@@ -502,7 +569,7 @@ class FormService {
     if (invoice == null) throw new CustomError("Invoice not found");
 
     let totalCost = 0;
-    let examData: Partial<IInvoiceExam>[] = [],
+    let actData: Partial<IInvoiceAct>[] = [],
       examCost = 0;
     let consultationData: Partial<IInvoiceConsultation>[] = [],
       consultationCost = 0;
@@ -514,8 +581,8 @@ class FormService {
     });
     totalCost += drugCost;
 
-    data.invoiceExams.forEach((exam) => {
-      examData.push({
+    data.invoiceActs.forEach((exam) => {
+      actData.push({
         examId: exam.id,
         patientId: invoice.patientId,
         price: exam.price,
@@ -538,12 +605,12 @@ class FormService {
       consultationCost += consultation.price;
     });
 
-    const examsSave = await InvoiceExams.bulkCreate(examData);
-    if (examsSave.length == examData.length) {
+    const examsSave = await InvoiceActs.bulkCreate(actData);
+    if (examsSave.length == actData.length) {
       // All saved
       totalCost += examCost;
-      const examIds = examData.map((i) => i.examId);
-      await FormExams.update(
+      const examIds = actData.map((i) => i.examId);
+      await FormActs.update(
         { invoiceId: invoice.id },
         { where: { formId: invoice.formId, examId: { [Op.in]: examIds } } }
       );
@@ -737,6 +804,40 @@ class FormService {
 
   //   return Invoice;
   // }
+
+  public static async examination(
+    data: IFormActRequest,
+    formId: string,
+    userId: string,
+    institutionId: string
+  ) {
+    data.acts.forEach(async (act) => {
+      const actData = await this.addAct(formId, data.consultationId, act);
+
+      const existingData = await FormActs.findOne({
+        where: {
+          formId,
+          serviceActId: act.serviceActId,
+          formConsultationId: data.consultationId,
+        },
+      });
+
+      const institution = act.done == false ? null : institutionId;
+
+      await FormActs.update(
+        {
+          done: act.done,
+          comment: act.comment,
+          userId: existingData?.invoiceId == null ? userId : undefined,
+          institutionId:
+            existingData?.invoiceId == null ? institution : undefined,
+        },
+        { where: { id: actData.id } }
+      );
+    });
+
+    return this.getOne(formId);
+  }
 
   public static async removeDrugFromInvoice(drugId: string) {
     const invoiceDrug = await InvoiceDrugsModel.findByPk(drugId, {

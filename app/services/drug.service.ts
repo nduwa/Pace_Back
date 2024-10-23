@@ -288,6 +288,7 @@ class DrugService {
         "drugId",
         [Sequelize.fn("max", Sequelize.col("price")), "maxPrice"], // Max price per group
       ],
+      group: ["InstitutionDrugs.drugId"],
     });
 
     let drugPrices: { [key: string]: number } = {};

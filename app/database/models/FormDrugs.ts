@@ -18,6 +18,9 @@ import PatientsModel from "./PatientsModel";
 import FormModel from "./FormModel";
 import DrugModel from "./DrugModel";
 import InvoiceModel from "./InvoiceModel";
+import FormConsultations from "./FormConsultations";
+import InsuranceDrugs from "./InsuranceDrugs";
+import InstitutionDrugs from "./InstututionDrugs";
 
 @Table({
   tableName: "form_drugs",
@@ -30,9 +33,19 @@ class FormDrugs extends Model {
   id!: string;
 
   @ForeignKey(() => DrugModel)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   drugId!: string;
+
+  @ForeignKey(() => InstitutionDrugs)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  institutionDrugId!: string;
+
+  @ForeignKey(() => InsuranceDrugs)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  insuranceDrugId!: string;
 
   @ForeignKey(() => PatientsModel)
   @AllowNull(false)
@@ -50,9 +63,18 @@ class FormDrugs extends Model {
   @Column(DataType.UUID)
   invoiceId!: string;
 
+  @ForeignKey(() => FormConsultations)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  formConsultationId!: string;
+
   @AllowNull(false)
   @Column(DataType.FLOAT)
   quantity!: number;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isMaterial!: boolean;
 
   @Column(DataType.STRING)
   prescription!: string;
@@ -78,6 +100,9 @@ class FormDrugs extends Model {
 
   @BelongsTo(() => DrugModel)
   drug!: DrugModel;
+
+  @BelongsTo(() => InsuranceDrugs)
+  insuranceDrug!: InsuranceDrugs;
 }
 
 export default FormDrugs;

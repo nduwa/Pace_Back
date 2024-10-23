@@ -20,7 +20,7 @@ import {
   IForm,
   IFormConsultationRequest,
   IFormDTO,
-  IFormExamRequest,
+  IFormActRequest,
   IFormInvoiceData,
   IFormInvoiceRequest,
   IFormRequest,
@@ -114,7 +114,7 @@ export class FormController extends Controller {
 
   @Post("/{id}/examination")
   public static async examination(
-    @Body() data: IFormExamRequest,
+    @Body() data: IFormActRequest,
     @Path() id: string,
     @Inject() userId: string,
     @Inject() institutionId: string

@@ -5,7 +5,7 @@ import DrugPurchasesModel from "./models/DrugPurchases";
 import ExamModel from "./models/ExamModel";
 import FormConsultations from "./models/FormConsultations";
 import FormDrugs from "./models/FormDrugs";
-import FormExams from "./models/FormExams";
+import FormActs from "./models/FormActs";
 import FormModel from "./models/FormModel";
 import InstitutionModel from "./models/Institution";
 import InstitutionAct from "./models/InstututionAct";
@@ -15,7 +15,7 @@ import InsuranceDrugs from "./models/InsuranceDrugs";
 import InsuranceExams from "./models/InsuranceExams";
 import InvoiceConsultations from "./models/InvoiceConsultations";
 import InvoiceDrugsModel from "./models/InvoiceDrugsModel";
-import InvoiceExams from "./models/InvoiceExams";
+import InvoiceActs from "./models/InvoiceActs";
 import InvoiceModel from "./models/InvoiceModel";
 import PatientsModel from "./models/PatientsModel";
 import PermissionModel from "./models/PermissionModel";
@@ -54,7 +54,7 @@ const models = [
   InvoiceDrugsModel,
   PatientsModel,
 
-  InvoiceExams,
+  InvoiceActs,
   InvoiceConsultations,
 
   ExamModel,
@@ -62,7 +62,7 @@ const models = [
   InstitutionExams,
 
   FormModel,
-  FormExams,
+  FormActs,
   FormDrugs,
   FormConsultations,
 

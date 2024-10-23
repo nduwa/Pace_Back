@@ -22,7 +22,7 @@ import InvoiceDrugsModel from "./InvoiceDrugsModel";
 import { IInvoice } from "../../type/drugs";
 import UserModel from "./UserModel";
 import FormModel from "./FormModel";
-import InvoiceExams from "./InvoiceExams";
+import InvoiceActs from "./InvoiceActs";
 import InvoiceConsultations from "./InvoiceConsultations";
 
 @Table({
@@ -100,8 +100,8 @@ class InvoiceModel extends Model {
   @HasMany(() => InvoiceDrugsModel)
   drugs!: InvoiceDrugsModel[];
 
-  @HasMany(() => InvoiceExams)
-  exams!: InvoiceExams[];
+  @HasMany(() => InvoiceActs)
+  exams!: InvoiceActs[];
 
   @HasMany(() => InvoiceConsultations)
   consultations!: InvoiceConsultations[];

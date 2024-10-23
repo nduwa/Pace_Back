@@ -20,9 +20,8 @@ import InstitutionModel from "./Institution";
 import PatientsModel from "./PatientsModel";
 import { IForm } from "../../type/form";
 import FormDrugs from "./FormDrugs";
-import ExamModel from "./ExamModel";
 import FormConsultations from "./FormConsultations";
-import FormExams from "./FormExams";
+import FormActs from "./FormActs";
 
 @Table({
   tableName: "forms",
@@ -91,8 +90,8 @@ class FormModel extends Model {
   @HasMany(() => FormDrugs)
   drugs!: FormDrugs[];
 
-  @HasMany(() => FormExams)
-  exams!: FormExams[];
+  @HasMany(() => FormActs)
+  acts!: FormActs[];
 
   @HasMany(() => FormConsultations)
   consultations!: FormConsultations[];

@@ -21,6 +21,7 @@ import InvoiceModel from "./InvoiceModel";
 import InstitutionDrugs from "./InstututionDrugs";
 import PatientsModel from "./PatientsModel";
 import InsuranceDrugs from "./InsuranceDrugs";
+import FormDrugs from "./FormDrugs";
 
 @Table({
   tableName: "invoice_drugs",
@@ -36,6 +37,12 @@ class InvoiceDrugsModel extends Model {
   @AllowNull(true)
   @Column(DataType.UUID)
   drugId!: string;
+
+  @ForeignKey(() => FormDrugs)
+  @AllowNull(true)
+  @Default(true)
+  @Column(DataType.UUID)
+  formDrugId!: string;
 
   @ForeignKey(() => InstitutionDrugs)
   @AllowNull(false)
